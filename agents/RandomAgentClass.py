@@ -10,5 +10,5 @@ class RandomAgent(Agent):
 	def __init__(self, actions):
 		Agent.__init__(self, name="random",actions=actions)
 
-	def policy(self, state):
+	def act(self, state, reward):
 		return random.choice(self.actions)

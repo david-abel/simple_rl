@@ -1,9 +1,8 @@
 # Python libs.
 import os
-from collections import defaultdict
 import sys
-
 sys.path.append(os.getcwd() + "/..")
+from collections import defaultdict
 
 # Local libs.
 from ExperimentParametersClass import ExperimentParameters
@@ -20,19 +19,35 @@ class Experiment(object):
         self.mdp = mdp
         self.rewards = defaultdict(list)
         self.name = Experiment.resultsDir + str(self.mdp)
+        self._setupFiles()
 
+    def _setupFiles(self):
         if not os.path.exists(self.name + "/"):
             os.makedirs(self.name + "/")
+        else:
+            for agent in self.agents:
+                if os.path.exists(self.name + "/" + str(agent) + ".csv"):
+                    os.remove(self.name + "/" + str(agent) + ".csv")
 
     def makePlots(self):
         chartUtils.makePlots(self.name, self.agents)
-        # self.writeToFile(self.name)
 
     def addExperience(self, agent, s, a, r, sprime):
         self.rewards[agent] += [r]
-        self.writeRewardToFile(agent, r)
 
-    def writeRewardToFile(self, agent, r):
+    def endOfEpisode(self, agent):
+        self.writeEpisodeRewardToFile(agent, sum(self.rewards[agent]))
+
+    def endOfInstance(self, agent):
+        '''
+        Summary:
+            Adds a new line to indicate we're onto a new instance.
+        '''
+        out_file = open(self.name + "/" + str(agent) + ".csv", "a+")
+        out_file.write("\n")
+        out_file.close()
+
+    def writeEpisodeRewardToFile(self, agent, r):
         # Write reward.
         out_file = open(self.name + "/" + str(agent) + ".csv", "a+")
         out_file.write(str(r) + ",")
@@ -68,18 +83,3 @@ class Experiment(object):
         paramString = "PARAMS: " + str(self.parameters) + "\n\n"
 
         return agentString + mdpString + paramString
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

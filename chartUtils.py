@@ -58,7 +58,7 @@ def averageData(data, cumulative=False):
         try:
             avged = algInstances.sum(axis=0)/float(numInstances)
         except TypeError:
-            print "Error: algorithms have been run under different params."
+            print "Error: something went wrong. I couldn't find an algorithm or things were run a weird number of times."
             quit()
 
         if cumulative:
@@ -190,7 +190,7 @@ def plot(data, agents, useCost=False, cumulative=False, confidenceIntervals=[0.0
     yAxisLabel = plotLabel + " " + unit
 
     # Make the plot.
-    pylab.xlabel('Step Number')
+    pylab.xlabel('Episode Number')
     pylab.ylabel(yAxisLabel)
     pylab.title(plotTitle)
     pylab.grid(True)

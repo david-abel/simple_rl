@@ -16,11 +16,15 @@ class MDP(object):
 			action (str)
 
 		Returns:
-			(tuple: <State,float>)
+			(tuple: <float,State>): reward, State
 		'''
 		nextState = self.transitionFunc(self.curState, action)
 
+		self.curState = nextState
+
 		reward = self.rewardFunc(self.curState, action, nextState)
 
-		return nextState, reward
+		return reward, nextState
 
+	def reset(self):
+		self.__init__()

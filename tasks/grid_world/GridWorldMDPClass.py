@@ -1,24 +1,31 @@
 # Python imports.
 import sys
 import os
-sys.path.append(os.getcwd() + "/..")
+os.chdir(os.path.dirname(__file__))
+print "cwd:", os.getcwd()
+sys.path.append(os.getcwd() + "/../../")
 
 # Local imports.
 from MDPClass import MDP
 from GridWorldStateClass import GridWorldState
 
-class GridWorld(MDP):
+class GridWorldMDP(MDP):
 	''' Class for a Grid World MDP '''
 	
 	# Static constants.
 	actions = ["up", "down", "left", "right"]
 
 	def __init__(self, height, width, initLoc, goalLoc):
-		MDP.__init__(self, GridWorld.actions, self._transitionFunction, self._rewardFunction)		
+		MDP.__init__(self, GridWorldMDP.actions, self._transitionFunction, self._rewardFunction)		
 		self.height = height
 		self.width = width
+		self.initLoc = initLoc
+		self.goalLoc = goalLoc
 		self.curState = GridWorldState(initLoc[0], initLoc[1])
 		self.goalState = GridWorldState(goalLoc[0], goalLoc[1])
+
+	def reset(self):
+		self.curState = GridWorldState(self.initLoc[0], self.initLoc[1])
 
 	def _rewardFunction(self, state, action, statePrime):
 		'''
@@ -28,9 +35,8 @@ class GridWorld(MDP):
 			statePrime
 
 		Returns
-			float
+			(float)
 		'''
-
 		if statePrime == self.goalState:
 			return 1
 		else:
@@ -45,7 +51,7 @@ class GridWorld(MDP):
 		Returns
 			(State)
 		'''
-		if action not in GridWorld.actions:
+		if action not in GridWorldMDP.actions:
 			print "Error: the action provided (" + str(action) + ") was invalid."
 			quit()
 
