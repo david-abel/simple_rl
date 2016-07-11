@@ -34,7 +34,7 @@ def main():
     randomAgent = RandomAgent(GridWorld.actions)
 
     # Run experiments.
-    runAgentsOnMDP([randomAgent], gw, numSteps=100)
+    runAgentsOnMDP([randomAgent], gw, numSteps=1000)
 
 
 if __name__ == "__main__":

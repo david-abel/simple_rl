@@ -61,7 +61,7 @@ class GridWorld(MDP):
 			return GridWorldState(state.x, state.y)
 
 	def __str__(self):
-		return "gridworld(h:" + str(self.height) + ",w:" + str(self.width) + ")"
+		return "gridworld_h-" + str(self.height) + "_w-" + str(self.width)
 
 
 
