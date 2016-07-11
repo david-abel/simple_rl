@@ -4,16 +4,18 @@ import os
 import time
 sys.path.append(os.getcwd() + "/../agents/")
 sys.path.append(os.getcwd() + "/../tasks/grid_world/")
+sys.path.append(os.getcwd() + "/../tasks/chain/")
 from collections import defaultdict
 
 # Local imports.
 from GridWorldMDPClass import GridWorldMDP
+from ChainMDPClass import ChainMDP
 from ExperimentClass import Experiment
 from RandomAgentClass import RandomAgent
 from RMaxAgentClass import RMaxAgent
 from QLearnerAgentClass import QLearnerAgent
 
-def runAgentsOnMDP(agents, mdp, numInstances=5, numEpisodes=100, numSteps=100):
+def runAgentsOnMDP(agents, mdp, numInstances=20, numEpisodes=20, numSteps=20):
 
     # Experiment (for reproducibility, plotting).
     experiment = Experiment(agents=agents, mdp=mdp, params = {"numInstances":numInstances, "numEpisodes":numEpisodes, "numSteps":numSteps})
@@ -31,7 +33,7 @@ def runAgentsOnMDP(agents, mdp, numInstances=5, numEpisodes=100, numSteps=100):
             for episode in xrange(numEpisodes):
 
                 # Compute initial state/reward.
-                state = mdp.getCurState()
+                state = mdp.getInitState()
                 reward = 0
 
                 for step in xrange(numSteps):
@@ -49,7 +51,6 @@ def runAgentsOnMDP(agents, mdp, numInstances=5, numEpisodes=100, numSteps=100):
 
                 # Process experiment info at end of episode.
                 experiment.endOfEpisode(agent)
-                mdp.reset()
 
             # Process that learning instance's info at end of learning.
             experiment.endOfInstance(agent)
@@ -62,25 +63,26 @@ def runAgentsOnMDP(agents, mdp, numInstances=5, numEpisodes=100, numSteps=100):
         times[agent] = round(end - start,3)
 
     # Time stuff.
-    print "--- TIMES ---"
+    print "\n--- TIMES ---"
     for agent in times.keys():
         print str(agent) + " agent took " + str(times[agent]) + " seconds."
-    print "-------------"
+    print "-------------\n"
 
     experiment.makePlots()
 
 
 def main():
     # MDP.
-    gw = GridWorldMDP(5,5, (1,1), (5,5))
+    # gw = GridWorldMDP(5,5, (1,1), (5,5))
+    chain = ChainMDP(5)
 
     # Agent.
-    randomAgent = RandomAgent(actions = GridWorldMDP.actions)
-    rMaxAgent = RMaxAgent(actions = GridWorldMDP.actions)
-    qLearnerAgent = QLearnerAgent(actions = GridWorldMDP.actions)
+    randomAgent = RandomAgent(ChainMDP.actions)
+    rMaxAgent = RMaxAgent(actions = ChainMDP.actions)
+    qLearnerAgent = QLearnerAgent(actions = ChainMDP.actions)
 
     # Run experiments.
-    runAgentsOnMDP([qLearnerAgent, randomAgent], gw)
+    runAgentsOnMDP([qLearnerAgent, randomAgent, rMaxAgent], chain)
 
 
 if __name__ == "__main__":

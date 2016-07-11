@@ -2,7 +2,6 @@
 import sys
 import os
 os.chdir(os.path.dirname(__file__))
-print "cwd:", os.getcwd()
 sys.path.append(os.getcwd() + "/../../")
 
 # Local imports.
@@ -16,16 +15,13 @@ class GridWorldMDP(MDP):
 	actions = ["up", "down", "left", "right"]
 
 	def __init__(self, height, width, initLoc, goalLoc):
-		MDP.__init__(self, GridWorldMDP.actions, self._transitionFunction, self._rewardFunction)		
+		MDP.__init__(self, GridWorldMDP.actions, self._transitionFunction, self._rewardFunction, initState = GridWorldState(initLoc[0], initLoc[1]))		
 		self.height = height
 		self.width = width
 		self.initLoc = initLoc
 		self.goalLoc = goalLoc
 		self.curState = GridWorldState(initLoc[0], initLoc[1])
 		self.goalState = GridWorldState(goalLoc[0], goalLoc[1])
-
-	def reset(self):
-		self.curState = GridWorldState(self.initLoc[0], self.initLoc[1])
 
 	def _rewardFunction(self, state, action, statePrime):
 		'''

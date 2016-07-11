@@ -29,3 +29,5 @@ class GridWorldState(State):
 		'''
 		if isinstance(other, GridWorldState) and self.x == other.x and self.y == other.y:
 			return True
+		else:
+			return False

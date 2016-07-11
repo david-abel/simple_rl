@@ -1,13 +1,17 @@
 class MDP(object):
 	''' Abstract class for a Markov Decision Process. '''
-	def __init__(self, actions, transitionFunc, rewardFunc, gamma=0.95, initState=None):
+	def __init__(self, actions, transitionFunc, rewardFunc, initState, gamma=0.95):
 		self.actions = actions
 		self.transitionFunc = transitionFunc
 		self.rewardFunc = rewardFunc
 		self.gamma = gamma
+		self.initState = initState
 		self.curState = initState
 
-	def getCurState(self):
+	def getInitState(self):
+		return self.initState
+
+	def getCurrState(self):
 		return self.curState
 
 	def executeAgentAction(self, action):
