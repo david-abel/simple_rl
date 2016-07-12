@@ -15,20 +15,20 @@ Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.
 
 ## Making a New MDP
 
-Make a directory in _tasks_. Then make an subclass MDP:
+Make a directory in _tasks/_. Then make an MDP subclass, which needs:
 
-* Add a static variabel consisting of a list of strings _actions_, denoting each action.
+* A static variable, _actions_, which is a list of strings denoting each action.
 
 * Implement a reward and transition function and pass them to MDP constructor (along with _actions_).
 
-* I also suggest overwriting the "__str__" method of the class, and adding a "__init__.py" file to the directory.
+* I also suggest overwriting the "\_\_str\_\_" method of the class, and adding a "\_\_init\_\_.py" file to the directory.
 
-* Create a State subclass for your MDP. I suggest overwriting the "__hash__", "__eq__", and "__str__".
+* Create a State subclass for your MDP. I also suggest overwriting the "\_\_hash\_\_", "\_\_eq\_\_", and "\_\_str\_\_".
 
 
 ## Making a New Agent
 
-Make an Agent subclass in _agents/_. Just needs:
+Make an Agent subclass in _agents/_. Requires:
 
 * A method, _act(self, state, reward)_, that returns an action.
 
