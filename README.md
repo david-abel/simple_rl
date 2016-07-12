@@ -1,5 +1,5 @@
-# mdps
-Some simple infrastructure for experimenting with Markov Decision Processes in Python 2.7.
+# simpleRL
+A simple framework for experimenting with Reinforcement Learning and Markov Decision Processes in Python 2.7.
 
 See _experiments/runExperiments.py_ to run some basic experiments.
 
