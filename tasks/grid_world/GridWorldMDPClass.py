@@ -5,6 +5,7 @@ import random
 
 # Local imports.
 from mdp.MDPClass import MDP
+from mdp.StateClass import State
 from GridWorldStateClass import GridWorldState
 
 class GridWorldMDP(MDP):
@@ -35,6 +36,7 @@ class GridWorldMDP(MDP):
 		self._errorCheck(state, action, statePrime)
 
 		if statePrime.x == self.goalLoc[0] and statePrime.y == self.goalLoc[1]:
+			print "Goal"
 			return 1
 		else:
 			return -0.5
@@ -62,6 +64,16 @@ class GridWorldMDP(MDP):
 			return GridWorldState(state.x, state.y)
 
 	def _errorCheck(self, state, action, sPrime = -1):
+		'''
+		Args:
+			state (State)
+			action (str)
+			sPrime (State): -1 if left blank (and thus type is int).
+
+		Summary:
+			Checks to make sure we've received states/actions of the right type.
+		'''
+		
 		if action not in GridWorldMDP.actions:
 			print "Error: the action provided (" + str(action) + ") was invalid."
 			quit()
@@ -70,7 +82,7 @@ class GridWorldMDP(MDP):
 			print "Error: the given state (" + str(state) + ") was not of the correct class."
 			quit()
 
-		if not(sPrime == -1) or not(isinstance(state, GridWorldState)):
+		if not(sPrime == -1 or isinstance(state, GridWorldState)):
 			print "Error: the given state (" + str(sPrime) + ") was not of the correct class."
 			quit()
 

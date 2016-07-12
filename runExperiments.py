@@ -7,7 +7,9 @@ Instructions:
     (3) Set experiment parameters (numInstances, numEpisodes, numSteps).
     (4) Call runAgentsOnMDP(agents, mdp).
 
-Author: David Abel
+    -> Runs all experiments and will open a plot with results when finished.
+
+Author: David Abel (cs.brown.edu/~dabel/)
 '''
 
 # Python imports.
@@ -29,6 +31,7 @@ def runAgentsOnMDP(agents, mdp, numInstances=10, numEpisodes=100, numSteps=50):
     # Experiment (for reproducibility, plotting).
     experiment = Experiment(agents=agents, mdp=mdp, params = {"numInstances":numInstances, "numEpisodes":numEpisodes, "numSteps":numSteps})
 
+    # Record how long each agent spends learning.
     times = defaultdict(float)
 
     # Learn.
@@ -66,9 +69,9 @@ def runAgentsOnMDP(agents, mdp, numInstances=10, numEpisodes=100, numSteps=50):
 
             # Reset the agent and MDP.
             agent.reset()
-        end = time.clock()
 
         # Track how much time this agent took.
+        end = time.clock()
         times[agent] = round(end - start,3)
 
     # Time stuff.
@@ -81,6 +84,7 @@ def runAgentsOnMDP(agents, mdp, numInstances=10, numEpisodes=100, numSteps=50):
 
 
 def main():
+
     # MDP.
     mdp = GridWorldMDP(10,10, (1,1), (9,0))
     # mdp = ChainMDP(15)
