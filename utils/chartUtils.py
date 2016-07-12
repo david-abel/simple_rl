@@ -1,11 +1,9 @@
 # Python libs.
-# import pylab
 import matplotlib.pyplot as pyplot
 import numpy as np
 import math
 from os import listdir, remove, walk, system
 from os.path import isfile, isdir, join
-import numpy as np
 
 def loadData(experimentDirectory, experimentAgents):
     '''
@@ -82,7 +80,6 @@ def computeConfidenceIntervals(data, cumulative=False):
         cumulative (bool) *opt
     '''
 
-    # Relevant params.
     confidenceIntervalsEachAlg = [] # [alg][conf_inv_for_episode]
     
     for i, algInstances in enumerate(data):
@@ -95,18 +92,16 @@ def computeConfidenceIntervals(data, cumulative=False):
         totalSoFar = np.zeros(numInstances)
         for j in xrange(numEpisodes):
             # Compute datum for confidence interval.
-            nextVector = algInstances[:,j]
-
-            while len(nextVector) < numInstances:
-                nextVector = np.append(nextVector, 0)
+            episodeJAllInstances = algInstances[:,j]
+            
             if cumulative:
                 # Cumulative.
-                summedVector = np.add(nextVector, totalSoFar)
-                totalSoFar = np.add(nextVector, totalSoFar)
-                nextVector = summedVector
+                summedVector = np.add(episodeJAllInstances, totalSoFar)
+                totalSoFar = np.add(episodeJAllInstances, totalSoFar)
+                episodeJAllInstances = summedVector
 
             # Compute the interval and add it to list.
-            ci = computeSingleConfidenceInterval(nextVector)
+            ci = computeSingleConfidenceInterval(episodeJAllInstances)
             thisAlgsCI.append(ci)
 
         confidenceIntervalsEachAlg.append(thisAlgsCI)

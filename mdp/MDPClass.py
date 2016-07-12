@@ -14,6 +14,9 @@ class MDP(object):
 	def getCurrState(self):
 		return self.curState
 
+	def getActions(self):
+		return self.actions
+
 	def executeAgentAction(self, action):
 		'''
 		Args:

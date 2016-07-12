@@ -1,7 +1,7 @@
 # Misc. python libs
-from collections import defaultdict
 import numpy as np
 import random
+from collections import defaultdict
 
 # Local classes
 from AgentClass import Agent

@@ -3,8 +3,8 @@ from AgentClass import Agent
 
 # Python libs.
 import random
-from collections import defaultdict
 import numpy
+from collections import defaultdict
 
 class RMaxAgent(Agent):
     ''' Implementation for an R-Max Agent [Brafman and Tennenholtz 2003] '''

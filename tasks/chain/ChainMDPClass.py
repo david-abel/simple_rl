@@ -2,11 +2,9 @@
 import random
 import sys
 import os
-os.chdir(os.path.dirname(__file__))
-sys.path.append(os.getcwd() + "/../../")
 
 # Local libs.
-from MDPClass import MDP
+from mdp.MDPClass import MDP
 from ChainStateClass import ChainState
 
 class ChainMDP(MDP):

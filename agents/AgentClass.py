@@ -1,4 +1,3 @@
-
 class Agent(object):
 	''' Abstract Agent class. '''
 

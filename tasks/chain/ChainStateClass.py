@@ -2,12 +2,8 @@
 import sys
 import os
 
-# Setup path, import relevant libs.
-os.chdir(os.path.dirname(__file__))
-sys.path.append(os.getcwd() + "/../..")
-
 # Local libs.
-from StateClass import State
+from mdp.StateClass import State
 
 class ChainState(State):
 	''' Class for Chain MDP States '''

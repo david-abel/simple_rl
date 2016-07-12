@@ -1,17 +1,16 @@
 # Python libs.
 import os
 import sys
-sys.path.append(os.getcwd() + "/..")
 from collections import defaultdict
 
 # Local libs.
+from utils import chartUtils
 from ExperimentParametersClass import ExperimentParameters
-import chartUtils
 
 class Experiment(object):
     ''' Experiment Class for Discrete MDP Experiments '''
 
-    resultsDir = "../results/"
+    resultsDir = os.path.dirname(__file__) + "/../results/"
 
     def __init__(self, agents, mdp, params=None):
         self.agents = agents
@@ -35,13 +34,15 @@ class Experiment(object):
                     os.remove(self.expDirectory + "/" + str(agent) + ".csv")
 
     def makePlots(self):
-        chartUtils.makePlots(self.expDirectory, self.agents, cumulative=False)
+        print "self.expDirectory", self.expDirectory
+        chartUtils.makePlots(self.expDirectory, self.agents)
 
     def addExperience(self, agent, s, a, r, sprime):
         self.rewards[agent] += [r]
 
     def endOfEpisode(self, agent):
         self.writeEpisodeRewardToFile(agent, sum(self.rewards[agent]))
+        self.rewards[agent] = []
 
     def endOfInstance(self, agent):
         '''

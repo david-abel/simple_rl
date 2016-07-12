@@ -1,11 +1,10 @@
 # Python imports.
 import sys
 import os
-os.chdir(os.path.dirname(__file__))
-sys.path.append(os.getcwd() + "/../../")
+import random
 
 # Local imports.
-from MDPClass import MDP
+from mdp.MDPClass import MDP
 from GridWorldStateClass import GridWorldState
 
 class GridWorldMDP(MDP):

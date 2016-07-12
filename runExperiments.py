@@ -1,21 +1,30 @@
+'''
+Code for running experiments on an MDP
+
+Instructions:
+    (1) Set mdp in main.
+    (2) Create agent instances.
+    (3) Set experiment parameters (numInstances, numEpisodes, numSteps).
+    (4) Call runAgentsOnMDP.
+
+Author: David Abel
+'''
+
 # Python imports.
 import sys
 import os
 import time
-sys.path.append(os.getcwd() + "/../agents/")
-sys.path.append(os.getcwd() + "/../tasks/grid_world/")
-sys.path.append(os.getcwd() + "/../tasks/chain/")
 from collections import defaultdict
 
 # Local imports.
-from GridWorldMDPClass import GridWorldMDP
-from ChainMDPClass import ChainMDP
-from ExperimentClass import Experiment
-from RandomAgentClass import RandomAgent
-from RMaxAgentClass import RMaxAgent
-from QLearnerAgentClass import QLearnerAgent
+from tasks.grid_world.GridWorldMDPClass import GridWorldMDP
+from tasks.chain.ChainMDPClass import ChainMDP
+from experiments.ExperimentClass import Experiment
+from agents.RandomAgentClass import RandomAgent
+from agents.RMaxAgentClass import RMaxAgent
+from agents.QLearnerAgentClass import QLearnerAgent
 
-def runAgentsOnMDP(agents, mdp, numInstances=3, numEpisodes=1000, numSteps=50):
+def runAgentsOnMDP(agents, mdp, numInstances=200, numEpisodes=25, numSteps=40):
 
     # Experiment (for reproducibility, plotting).
     experiment = Experiment(agents=agents, mdp=mdp, params = {"numInstances":numInstances, "numEpisodes":numEpisodes, "numSteps":numSteps})
@@ -73,16 +82,17 @@ def runAgentsOnMDP(agents, mdp, numInstances=3, numEpisodes=1000, numSteps=50):
 
 def main():
     # MDP.
-    # gw = GridWorldMDP(5,5, (1,1), (5,5))
-    chain = ChainMDP(15)
+    mdp = GridWorldMDP(5,5, (1,1), (5,5))
+    # mdp = ChainMDP(15)
+    actions = mdp.getActions()
 
     # Agent.
-    randomAgent = RandomAgent(ChainMDP.actions)
-    rMaxAgent = RMaxAgent(actions = ChainMDP.actions)
-    qLearnerAgent = QLearnerAgent(actions = ChainMDP.actions)
+    randomAgent = RandomAgent(actions)
+    rMaxAgent = RMaxAgent(actions)
+    qLearnerAgent = QLearnerAgent(actions)
 
     # Run experiments.
-    runAgentsOnMDP([qLearnerAgent, randomAgent], chain)
+    runAgentsOnMDP([qLearnerAgent, randomAgent], mdp)
 
 
 if __name__ == "__main__":
