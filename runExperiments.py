@@ -5,7 +5,7 @@ Instructions:
     (1) Set mdp in main.
     (2) Create agent instances.
     (3) Set experiment parameters (numInstances, numEpisodes, numSteps).
-    (4) Call runAgentsOnMDP.
+    (4) Call runAgentsOnMDP(agents, mdp).
 
 Author: David Abel
 '''
