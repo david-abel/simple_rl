@@ -18,19 +18,24 @@ class Experiment(object):
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.rewards = defaultdict(list)
-        self.name = Experiment.resultsDir + str(self.mdp)
+        self.name = str(self.mdp)
+        self.expDirectory = Experiment.resultsDir + self.name
         self._setupFiles()
 
     def _setupFiles(self):
-        if not os.path.exists(self.name + "/"):
-            os.makedirs(self.name + "/")
+        '''
+        Summary:
+            Creates and removes relevant directories/files.
+        '''
+        if not os.path.exists(self.expDirectory + "/"):
+            os.makedirs(self.expDirectory + "/")
         else:
             for agent in self.agents:
-                if os.path.exists(self.name + "/" + str(agent) + ".csv"):
-                    os.remove(self.name + "/" + str(agent) + ".csv")
+                if os.path.exists(self.expDirectory + "/" + str(agent) + ".csv"):
+                    os.remove(self.expDirectory + "/" + str(agent) + ".csv")
 
     def makePlots(self):
-        chartUtils.makePlots(self.name, self.agents)
+        chartUtils.makePlots(self.expDirectory, self.agents, cumulative=False)
 
     def addExperience(self, agent, s, a, r, sprime):
         self.rewards[agent] += [r]
@@ -43,31 +48,25 @@ class Experiment(object):
         Summary:
             Adds a new line to indicate we're onto a new instance.
         '''
-        out_file = open(self.name + "/" + str(agent) + ".csv", "a+")
-        out_file.write("\n")
-        out_file.close()
+        outFile = open(self.expDirectory + "/" + str(agent) + ".csv", "a+")
+        outFile.write("\n")
+        outFile.close()
 
     def writeEpisodeRewardToFile(self, agent, r):
         # Write reward.
-        out_file = open(self.name + "/" + str(agent) + ".csv", "a+")
-        out_file.write(str(r) + ",")
-        out_file.close()
+        outFile = open(self.expDirectory + "/" + str(agent) + ".csv", "a+")
+        outFile.write(str(r) + ",")
+        outFile.close()
 
     def writeToFile(self):
         '''
         Summary:
             Writes relevant experiment information to a file for reproducibility.
         '''
-        # Make the subdirectory if it doesn't yet exist.
-        new_dir = self.name
-        if not os.path.exists(new_dir):
-            os.makedirs(new_dir)
-        
-        # Write.
-        out_file = open(new_dir + "/parameters.txt", "w+")
+        outFile = open(self.expDirectory + "/parameters.txt", "w+")
         toFile = self._getExpFileString()
-        out_file.write(toFile)
-        out_file.close()
+        outFile.write(toFile)
+        outFile.close()
 
     def _getExpFileString(self):
         '''

@@ -1,5 +1,6 @@
 # Python libs.
-import pylab
+# import pylab
+import matplotlib.pyplot as pyplot
 import ast
 import numpy as np
 import math
@@ -8,10 +9,10 @@ from os import listdir, remove, walk, system
 from os.path import isfile, isdir, join
 import numpy as np  
 
-def loadData(experimentName, experimentAgents):
+def loadData(experimentDirectory, experimentAgents):
     '''
     Args:
-        experimentName (str): Points to the file containing all the data.
+        experimentDirectory (str): Points to the file containing all the data.
         experimentAgents (list): Points to which results files will be plotted.
 
     Returns:
@@ -22,7 +23,7 @@ def loadData(experimentName, experimentAgents):
     for alg in experimentAgents:
 
         # Load the reward for all instances of each agent
-        allReward = open(experimentName + "/" + str(alg) + ".csv", "r")
+        allReward = open(experimentDirectory + "/" + str(alg) + ".csv", "r")
         allInstances = []
 
         # Put the reward instances into a list of floats.
@@ -129,14 +130,15 @@ def computeSingleConfidenceInterval(datum):
     return marginOfError
 
 
-def plot(data, agents, useCost=False, cumulative=False, confidenceIntervals=[0.01]*8, resultsPrefix=""):
+def plot(results, experimentDirectory, agents, useCost=False, cumulative=False, confidenceIntervals=[0.01]*8):
     '''
     Args:
-        data (list of lists): each element is itself the reward from an episode for an algorithm.
+        results (list of lists): each element is itself the reward from an episode for an algorithm.
+        experimentDirectory (str): path to results.
+        agents (list): each element is an agent that was run in the experiment.
         useCost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
         confidenceIntervals (list of floats) [optional]: confidence intervals to display with the chart.
-        resultsPrefix (str)
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -144,66 +146,61 @@ def plot(data, agents, useCost=False, cumulative=False, confidenceIntervals=[0.0
 
     # Some nice colors for plotting.
     colors = [[240,163,255],[0,117,220],[153,63,0],[76,0,92],[25,25,25],[0,92,49],[255,204,153],[128,128,128],[148,255,181],[143,124,0],[157,204,0],[194,0,136],[0,51,128],[255,164,5],[255,168,187],[66,102,0],[255,0,16],[94,241,242],[0,153,143],[224,255,102],[116,10,255],[153,0,0],[255,255,128],[255,255,0],[255,80,5]]
-    colors = [[shade / 255.0 for shade in rgb] for rgb in colors] # Map them to floats in [0:1].
+    # Map them to floats in [0:1].
+    colors = [[shade / 255.0 for shade in rgb] for rgb in colors]
+    markers = ['o','s','D','^','*','+','p','x','v']
+    
+    # Will show the marker and error bars 1/20th of the time. (pretty messy otherwise)
+    showAccentEveryNPoints = int(math.ceil(len(results[0]) / 16.0))
 
     # Puts the legend into the best location in the plot.
-    pylab.rcParams['legend.loc'] = 'best' 
+    pyplot.rcParams['legend.loc'] = 'best' 
 
-    results = data
+    # Negate everything if we're plotting cost.
     if useCost:
-        results = [[-x for x in alg] for alg in data]
-
-    ymin = min([min(d) for d in results])
-    ymax = max([max(d) for d in results])
-    pylab.ylim(ymin=ymin,ymax=ymax)
-
-    randColorIndex = 0
-    showErrorBarsEveryNPoints = 8 # Will show the error bars every N episodes. (pretty messy otherwise)
+        results = [[-x for x in alg] for alg in results]
 
     # Make the plot.
     for i, alg in enumerate(agents):
         # Add figure for this algorithm.
-        randColor = colors[(randColorIndex + i + 5) % len(colors)]
+        seriesColor = colors[i % len(colors)]
 
-        # Compute CIs
-        CI = confidenceIntervals[i] #[::showErrorBarsEveryNPoints]
+        # Plot Confidence Intervals.
+        CI = confidenceIntervals[i]
         try:
-            pylab.errorbar(range(len(results[i])), results[i], yerr=CI, errorevery=showErrorBarsEveryNPoints, fmt='', color=randColor)
+            pyplot.fill_between(range(len(results[i])), results[i] - CI[i], results[i] + CI[i], facecolor=seriesColor, edgecolor=seriesColor, alpha=0.15)
         except ValueError:
             print "Error: dimension mismatch. Two algorithms were run a different number of episodes."
             quit()
-        # plt.fill_between(x, y-yerr, y+yerr,facecolor='r',alpha=0.5)
 
-        legendInfo = alg
+        print "Mean last episode: (" + str(agents[i]) + ") :", results[i][-1], "(CI:",CI[-1],")"
 
-        print "Mean (" + str(agents[i]) + ") :", results[i][-1], "(CI:",CI[-1],")"
-
-        pylab.plot(range(len(results[i])), results[i], color=randColor, label=legendInfo)
-        pylab.legend()
+        pyplot.plot(range(len(results[i])), results[i], color=seriesColor, marker=markers[i], markevery=showAccentEveryNPoints, label=alg)
+        pyplot.legend()
 
     # Configure plot naming information.
     unit = "Cost" if useCost else "Reward"
-
     plotLabel = "Cumulative" if cumulative else "Average"
-    plot_name = resultsPrefix + "/all_" + plotLabel.lower() + "_" + unit.lower() + ".pdf"
-    plotTitle = plotLabel + " " + unit + ""
+    plotName = experimentDirectory + "/all_" + plotLabel.lower() + "_" + unit.lower() + ".pdf"
+    plotTitle = plotLabel + " " + unit + ": " + experimentDirectory.split("/")[-1]
     yAxisLabel = plotLabel + " " + unit
+    pyplot.xlabel('Episode Number')
+    pyplot.ylabel(yAxisLabel)
+    pyplot.title(plotTitle)
+    pyplot.grid(True)
 
-    # Make the plot.
-    pylab.xlabel('Episode Number')
-    pylab.ylabel(yAxisLabel)
-    pylab.title(plotTitle)
-    pylab.grid(True)
-    pylab.savefig(plot_name, format="pdf")
-    pylab.cla() # Clears.
+    # Save the plot.
+    pyplot.savefig(plotName, format="pdf")
+    pyplot.cla() # Clears.
 
-    system("open " + plot_name)
+    # Open it.
+    system("open " + plotName)
 
 
-def makePlots(experimentName, experimentAgents, cumulative=True):
+def makePlots(experimentDirectory, experimentAgents, cumulative=True):
     '''
     Args:
-        experimentName (str)
+        experimentDirectory (str): path to results.
         experimentAgents (list)
         cumulative (bool) [opt]
 
@@ -213,7 +210,7 @@ def makePlots(experimentName, experimentAgents, cumulative=True):
     '''
 
     # Load the data.
-    data = loadData(experimentName, experimentAgents) # [alg][instance][episode]
+    data = loadData(experimentDirectory, experimentAgents) # [alg][instance][episode]
 
     # Average the data.
     avgData = averageData(data, cumulative=cumulative)
@@ -222,4 +219,4 @@ def makePlots(experimentName, experimentAgents, cumulative=True):
     confIntervals = computeConfidenceIntervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avgData, experimentAgents, useCost=True, cumulative=cumulative, confidenceIntervals=confIntervals, resultsPrefix = experimentName)
+    plot(avgData, experimentDirectory, experimentAgents, useCost=True, cumulative=cumulative, confidenceIntervals=confIntervals)
