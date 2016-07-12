@@ -16,23 +16,24 @@ class QLearnerAgent(Agent):
             gamma (float): Discount factor.
             epsilon (float): Exploration term.
         '''
-        Agent.__init__(self, name="qlearner", actions=actions)
+        Agent.__init__(self, name="qlearner", actions=actions, gamma=gamma)
 
         # Set/initialize parameters and other relevant classwide data
         self.alpha = alpha
         self.epsilon = epsilon
-        self.gamma = gamma
 
         self.prevState = None
         self.prevAction = None
-        self.Q = defaultdict(float)
+        self.defaultQ = 0.0
+        self.Q = defaultdict(lambda : self.defaultQ)
 
+        # Choose explore type. Can also be "uniform" for \epsilon-greedy.
         self.explore = "softmax"
 
     def reset(self):
         self.prevState = None
         self.prevAction = None
-        self.Q = defaultdict(float)
+        self.Q = defaultdict(lambda : self.defaultQ)
 
     # --------------------------------
     # ---- CENTRAL ACTION METHODS ----
@@ -106,10 +107,33 @@ class QLearnerAgent(Agent):
             self.prevState = currState
             return
 
-        # Update Q Function according to the Bellman Equation.
+        # Update the Q Function.
         maxQCurrState = self.getMaxQValue(currState)
         prevQVal = self.getQValue(self.prevState , self.prevAction)
         self.Q[(self.prevState, self.prevAction)] = (1 - self.alpha) * prevQVal + self.alpha * (reward + self.gamma*maxQCurrState)
+
+    def _computeMaxQValActionPair(self, state):
+        ''' 
+        Args:
+            state (State)
+
+        Returns:
+            (tuple) --> (float,str): where the float is the Qval, str is the action.
+        '''
+        # Grab random initial action in case all equal
+        bestAction = None
+        maxQVal = float("-inf")
+        shuffledActionList = self.actions[:]
+        random.shuffle(shuffledActionList)
+
+        # Find best action (action w/ current max predicted Q value)
+        for action in shuffledActionList:
+            Q_s_a = self.getQValue(state, action)
+            if Q_s_a > maxQVal:
+                maxQVal = Q_s_a
+                bestAction = action
+
+        return maxQVal, bestAction
 
     def getMaxQAction(self, state):
         ''' 
@@ -119,21 +143,7 @@ class QLearnerAgent(Agent):
         Returns:
             (str): denoting the action with the max q value in the given @state.
         '''
-    
-        # Grab random initial action in case all equal
-        best_action = None
-        max_qval = float("-inf")
-        shuffledActionList = self.actions[:]
-        random.shuffle(shuffledActionList)
-
-        # Find best action (action w/ current max predicted Q value)
-        for action in shuffledActionList:
-            Q_s_a = self.getQValue(state, action)
-            if Q_s_a > max_qval:
-                max_qval = Q_s_a
-                best_action = action
-
-        return best_action
+        return self._computeMaxQValActionPair(state)[1]
 
     def getMaxQValue(self, state):
         ''' 
@@ -143,16 +153,8 @@ class QLearnerAgent(Agent):
         Returns:
             (float): denoting the max q value in the given @state.
         '''
-    
-        max_qval = float("-inf")
+        return self._computeMaxQValActionPair(state)[0]
 
-        # Find best action (action w/ current max predicted Q value).
-        for action in self.actions:
-            Q_s_a = self.getQValue(state, action)
-            if Q_s_a > max_qval:
-                max_qval = Q_s_a
-
-        return max_qval
 
 
     def getQValue(self , state , action):
@@ -164,9 +166,6 @@ class QLearnerAgent(Agent):
         Returns:
             (float): denoting the q value of the (@state,@action) pair.
         '''
-        if (state, action) not in self.Q:
-            # If the Q value isn't in there yet, initialize it to the default before returning.
-            self.Q[(state, action)] = 0
         return self.Q[(state, action)]
 
     def getActionDistr(self, state):

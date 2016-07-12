@@ -24,7 +24,7 @@ from agents.RandomAgentClass import RandomAgent
 from agents.RMaxAgentClass import RMaxAgent
 from agents.QLearnerAgentClass import QLearnerAgent
 
-def runAgentsOnMDP(agents, mdp, numInstances=200, numEpisodes=25, numSteps=40):
+def runAgentsOnMDP(agents, mdp, numInstances=10, numEpisodes=100, numSteps=50):
 
     # Experiment (for reproducibility, plotting).
     experiment = Experiment(agents=agents, mdp=mdp, params = {"numInstances":numInstances, "numEpisodes":numEpisodes, "numSteps":numSteps})
@@ -82,7 +82,7 @@ def runAgentsOnMDP(agents, mdp, numInstances=200, numEpisodes=25, numSteps=40):
 
 def main():
     # MDP.
-    mdp = GridWorldMDP(5,5, (1,1), (5,5))
+    mdp = GridWorldMDP(10,10, (1,1), (9,0))
     # mdp = ChainMDP(15)
     actions = mdp.getActions()
 
@@ -92,7 +92,7 @@ def main():
     qLearnerAgent = QLearnerAgent(actions)
 
     # Run experiments.
-    runAgentsOnMDP([qLearnerAgent, randomAgent], mdp)
+    runAgentsOnMDP([qLearnerAgent, rMaxAgent, randomAgent], mdp)
 
 
 if __name__ == "__main__":

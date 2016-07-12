@@ -27,12 +27,14 @@ class GridWorldMDP(MDP):
 		Args:
 			state (State)
 			action (str)
-			statePrime
+			statePrime (State)
 
 		Returns
 			(float)
 		'''
-		if statePrime == self.goalState:
+		self._errorCheck(state, action, statePrime)
+
+		if statePrime.x == self.goalLoc[0] and statePrime.y == self.goalLoc[1]:
 			return 1
 		else:
 			return -0.5
@@ -46,9 +48,7 @@ class GridWorldMDP(MDP):
 		Returns
 			(State)
 		'''
-		if action not in GridWorldMDP.actions:
-			print "Error: the action provided (" + str(action) + ") was invalid."
-			quit()
+		self._errorCheck(state, action)
 
 		if action == "up" and state.y < self.height:
 			return GridWorldState(state.x, state.y + 1)
@@ -61,9 +61,22 @@ class GridWorldMDP(MDP):
 		else:
 			return GridWorldState(state.x, state.y)
 
+	def _errorCheck(self, state, action, sPrime = -1):
+		if action not in GridWorldMDP.actions:
+			print "Error: the action provided (" + str(action) + ") was invalid."
+			quit()
+
+		if not(isinstance(state, GridWorldState)):
+			print "Error: the given state (" + str(state) + ") was not of the correct class."
+			quit()
+
+		if not(sPrime == -1) or not(isinstance(state, GridWorldState)):
+			print "Error: the given state (" + str(sPrime) + ") was not of the correct class."
+			quit()
+
+
 	def __str__(self):
 		return "gridworld_h-" + str(self.height) + "_w-" + str(self.width)
-
 
 
 def main():
