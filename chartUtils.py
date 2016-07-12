@@ -1,13 +1,11 @@
 # Python libs.
 # import pylab
 import matplotlib.pyplot as pyplot
-import ast
 import numpy as np
 import math
-import argparse
 from os import listdir, remove, walk, system
 from os.path import isfile, isdir, join
-import numpy as np  
+import numpy as np
 
 def loadData(experimentDirectory, experimentAgents):
     '''

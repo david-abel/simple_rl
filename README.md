@@ -3,7 +3,7 @@ Some simple infrastructure for experimenting with Markov Decision Processes in P
 
 See _experiments/runExperiments.py_ to run some basic experiments.
 
-No irregular dependencies. Requires [numpy](http://www.numpy.org/), 
+No irregular dependencies, just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). 
 
 ## Overview
 
