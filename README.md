@@ -7,11 +7,16 @@ Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.
 
 ## Overview
 
-* (_tasks_): Implementations for a few standard MDPs
+* (_agents_): Code for some basic agents (a random actor, _Q_-learner, etc.). More to come (hopefully).
 
-* (_experiments_): code for running experiments. runExperiments.py is the real meat: running that will autogenerate plots for a given set of {agents, MDP, parameters (numEpisodes, numInstances, etc.)}.
+* (_experiments_): Code for an Experiment class (for reproducibility of results).
 
-* (_agents_): code for some basic agents (a random actor, _Q_-learner, etc.). More to come (hopefully).
+* (_mdp_): Code for a basic MDP class (and friends).
+
+* (_tasks_): Implementations for a few standard MDPs. Currently contains grid world and chain.
+
+* (_utils_): Code for relevant utilities like plotting.
+
 
 ## Making a New MDP
 
@@ -33,6 +38,7 @@ Make an Agent subclass in _agents/_. Requires:
 * A method, _act(self, state, reward)_, that returns an action.
 
 * A method, _reset()_, that puts the agent back to its _tabula rasa_ state.
+
 
 Let me know if you have any questions or suggestions.
 
