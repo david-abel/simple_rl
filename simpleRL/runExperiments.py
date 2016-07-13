@@ -19,14 +19,14 @@ import time
 from collections import defaultdict
 
 # Local imports.
-from tasks.grid_world.GridWorldMDPClass import GridWorldMDP
-from tasks.chain.ChainMDPClass import ChainMDP
-from experiments.ExperimentClass import Experiment
-from agents.RandomAgentClass import RandomAgent
-from agents.RMaxAgentClass import RMaxAgent
-from agents.QLearnerAgentClass import QLearnerAgent
+from simpleRL.tasks.grid_world.GridWorldMDPClass import GridWorldMDP
+from simpleRL.tasks.chain.ChainMDPClass import ChainMDP
+from simpleRL.experiments.ExperimentClass import Experiment
+from simpleRL.agents.RandomAgentClass import RandomAgent
+from simpleRL.agents.RMaxAgentClass import RMaxAgent
+from simpleRL.agents.QLearnerAgentClass import QLearnerAgent
 
-def runAgentsOnMDP(agents, mdp, numInstances=10, numEpisodes=100, numSteps=50):
+def runAgentsOnMDP(agents, mdp, numInstances=5, numEpisodes=20, numSteps=20):
 
     # Experiment (for reproducibility, plotting).
     experiment = Experiment(agents=agents, mdp=mdp, params = {"numInstances":numInstances, "numEpisodes":numEpisodes, "numSteps":numSteps})
@@ -86,14 +86,15 @@ def runAgentsOnMDP(agents, mdp, numInstances=10, numEpisodes=100, numSteps=50):
 def main():
 
     # MDP.
-    mdp = GridWorldMDP(10,10, (1,1), (9,0))
-    # mdp = ChainMDP(15)
+    # mdp = GridWorldMDP(10,10, (1,1), (9,9))
+    mdp = ChainMDP(15)
     actions = mdp.getActions()
+    gamma = mdp.getGamma()
 
     # Agent.
     randomAgent = RandomAgent(actions)
-    rMaxAgent = RMaxAgent(actions)
-    qLearnerAgent = QLearnerAgent(actions)
+    rMaxAgent = RMaxAgent(actions, gamma=gamma)
+    qLearnerAgent = QLearnerAgent(actions, gamma=gamma)
 
     # Run experiments.
     runAgentsOnMDP([qLearnerAgent, rMaxAgent, randomAgent], mdp)

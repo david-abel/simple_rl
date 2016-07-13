@@ -91,6 +91,10 @@ class RMaxAgent(Agent):
             (float)
         '''
 
+        # If we've hashed a Q value for this already.
+        if (state,action) in self.Q:
+            return self.Q[(state,action)]
+
         if horizon == 0:
             return self.R[(state,action)]
 

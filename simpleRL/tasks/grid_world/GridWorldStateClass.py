@@ -3,7 +3,7 @@ import sys
 import os
 
 # Local libs.
-from mdp.StateClass import State
+from simpleRL.mdp.StateClass import State
 
 class GridWorldState(State):
 	''' Class for Grid World States '''

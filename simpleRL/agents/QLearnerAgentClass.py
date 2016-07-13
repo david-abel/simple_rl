@@ -9,31 +9,24 @@ from AgentClass import Agent
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, alpha=0.05, gamma=0.95, epsilon=0.01):
+    def __init__(self, actions, name="qlearner", alpha=0.05, gamma=0.95, epsilon=0.01, explore="softmax"):
         '''
         Args:
+            actions (list): Contains strings denoting the actions.
+            name (str): Denotes the name of the agent.
             alpha (float): Learning rate.
             gamma (float): Discount factor.
             epsilon (float): Exploration term.
+            explore (str): One of {softmax, uniform}. Denotes explore policy.
         '''
-        Agent.__init__(self, name="qlearner", actions=actions, gamma=gamma)
+        Agent.__init__(self, name=name, actions=actions, gamma=gamma)
 
         # Set/initialize parameters and other relevant classwide data
         self.alpha = alpha
         self.epsilon = epsilon
 
-        self.prevState = None
-        self.prevAction = None
-        self.defaultQ = 0.0
-        self.Q = defaultdict(lambda : self.defaultQ)
-
         # Choose explore type. Can also be "uniform" for \epsilon-greedy.
-        self.explore = "softmax"
-
-    def reset(self):
-        self.prevState = None
-        self.prevAction = None
-        self.Q = defaultdict(lambda : self.defaultQ)
+        self.explore = explore
 
     # --------------------------------
     # ---- CENTRAL ACTION METHODS ----

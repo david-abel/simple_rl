@@ -17,6 +17,9 @@ class MDP(object):
 	def getActions(self):
 		return self.actions
 
+	def getGamma(self):
+		return self.gamma
+
 	def executeAgentAction(self, action):
 		'''
 		Args:
@@ -25,11 +28,10 @@ class MDP(object):
 		Returns:
 			(tuple: <float,State>): reward, State
 		'''
+		reward = self.rewardFunc(self.curState, action)
+
 		nextState = self.transitionFunc(self.curState, action)
-
 		self.curState = nextState
-
-		reward = self.rewardFunc(self.curState, action, nextState)
 
 		return reward, nextState
 

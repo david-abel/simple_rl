@@ -4,13 +4,14 @@ import sys
 from collections import defaultdict
 
 # Local libs.
-from utils import chartUtils
-from ExperimentParametersClass import ExperimentParameters
+from simpleRL.utils import chartUtils
+from simpleRL.experiments.ExperimentParametersClass import ExperimentParameters
 
 class Experiment(object):
     ''' Experiment Class for Discrete MDP Experiments '''
 
-    resultsDir = os.path.dirname(__file__) + "/../results/"
+    # Dumps the results in a directory called "results" in the current working dir.
+    resultsDir = os.getcwdu() + "/results/"
 
     def __init__(self, agents, mdp, params=None):
         self.agents = agents
@@ -34,7 +35,6 @@ class Experiment(object):
                     os.remove(self.expDirectory + "/" + str(agent) + ".csv")
 
     def makePlots(self):
-        print "self.expDirectory", self.expDirectory
         chartUtils.makePlots(self.expDirectory, self.agents)
 
     def addExperience(self, agent, s, a, r, sprime):

@@ -2,8 +2,8 @@
 import matplotlib.pyplot as pyplot
 import numpy as np
 import math
-from os import listdir, remove, walk, system
-from os.path import isfile, isdir, join
+import sys
+import os
 
 def loadData(experimentDirectory, experimentAgents):
     '''
@@ -118,36 +118,34 @@ def computeSingleConfidenceInterval(datum):
         (float): Margin of error.
     '''
     stdDev = np.std(datum)
-    stdErr = stdDev / math.sqrt(len(datum))
-    marginOfError = stdErr * 2
-    return marginOfError
+    stdErr = 1.96*(stdDev / math.sqrt(len(datum)))
+    # marginOfError = stdErr * 2
+    return stdErr
 
 
-def plot(results, experimentDirectory, agents, useCost=False, cumulative=False, confidenceIntervals=[0.01]*8):
+def plot(results, experimentDirectory, agents, confidenceIntervals=[], useCost=False, cumulative=False):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
         experimentDirectory (str): path to results.
         agents (list): each element is an agent that was run in the experiment.
+        confidenceIntervals (list of floats) [optional]: confidence intervals to display with the chart.
         useCost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
-        confidenceIntervals (list of floats) [optional]: confidence intervals to display with the chart.
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
     '''
 
-    # Some nice colors for plotting.
+    # Some nice markers and colors for plotting.
+    markers = ['o','s','D','^','*','+','p','x','v']
     colors = [[240,163,255],[0,117,220],[153,63,0],[76,0,92],[25,25,25],[0,92,49],[255,204,153],[128,128,128],[148,255,181],[143,124,0],[157,204,0],[194,0,136],[0,51,128],[255,164,5],[255,168,187],[66,102,0],[255,0,16],[94,241,242],[0,153,143],[224,255,102],[116,10,255],[153,0,0],[255,255,128],[255,255,0],[255,80,5]]
     # Map them to floats in [0:1].
     colors = [[shade / 255.0 for shade in rgb] for rgb in colors]
-    markers = ['o','s','D','^','*','+','p','x','v']
     
-    # Will show the marker and error bars 1/20th of the time. (pretty messy otherwise)
-    showAccentEveryNPoints = int(math.ceil(len(results[0]) / 16.0))
-
-    # Puts the legend into the best location in the plot.
-    pyplot.rcParams['legend.loc'] = 'best' 
+    # Puts the legend into the best location in the plot and use a tight layout.
+    pyplot.rcParams['legend.loc'] = 'best'
+    pyplot.xlim(0,len(results[0]) - 1)
 
     # Negate everything if we're plotting cost.
     if useCost:
@@ -155,20 +153,20 @@ def plot(results, experimentDirectory, agents, useCost=False, cumulative=False, 
 
     # Make the plot.
     for i, alg in enumerate(agents):
+
         # Add figure for this algorithm.
         seriesColor = colors[i % len(colors)]
+        yAxis = results[i]
+        xAxis = range(len(yAxis))
 
         # Plot Confidence Intervals.
-        CI = confidenceIntervals[i]
-        try:
-            pyplot.fill_between(range(len(results[i])), results[i] - CI[i], results[i] + CI[i], facecolor=seriesColor, edgecolor=seriesColor, alpha=0.15)
-        except ValueError:
-            print "Error: dimension mismatch. Two algorithms were run a different number of episodes."
-            quit()
+        if confidenceIntervals != []:
+            CI = confidenceIntervals[i]
+            pyplot.fill_between(xAxis, np.add(yAxis,CI), np.subtract(yAxis,CI), facecolor=seriesColor, edgecolor=seriesColor, alpha=0.15)
 
-        print "Mean last episode: (" + str(agents[i]) + ") :", results[i][-1], "(CI:",CI[-1],")"
-
-        pyplot.plot(range(len(results[i])), results[i], color=seriesColor, marker=markers[i], markevery=showAccentEveryNPoints, label=alg)
+        print "Mean last episode: (" + str(agents[i]) + ") :", yAxis[-1], "(CI:",CI[-1],")"
+        
+        pyplot.plot(xAxis, yAxis, color=seriesColor, marker=markers[i], markevery=4, label=alg)
         pyplot.legend()
 
     # Configure plot naming information.
@@ -187,14 +185,14 @@ def plot(results, experimentDirectory, agents, useCost=False, cumulative=False, 
     pyplot.cla() # Clears.
 
     # Open it.
-    system("open " + plotName)
+    os.system("open " + plotName)
 
 
 def makePlots(experimentDirectory, experimentAgents, cumulative=True):
     '''
     Args:
         experimentDirectory (str): path to results.
-        experimentAgents (list)
+        experimentAgents (list): agent names (looks for "<agent-name>.csv").
         cumulative (bool) [opt]
 
     Summary:
@@ -212,4 +210,23 @@ def makePlots(experimentDirectory, experimentAgents, cumulative=True):
     confIntervals = computeConfidenceIntervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avgData, experimentDirectory, experimentAgents, useCost=True, cumulative=cumulative, confidenceIntervals=confIntervals)
+    plot(avgData, experimentDirectory, experimentAgents, confidenceIntervals=confIntervals, useCost=True, cumulative=cumulative)
+
+def main():
+    # For manual plotting.
+    if len(sys.argv) < 2:
+        print "Error: you must specify a directory containing the relevant csv files of data."
+        print "Usage: python chartUtils.py <path-to-data>"
+        quit()
+
+    f = sys.argv[1]
+    agents = [agent for agent in os.listdir(f) if "." not in agent]
+
+    if len(agents) == 0:
+        print "Error: no csv files found."
+        quit()
+
+    makePlots(f, agents)
+
+if __name__ == "__main__":
+    main()

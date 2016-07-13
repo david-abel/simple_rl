@@ -4,15 +4,15 @@ import os
 import random
 
 # Local imports.
-from mdp.MDPClass import MDP
-from mdp.StateClass import State
-from GridWorldStateClass import GridWorldState
+from simpleRL.mdp.MDPClass import MDP
+from simpleRL.mdp.StateClass import State
+from simpleRL.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class GridWorldMDP(MDP):
 	''' Class for a Grid World MDP '''
 	
 	# Static constants.
-	actions = ["up", "down", "left", "right"]
+	actions = ["up", "down", "left", "right","burn"]
 
 	def __init__(self, height, width, initLoc, goalLoc):
 		MDP.__init__(self, GridWorldMDP.actions, self._transitionFunction, self._rewardFunction, initState = GridWorldState(initLoc[0], initLoc[1]))		
@@ -23,7 +23,7 @@ class GridWorldMDP(MDP):
 		self.curState = GridWorldState(initLoc[0], initLoc[1])
 		self.goalState = GridWorldState(goalLoc[0], goalLoc[1])
 
-	def _rewardFunction(self, state, action, statePrime):
+	def _rewardFunction(self, state, action):
 		'''
 		Args:
 			state (State)
@@ -33,13 +33,34 @@ class GridWorldMDP(MDP):
 		Returns
 			(float)
 		'''
-		self._errorCheck(state, action, statePrime)
+		self._errorCheck(state, action)
 
-		if statePrime.x == self.goalLoc[0] and statePrime.y == self.goalLoc[1]:
-			print "Goal"
+		if action == "burn":
+			return -1.0
+		elif self._isGoalStateAction(state, action):
 			return 1
 		else:
-			return -0.5
+			return 0
+
+	def _isGoalStateAction(self, state, action):
+		'''
+		Args:
+			state (State)
+			action (str)
+
+		Returns:
+			(bool): True iff the state-action pair send the agent to the goal state.
+		'''
+		if action == "left" and (state.x == self.goalState.x + 1) or (state.x == 1 == self.goalState.x):
+			return True
+		elif action == "right" and (state.x == self.goalState.x + 1) or (state.x == self.width == self.goalState.x):
+			return True
+		elif action == "down" and (state.y == self.goalState.y - 1) or (state.y == 1 == self.goalState.y):
+			return True
+		elif action == "up" and (state.y == self.goalState.y + 1) or (state.y == self.height == self.goalState.y):
+			return True
+		else:
+			return False
 
 	def _transitionFunction(self, state, action):
 		'''
@@ -63,17 +84,16 @@ class GridWorldMDP(MDP):
 		else:
 			return GridWorldState(state.x, state.y)
 
-	def _errorCheck(self, state, action, sPrime = -1):
+	def _errorCheck(self, state, action):
 		'''
 		Args:
 			state (State)
 			action (str)
-			sPrime (State): -1 if left blank (and thus type is int).
 
 		Summary:
-			Checks to make sure we've received states/actions of the right type.
+			Checks to make sure we've received state and action of the right type.
 		'''
-		
+
 		if action not in GridWorldMDP.actions:
 			print "Error: the action provided (" + str(action) + ") was invalid."
 			quit()
@@ -82,9 +102,6 @@ class GridWorldMDP(MDP):
 			print "Error: the given state (" + str(state) + ") was not of the correct class."
 			quit()
 
-		if not(sPrime == -1 or isinstance(state, GridWorldState)):
-			print "Error: the given state (" + str(sPrime) + ") was not of the correct class."
-			quit()
 
 
 	def __str__(self):

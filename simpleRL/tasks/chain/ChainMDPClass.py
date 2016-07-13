@@ -4,8 +4,8 @@ import sys
 import os
 
 # Local libs.
-from mdp.MDPClass import MDP
-from ChainStateClass import ChainState
+from simpleRL.mdp.MDPClass import MDP
+from simpleRL.tasks.chain.ChainStateClass import ChainState
 
 class ChainMDP(MDP):
 	''' Imeplementation for a standard Chain MDP '''
@@ -20,7 +20,7 @@ class ChainMDP(MDP):
 		MDP.__init__(self, ChainMDP.actions, self._transitionFunction, self._rewardFunction, initState = ChainState(1))
 		self.numStates = numStates
 
-	def _rewardFunction(self, state, action, statePrime):
+	def _rewardFunction(self, state, action):
 		'''
 		Args:
 			state (State)
@@ -30,7 +30,7 @@ class ChainMDP(MDP):
 		Returns
 			(float)
 		'''
-		if action == "forward" and statePrime.num == self.numStates:
+		if action == "forward" and state.num == self.numStates - 1:
 			return 1
 		elif action == "reset":
 			return 0.01
