@@ -1,3 +1,5 @@
+''' AgentClass.py: Class for a basic RL Agent '''
+
 # Python libs.
 from collections import defaultdict
 
@@ -9,10 +11,10 @@ class Agent(object):
         self.actions = actions
         self.gamma = gamma
 
-        self.prevState = None
-        self.prevAction = None
-        self.defaultQ = 0.0
-        self.Q = defaultdict(lambda : self.defaultQ)
+        self.prev_state = None
+        self.prev_action = None
+        self.default_q = 0.0
+        self.q_func = defaultdict(lambda: self.default_q)
 
     def act(self, state, reward):
         '''
@@ -30,9 +32,9 @@ class Agent(object):
         Summary:
             Resets the agent back to its tabula rasa config.
         '''
-        self.prevState = None
-        self.prevAction = None
-        self.Q = defaultdict(lambda : self.defaultQ)
+        self.prev_state = None
+        self.prev_action = None
+        self.q_func = defaultdict(lambda: self.default_q)
 
     def __str__(self):
         return str(self.name)

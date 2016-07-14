@@ -1,7 +1,7 @@
-# simpleRL
+# simple_rl
 A simple framework for experimenting with Reinforcement Learning and Markov Decision Processes in Python 2.7.
 
-See _experiments/runExperiments.py_ to run some basic experiments.
+See _experiments/run_experiments.py_ to run some basic experiments.
 
 Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). 
 

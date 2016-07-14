@@ -1,10 +1,11 @@
+''' QLearningAgentClass.py: Class for a basic QLearningAgent '''
+
 # Misc. python libs
-import numpy as np
 import random
-from collections import defaultdict
+import numpy
 
 # Local classes
-from AgentClass import Agent
+from simple_rl.agents.AgentClass import Agent
 
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
@@ -39,22 +40,25 @@ class QLearnerAgent(Agent):
             reward (float)
 
         Summary:
-            The central method called during each time step. Retrieves the action according to the current policy and performs updates given (s=self.prevState,a=self.prevAction,r=reward,s'=state)
+            The central method called during each time step.
+            Retrieves the action according to the current policy
+            and performs updates given (s=self.prev_state,
+            a=self.prev_action, r=reward, s'=state)
         '''
-        self.updateQ(state, reward)
+        self.update_q(state, reward)
 
         if self.explore == "softmax":
             # Softmax exploration
-            action = self.softMaxPolicy(state)
+            action = self.soft_max_policy(state)
         else:
             # Uniform exploration
-            action = self.epsilonGreedyQPolicy(state)
-            
-        self.prevState = state
-        self.prevAction = action
+            action = self.epsilon_greedy_q_policy(state)
+
+        self.prev_state = state
+        self.prev_action = action
         return action
 
-    def epsilonGreedyQPolicy(self, state):
+    def epsilon_greedy_q_policy(self, state):
         '''
         Args:
             state (State)
@@ -63,16 +67,16 @@ class QLearnerAgent(Agent):
             (str): action.
         '''
         # Policy: Epsilon of the time explore, otherwise, greedyQ.
-        if np.random.random() > self.epsilon:
+        if numpy.random.random() > self.epsilon:
             # Exploit.
-            action = self.getMaxQAction(state)
+            action = self.get_max_q_action(state)
         else:
             # Explore
-            action = np.random.choice(self.actions)
+            action = numpy.random.choice(self.actions)
 
         return action
 
-    def softMaxPolicy(self, state):
+    def soft_max_policy(self, state):
         '''
         Args:
             state (State): Contains relevant state information.
@@ -80,102 +84,103 @@ class QLearnerAgent(Agent):
         Returns:
             (str): action.
         '''
-        return np.random.choice(self.actions, 1, p=self.getActionDistr(state))[0]
+        return numpy.random.choice(self.actions, 1, p=self.get_action_distr(state))[0]
 
     # ---------------------------------
     # ---- Q VALUES AND PARAMETERS ----
     # ---------------------------------
 
-    def updateQ(self, currState, reward):
+    def update_q(self, curr_state, reward):
         '''
         Args:
-            currState (State): A State object containing the abstracted state representation
+            curr_state (State): A State object containing the abstracted state representation
             reward (float): The real valued reward of the associated state
 
         Summary:
             Updates the internal Q Function according to the Bellman Equation. (Classic Q Learning update)
         '''
         # If this is the first state, just return.
-        if self.prevState == None:
-            self.prevState = currState
+        if self.prev_state is None:
+            self.prev_state = curr_state
             return
 
         # Update the Q Function.
-        maxQCurrState = self.getMaxQValue(currState)
-        prevQVal = self.getQValue(self.prevState , self.prevAction)
-        self.Q[(self.prevState, self.prevAction)] = (1 - self.alpha) * prevQVal + self.alpha * (reward + self.gamma*maxQCurrState)
+        max_q_curr_state = self.get_max_q_value(curr_state)
+        prev_q_val = self.get_q_value(self.prev_state, self.prev_action)
+        self.q_func[(self.prev_state, self.prev_action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
 
-    def _computeMaxQValActionPair(self, state):
-        ''' 
+    def _compute_max_qval_action_pair(self, state):
+        '''
         Args:
             state (State)
 
         Returns:
-            (tuple) --> (float,str): where the float is the Qval, str is the action.
+            (tuple) --> (float, str): where the float is the Qval, str is the action.
         '''
         # Grab random initial action in case all equal
-        bestAction = None
-        maxQVal = float("-inf")
-        shuffledActionList = self.actions[:]
-        random.shuffle(shuffledActionList)
+        best_action = None
+        max_q_val = float("-inf")
+        shuffled_action_list = self.actions[:]
+        random.shuffle(shuffled_action_list)
 
         # Find best action (action w/ current max predicted Q value)
-        for action in shuffledActionList:
-            Q_s_a = self.getQValue(state, action)
-            if Q_s_a > maxQVal:
-                maxQVal = Q_s_a
-                bestAction = action
+        for action in shuffled_action_list:
+            q_s_a = self.get_q_value(state, action)
+            if q_s_a > max_q_val:
+                max_q_val = q_s_a
+                best_action = action
 
-        return maxQVal, bestAction
+        return max_q_val, best_action
 
-    def getMaxQAction(self, state):
-        ''' 
+    def get_max_q_action(self, state):
+        '''
         Args:
             state (State)
 
         Returns:
             (str): denoting the action with the max q value in the given @state.
         '''
-        return self._computeMaxQValActionPair(state)[1]
+        return self._compute_max_qval_action_pair(state)[1]
 
-    def getMaxQValue(self, state):
-        ''' 
+    def get_max_q_value(self, state):
+        '''
         Args:
             state (State)
 
         Returns:
             (float): denoting the max q value in the given @state.
         '''
-        return self._computeMaxQValActionPair(state)[0]
+        return self._compute_max_qval_action_pair(state)[0]
 
 
 
-    def getQValue(self , state , action):
+    def get_q_value(self, state, action):
         '''
         Args:
             state (State)
             action (str)
 
         Returns:
-            (float): denoting the q value of the (@state,@action) pair.
+            (float): denoting the q value of the (@state, @action) pair.
         '''
-        return self.Q[(state, action)]
+        return self.q_func[(state, action)]
 
-    def getActionDistr(self, state):
+    def get_action_distr(self, state):
         '''
         Args:
             state (State)
 
         Returns:
-            (list of floats): The i-th float corresponds to the probability mass associated with the i-th action (indexing into self.actions)
+            (list of floats): The i-th float corresponds to the probability
+            mass associated with the i-th action (indexing into self.actions)
         '''
         all_q_vals = []
         for i in xrange(len(self.actions)):
             action = self.actions[i]
-            all_q_vals.append(self.getQValue(state, action))
+            all_q_vals.append(self.get_q_value(state, action))
 
         # Softmax distribution.
-        total = sum([np.exp(qv) for qv in all_q_vals])
-        softmax = [np.exp(qv) / total for qv in all_q_vals]
+        total = sum([numpy.exp(qv) for qv in all_q_vals])
+        softmax = [numpy.exp(qv) / total for qv in all_q_vals]
 
         return softmax
