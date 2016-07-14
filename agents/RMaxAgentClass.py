@@ -24,7 +24,7 @@ class RMaxAgent(Agent):
     def reset(self):
         '''
         Summary:
-            Resets the agent back to its tabula rusa config.
+            Resets the agent back to its tabula rasa config.
         '''
         self.rewards = defaultdict(lambda: self.rmax) # keys are (s, a) pairs, value is int.
         self.transitions = defaultdict(lambda: None) # key is (s, a) pair, val is a state (DETERMINISTIC for now)
