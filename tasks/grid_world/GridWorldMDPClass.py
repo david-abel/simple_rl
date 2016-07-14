@@ -8,7 +8,7 @@ class GridWorldMDP(MDP):
     ''' Class for a Grid World MDP '''
 
     # Static constants.
-    ACTIONS = ["up", "down", "left", "right", "burn"]
+    ACTIONS = ["up", "down", "left", "right"]
 
     def __init__(self, height, width, init_loc, goal_loc):
         MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=GridWorldState(init_loc[0], init_loc[1]))
@@ -31,9 +31,7 @@ class GridWorldMDP(MDP):
         '''
         _error_check(state, action)
 
-        if action == "burn":
-            return -1.0
-        elif self._is_goal_state_action(state, action):
+        if self._is_goal_state_action(state, action):
             return 1
         else:
             return 0

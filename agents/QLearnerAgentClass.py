@@ -153,7 +153,6 @@ class QLearnerAgent(Agent):
         return self._compute_max_qval_action_pair(state)[0]
 
 
-
     def get_q_value(self, state, action):
         '''
         Args:

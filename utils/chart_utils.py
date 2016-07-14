@@ -152,10 +152,11 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     '''
 
     # Some nice markers and colors for plotting.
-    markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v']
+    markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
     colors = [[240, 163, 255], [0, 117, 220], [153, 63, 0],\
             [76, 0, 92], [25, 25, 25], [0, 92, 49],\
-            [255, 204, 153], [128, 128, 128], [148, 255, 181]]
+            [255, 204, 153], [128, 128, 128], [148, 255, 181],\
+            [95, 37, 159], [184, 221, 255]]
 
     # Map them to floats in [0:1].
     colors = [[shade / 255.0 for shade in rgb] for rgb in colors]
@@ -173,6 +174,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
         # Add figure for this algorithm.
         series_color = colors[i % len(colors)]
+        series_marker = markers[i % len(markers)]
         y_axis = results[i]
         x_axis = range(len(y_axis))
 
@@ -185,7 +187,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
         print "Mean last episode: (" + str(agents[i]) + ") :", y_axis[-1], "(conf_interv:", alg_conf_interv[-1], ")"
 
-        pyplot.plot(x_axis, y_axis, color=series_color, marker=markers[i], markevery=4, label=alg)
+        pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=4, label=alg)
         pyplot.legend()
 
     # Configure plot naming information.
