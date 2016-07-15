@@ -108,7 +108,7 @@ def main():
             (3) Run them on the mdp.
     '''
     # MDP.
-    mdp = GridWorldMDP(10, 10, (1, 1), (9, 9))
+    mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
     # mdp = ChainMDP(15)
     actions = mdp.get_actions()
     gamma = mdp.get_gamma()

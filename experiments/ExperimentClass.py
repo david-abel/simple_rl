@@ -41,6 +41,7 @@ class Experiment(object):
             for agent in self.agents:
                 if os.path.exists(self.exp_directory + "/" + str(agent) + ".csv"):
                     os.remove(self.exp_directory + "/" + str(agent) + ".csv")
+        self.write_exp_info_to_file()
 
     def make_plots(self):
         '''
@@ -82,7 +83,7 @@ class Experiment(object):
         out_file.write(str(reward) + ",")
         out_file.close()
 
-    def write_to_file(self):
+    def write_exp_info_to_file(self):
         '''
         Summary:
             Writes relevant experiment information to a file for reproducibility.
@@ -99,7 +100,7 @@ class Experiment(object):
         '''
         agent_string = "AGENTS: "
         for agent in self.agents:
-            agent_string += str(agent)
+            agent_string += "\t" + str(agent) + "\n"
 
         agent_string += "\n\n"
         mdp_string = "MDP: " + str(self.mdp) + "\n\n"

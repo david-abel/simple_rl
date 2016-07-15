@@ -6,6 +6,7 @@ Notes:
 '''
 
 # Python libs.
+import random
 from collections import defaultdict
 
 # Local classes.
@@ -33,15 +34,19 @@ class RMaxAgent(Agent):
         self.prev_action = None
 
     def act(self, state, reward):
-        # s, a, r, s' : self.prev_state, self.prev_action, reward, state
-        self.s_a_counts[(self.prev_state, self.prev_action)] += 1
-        self.rewards[(self.prev_state, self.prev_action)] = reward
-        self.transitions[(self.prev_state, self.prev_action)] = state
+        
+        if self.prev_state != None and self.prev_action != None:
+            # s, a, r, s' : self.prev_state, self.prev_action, reward, state
+            self.s_a_counts[(self.prev_state, self.prev_action)] += 1
+            self.rewards[(self.prev_state, self.prev_action)] = reward
+            self.transitions[(self.prev_state, self.prev_action)] = state
 
         # Compute best action.
         action = self.get_max_q_action(state)
+
         self.prev_action = action
         self.prev_state = state
+
 
         return action
 
@@ -66,7 +71,7 @@ class RMaxAgent(Agent):
 
         return best_action
 
-    def compute_q_value_of_state(self, state, horizon=5):
+    def compute_q_value_of_state(self, state, horizon=7):
         '''
         Args:
             state (State)
@@ -76,16 +81,24 @@ class RMaxAgent(Agent):
         '''
 
         if state is None:
-            return self.rmax * horizon
+            return (self.rmax * horizon)
 
-        max_q = float("-inf")
-        for action in self.actions:
+        # Grab random initial action in case all equal
+        best_action = None
+        max_q_val = float("-inf")
+        shuffled_action_list = self.actions[:]
+        random.shuffle(shuffled_action_list)
+
+        # Find best action (action w/ current max predicted Q value)
+        for action in shuffled_action_list:
             q_s_a = self.get_q_value(state, action, horizon)
-            if q_s_a > max_q:
-                max_q = q_s_a
-        return max_q
+            if q_s_a > max_q_val:
+                max_q_val = q_s_a
+                best_action = action
 
-    def get_q_value(self, state, action, horizon=5):
+        return max_q_val
+
+    def get_q_value(self, state, action, horizon=7):
         '''
         Args:
             state (State)

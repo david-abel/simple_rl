@@ -244,8 +244,8 @@ def main():
         quit()
 
     data_dir = sys.argv[1]
-    agents = [agent for agent in os.listdir(data_dir) if "." not in agent]
-
+    agents = [agent.replace(".csv","") for agent in os.listdir(data_dir) if ".csv" in agent]
+    print agents
     if len(agents) == 0:
         print "Error: no csv files found."
         quit()

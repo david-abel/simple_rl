@@ -36,5 +36,13 @@ class Agent(object):
         self.prev_action = None
         self.q_func = defaultdict(lambda: self.default_q)
 
+    def end_of_episode(self):
+        '''
+        Summary:
+            Resets the agents prior pointers.
+        '''
+        self.prev_state = None
+        self.prev_action = None
+
     def __str__(self):
         return str(self.name)

@@ -27,7 +27,7 @@ class ChainMDP(MDP):
         Returns
             (float)
         '''
-        if action == "forward" and state.num == self.num_states - 1:
+        if action == "forward" and state.num == self.num_states:
             return 1
         elif action == "reset":
             return 0.01
