@@ -210,12 +210,13 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     os.system("open " + plot_name)
 
 
-def make_plots(experiment_dir, experiment_agents, cumulative=False):
+def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=True):
     '''
     Args:
         experiment_dir (str): path to results.
         experiment_agents (list): agent names (looks for "<agent-name>.csv").
-        cumulative (bool) [opt]
+        cumulative (bool) [optional]: If true, plots show cumulative results.
+        use_cost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
 
     Summary:
         Creates plots for all agents run under the experiment.
@@ -232,25 +233,27 @@ def make_plots(experiment_dir, experiment_agents, cumulative=False):
     conf_intervals = compute_conf_intervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=True, cumulative=cumulative)
+    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative)
 
 def main():
     '''
     Summary:
         For manual plotting.
     '''
+    # Make sure we've been given a legitimate batch of results.
     if len(sys.argv) < 2:
         print "Error: you must specify a directory containing the relevant csv files of data."
         print "Usage: python chart_utils.py <path-to-data>"
         quit()
 
+    # Grab agents.
     data_dir = sys.argv[1]
     agents = [agent.replace(".csv","") for agent in os.listdir(data_dir) if ".csv" in agent]
-    print agents
     if len(agents) == 0:
         print "Error: no csv files found."
         quit()
 
+    # Plot.
     make_plots(data_dir, agents)
 
 if __name__ == "__main__":
