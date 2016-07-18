@@ -5,6 +5,14 @@ See _experiments/run_experiments.py_ to run some basic experiments.
 
 Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). 
 
+## Installation
+
+The easiest way to install is through [pip](https://pypi.python.org/pypi/pip). Just run:
+
+	pip install simple_rl
+
+Alternatively, you can download it [here](https://github.com/david-abel/simple_rl/tarball/0.1)
+
 ## Overview
 
 * (_agents_): Code for some basic agents (a random actor, _Q_-learner, etc.). More to come (hopefully).
