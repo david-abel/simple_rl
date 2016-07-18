@@ -21,12 +21,9 @@ import time
 from collections import defaultdict
 
 # Local imports.
-from simple_rl.tasks import GridWorldMDP
-from simple_rl.tasks import ChainMDP
+from simple_rl.tasks import GridWorldMDP, ChainMDP, BlackjackMDP
 from simple_rl.experiments import Experiment
-from simple_rl.agents import RandomAgent
-from simple_rl.agents import RMaxAgent
-from simple_rl.agents import QLearnerAgent
+from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent
 
 def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=20):
     '''
@@ -50,6 +47,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=2
     # Record how long each agent spends learning.
     times = defaultdict(float)
     print "Running experiment: \n" + str(experiment)
+
     # Learn.
     for agent in agents:
         print str(agent) + " is learning."
@@ -74,6 +72,10 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=2
                     # Record the experience.
                     experiment.add_experience(agent, state, action, reward, next_state)
 
+                    # Check if terminal state.
+                    if next_state.is_terminal():
+                        break
+
                     # Update pointer.
                     state = next_state
 
@@ -85,6 +87,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=2
 
             # Reset the agent and MDP.
             agent.reset()
+            mdp.reset()
 
         # Track how much time this agent took.
         end = time.clock()
@@ -108,8 +111,9 @@ def main():
             (3) Run them on the mdp.
     '''
     # MDP.
-    mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
-    # mdp = ChainMDP(15)
+    # mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
+    mdp = ChainMDP(15)
+
     actions = mdp.get_actions()
     gamma = mdp.get_gamma()
 
@@ -119,7 +123,7 @@ def main():
     qlearner_agent = QLearnerAgent(actions, gamma=gamma)
 
     # Run experiments.
-    run_agents_on_mdp([qlearner_agent, rmax_agent, random_agent], mdp)
+    run_agents_on_mdp([qlearner_agent, random_agent], mdp)
 
 
 if __name__ == "__main__":

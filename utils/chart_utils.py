@@ -187,7 +187,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
         print "Mean last episode: (" + str(agents[i]) + ") :", y_axis[-1], "(conf_interv:", alg_conf_interv[-1], ")"
 
-        pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=4, label=alg)
+        marker_every = max(len(y_axis) / 30,1)
+        pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=alg)
         pyplot.legend()
 
     # Configure plot naming information.
@@ -209,7 +210,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     os.system("open " + plot_name)
 
 
-def make_plots(experiment_dir, experiment_agents, cumulative=True):
+def make_plots(experiment_dir, experiment_agents, cumulative=False):
     '''
     Args:
         experiment_dir (str): path to results.
