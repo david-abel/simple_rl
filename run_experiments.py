@@ -49,7 +49,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=2
 
     # Record how long each agent spends learning.
     times = defaultdict(float)
-
+    print "Running experiment: \n" + str(experiment)
     # Learn.
     for agent in agents:
         print str(agent) + " is learning."

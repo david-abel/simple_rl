@@ -98,12 +98,13 @@ class Experiment(object):
         Returns:
             (str): contains the AGENT-names, the MDP-names, and PARAMETER-information.
         '''
-        agent_string = "AGENTS: "
+        mdp_string = "(MDP)\n\t" + str(self.mdp) + "\n"
+        agent_string = "(Agents)\n"
         for agent in self.agents:
             agent_string += "\t" + str(agent) + "\n"
+        param_string = "(Params)" + str(self.parameters) + "\n"
 
-        agent_string += "\n\n"
-        mdp_string = "MDP: " + str(self.mdp) + "\n\n"
-        param_string = "PARAMS: " + str(self.parameters) + "\n\n"
+        return  mdp_string + agent_string + param_string
 
-        return agent_string + mdp_string + param_string
+    def __str__(self):
+        return self._get_exp_file_string()
