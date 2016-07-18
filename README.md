@@ -7,11 +7,11 @@ Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.
 
 ## Installation
 
-The easiest way to install is through [pip](https://pypi.python.org/pypi/pip). Just run:
+The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just run:
 
 	pip install simple_rl
 
-Alternatively, you can download it [here](https://github.com/david-abel/simple_rl/tarball/0.1)
+Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/0.1).
 
 ## Overview
 
