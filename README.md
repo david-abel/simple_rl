@@ -1,7 +1,7 @@
 # simple_rl
 A simple framework for experimenting with Reinforcement Learning in Python 2.7.
 
-There are loads of other great libraries out there for RL: the aim of this one is twofold:
+There are loads of other great libraries out there for RL. The aim of this one is twofold:
 
 1. Simplicity.
 2. Reproducibility of results.
