@@ -30,12 +30,12 @@ class MDP(object):
         Returns:
             (tuple: <float,State>): reward, State
         '''
-        reward = self.reward_func(self.cur_state, action)
 
+        reward = self.reward_func(self.cur_state, action)
         next_state = self.transition_func(self.cur_state, action)
         self.cur_state = next_state
 
         return reward, next_state
 
     def reset(self):
-        self.__init__()
+        self.cur_state = self.init_state

@@ -12,7 +12,20 @@ class GridWorldState(State):
         self.y = y
 
     def __hash__(self):
-        return int(str(self.x) + "0990" + str(self.y))
+        # The X coordinate takes the first three digits.
+        if len(str(self.x)) < 3:
+            x_str = str(self.x)
+            while len(x_str) < 3:
+                x_str = "0" + x_str
+
+        # The Y coordinate takes the next three digits.
+        if len(str(self.y)) < 3:
+            y_str = str(self.y)
+            while len(y_str) < 3:
+                y_str = "0" + y_str
+
+        # Concatenate and return.
+        return int(y_str + x_str)
 
     def __str__(self):
         return "s: (" + str(self.x) + "," + str(self.y) + ")"

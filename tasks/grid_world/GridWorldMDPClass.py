@@ -4,6 +4,9 @@
 from simple_rl.mdp.MDPClass import MDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
+# Python imports.
+import random
+
 class GridWorldMDP(MDP):
     ''' Class for a Grid World MDP '''
 
@@ -24,7 +27,6 @@ class GridWorldMDP(MDP):
         Args:
             state (State)
             action (str)
-            statePrime (State)
 
         Returns
             (float)

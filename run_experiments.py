@@ -21,11 +21,11 @@ import time
 from collections import defaultdict
 
 # Local imports.
-from simple_rl.tasks import GridWorldMDP, ChainMDP, BlackjackMDP
+from simple_rl.tasks import GridWorldMDP, ChainMDP, BlackjackMDP, TaxiOOMDP
 from simple_rl.experiments import Experiment
 from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=20):
+def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=30):
     '''
     Args:
         agent (Agent): See agents/AgentClass.py (and friends).
@@ -55,6 +55,8 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=2
 
         # For each instance of the agent.
         for instance in xrange(num_instances):
+            print "\tInstance " + str(instance) + " of " + str(num_instances) + "."
+
             # For each episode.
             for episode in xrange(num_episodes):
 
@@ -110,20 +112,35 @@ def main():
             (2) Create each agent instance.
             (3) Run them on the mdp.
     '''
-    # MDP.
-    # mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
-    mdp = ChainMDP(15)
+    # Grid World MDP.
+    grid_mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
+
+    # Chain MDP.
+    chain_mdp = ChainMDP(15)
+
+    # Taxi MDP.
+    agent = {"x":1, "y":1, "has_passenger":0}
+    passengers = [{"x":2, "y":2, "dest_x":1, "dest_y":2, "in_taxi":0}]
+    taxi_mdp = TaxiOOMDP(2, 2, agent_loc=agent, walls=[], passengers=passengers)
+
+    # Choose task here.
+    task = "taxi"
+    mdp = {
+    "grid":grid_mdp,
+    "chain":chain_mdp,
+    "taxi":taxi_mdp
+    }[task]
 
     actions = mdp.get_actions()
     gamma = mdp.get_gamma()
 
-    # Agent.
+    # Agents.
     random_agent = RandomAgent(actions)
     rmax_agent = RMaxAgent(actions, gamma=gamma)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma)
 
     # Run experiments.
-    run_agents_on_mdp([qlearner_agent, random_agent], mdp)
+    run_agents_on_mdp([rmax_agent, random_agent, qlearner_agent], mdp)
 
 
 if __name__ == "__main__":
