@@ -12,7 +12,7 @@ def move_agent(state, dx=0, dy=0):
     '''
     if _is_wall_in_the_way(state, dx=dx, dy=dy):
         # There's a wall in the way.
-        return
+        return state
 
     new_state = _move_passenger_in_taxi(state, x=dx, y=dy)
     new_state.objects["agent"][0]["x"] += dx
