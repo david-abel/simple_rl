@@ -19,9 +19,9 @@ Alternatively, you can download simple_rl [here](https://github.com/david-abel/s
 
 * (_experiments_): Code for an Experiment class to easily reproduce results.
 
-* (_mdp_): Code for a basic MDP and MDPState class. Now contains OO-MDP implementations, too, from [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf)
+* (_mdp_): Code for a basic MDP and MDPState class. Also contains OO-MDP implementation [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf).
 
-* (_tasks_): Implementations for a few standard MDPs. Currently contains grid world, n-chain, and Taxi from [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf).
+* (_tasks_): Implementations for a few standard MDPs (grid world, n-chain, and Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf)).
 
 * (_utils_): Code for charting utilities.
 
