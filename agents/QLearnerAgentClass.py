@@ -45,7 +45,7 @@ class QLearnerAgent(Agent):
             and performs updates given (s=self.prev_state,
             a=self.prev_action, r=reward, s'=state)
         '''
-        self.update_q(state, reward)
+        self.update(self.prev_state, self.prev_action, reward, state)
 
         if self.explore == "softmax":
             # Softmax exploration
@@ -90,24 +90,26 @@ class QLearnerAgent(Agent):
     # ---- Q VALUES AND PARAMETERS ----
     # ---------------------------------
 
-    def update_q(self, curr_state, reward):
+    def update(self, state, action, reward, next_state):
         '''
         Args:
-            curr_state (State): A State object containing the abstracted state representation
-            reward (float): The real valued reward of the associated state
+            state (State)
+            action (str)
+            reward (float)
+            next_state (State)
 
         Summary:
             Updates the internal Q Function according to the Bellman Equation. (Classic Q Learning update)
         '''
         # If this is the first state, just return.
-        if self.prev_state is None:
-            self.prev_state = curr_state
+        if state is None:
+            self.prev_state = next_state
             return
 
         # Update the Q Function.
-        max_q_curr_state = self.get_max_q_value(curr_state)
-        prev_q_val = self.get_q_value(self.prev_state, self.prev_action)
-        self.q_func[(self.prev_state, self.prev_action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
+        max_q_curr_state = self.get_max_q_value(next_state)
+        prev_q_val = self.get_q_value(state, action)
+        self.q_func[(state, action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
 
     def _compute_max_qval_action_pair(self, state):
         '''

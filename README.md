@@ -8,7 +8,7 @@ There are loads of other great libraries out there for RL. The aim of this one i
 
 See _run_experiments.py_ to run some basic experiments.
 
-Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). 
+Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). If you want to use the [[Gradient Booster]](http://arxiv.org/abs/1603.04119) agent, you'll need [sklearn](http://scikit-learn.org/stable/).
 
 ## Installation
 
@@ -20,7 +20,7 @@ Alternatively, you can download simple_rl [here](https://github.com/david-abel/s
 
 ## Overview
 
-* (_agents_): Code for some basic agents (a random actor, _Q_-learner, etc.). More to come (hopefully).
+* (_agents_): Code for some basic agents (a random actor, _Q_-learner, [[R-Max]](http://www.jmlr.org/papers/volume3/brafman02a/brafman02a.pdf), _Q_-learner with a Linear Approximator, etc.).
 
 * (_experiments_): Code for an Experiment class to easily reproduce results.
 

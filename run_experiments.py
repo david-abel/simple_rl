@@ -1,5 +1,5 @@
 '''
-Code for running experiments on an MDP
+Code for running experiments on an MDP.
 
 Instructions:
     (1) Set mdp in main.
@@ -18,14 +18,15 @@ Author: David Abel (cs.brown.edu/~dabel/)
 
 # Python imports.
 import time
+import argparse
 from collections import defaultdict
 
 # Local imports.
-from simple_rl.tasks import GridWorldMDP, ChainMDP, BlackjackMDP, TaxiOOMDP
+from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
 from simple_rl.experiments import Experiment
-from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent
+from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=30):
+def run_agents_on_mdp(agents, mdp, num_instances=10, num_episodes=20, num_steps=50):
     '''
     Args:
         agent (Agent): See agents/AgentClass.py (and friends).
@@ -84,12 +85,15 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=3
                 # Process experiment info at end of episode.
                 experiment.end_of_episode(agent)
 
+                # Reset the MDP, tell the agent the episode is over.
+                mdp.reset()
+                agent.end_of_episode()
+
             # Process that learning instance's info at end of learning.
             experiment.end_of_instance(agent)
 
-            # Reset the agent and MDP.
+            # Reset the agent.
             agent.reset()
-            mdp.reset()
 
         # Track how much time this agent took.
         end = time.clock()
@@ -103,14 +107,14 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=20, num_steps=3
 
     experiment.make_plots()
 
-
-def main():
+def choose_mdp(mdp_name, atari_game="centipede"):
     '''
-    Summary:
-        Main function:
-            (1) Create an MDP.
-            (2) Create each agent instance.
-            (3) Run them on the mdp.
+    Args:
+        mdp_name (str): one of {atari, grid, chain, taxi}
+        atari_game (str): one of {centipede, breakout, etc.}
+
+    Returns:
+        (MDP)
     '''
     # Grid World MDP.
     grid_mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
@@ -123,24 +127,48 @@ def main():
     passengers = [{"x":2, "y":2, "dest_x":1, "dest_y":2, "in_taxi":0}]
     taxi_mdp = TaxiOOMDP(2, 2, agent_loc=agent, walls=[], passengers=passengers)
 
-    # Choose task here.
-    task = "taxi"
-    mdp = {
-    "grid":grid_mdp,
-    "chain":chain_mdp,
-    "taxi":taxi_mdp
-    }[task]
+    if mdp_name == "atari":
+        # Atari import is here in case users don't have the Arcade Learning Environment.
+        try:
+            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+        except:
+            print "ERROR: you don't have the Arcade Learning Environment installed."
+            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            quit()
+        return AtariMDP(rom=atari_game)
+    else:
+        return {"grid":grid_mdp, "chain":chain_mdp, "taxi":taxi_mdp}[mdp_name]
 
+def parse_args():
+    # Add all arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-mdp", type = str, nargs = '?', help = "Select the mdp. Options: {atari, grid, chain, taxi}")
+    parser.add_argument("-rom", type = str, nargs = '?', help = "Select the Atari Game to run: {centipede, breakout, etc.}")
+    args = parser.parse_args()
+
+    # Fix variables based on options.
+    task = args.mdp if args.mdp else "atari"
+    atari_rom = args.rom if args.rom else "breakout"
+
+    return task, atari_rom
+
+def main():
+    # Command line args.
+    task, rom = parse_args()
+
+    # Setup the MDP.
+    mdp = choose_mdp(task, rom)
     actions = mdp.get_actions()
     gamma = mdp.get_gamma()
 
-    # Agents.
+    # Setup agents.
     random_agent = RandomAgent(actions)
     rmax_agent = RMaxAgent(actions, gamma=gamma)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma)
+    lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma)
 
     # Run experiments.
-    run_agents_on_mdp([rmax_agent, random_agent, qlearner_agent], mdp)
+    run_agents_on_mdp([rmax_agent, random_agent, lin_approx_agent], mdp)
 
 
 if __name__ == "__main__":

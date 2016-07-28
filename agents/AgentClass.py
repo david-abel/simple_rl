@@ -8,7 +8,7 @@ class Agent(object):
 
     def __init__(self, name, actions, gamma=0.95):
         self.name = name
-        self.actions = actions
+        self.actions = list(actions) # Just in case we're given a numpy array (like from Atari).
         self.gamma = gamma
 
         self.prev_state = None
