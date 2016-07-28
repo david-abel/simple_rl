@@ -29,7 +29,7 @@ from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApprox
 def run_agents_on_mdp(agents, mdp, num_instances=10, num_episodes=20, num_steps=50):
     '''
     Args:
-        agent (Agent): See agents/AgentClass.py (and friends).
+        agents (list of Agents): See agents/AgentClass.py (and friends).
         mdp (MDP): See mdp/MDPClass.py for the abstract class. Specific MDPs in tasks/*.
         num_instances (int) [opt]: Number of times to run each agent (for confidence intervals).
         num_episodes (int) [opt]: Number of episodes for each learning instance.
