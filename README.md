@@ -8,7 +8,7 @@ There are loads of other great libraries out there for RL. The aim of this one i
 
 See _run_experiments.py_ to run some basic experiments.
 
-Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). If you want to use the [[Gradient Booster]](http://arxiv.org/abs/1603.04119) agent, you'll need [sklearn](http://scikit-learn.org/stable/).
+Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). If you want to use the [Gradient Booster](http://arxiv.org/abs/1603.04119) agent, you'll need [sklearn](http://scikit-learn.org/stable/).
 
 ## Installation
 
