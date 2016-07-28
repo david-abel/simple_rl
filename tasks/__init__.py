@@ -7,3 +7,5 @@ from simple_rl.tasks.blackjack.BlackjackMDPClass import BlackjackMDP
 from simple_rl.tasks.blackjack.BlackjackStateClass import BlackjackState
 from simple_rl.tasks.taxi.TaxiOOMDPClass import TaxiOOMDP
 from simple_rl.tasks.taxi.TaxiStateClass import TaxiState
+from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+from simple_rl.tasks.atari.AtariStateClass import AtariState
