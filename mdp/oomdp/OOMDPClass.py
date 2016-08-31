@@ -17,3 +17,5 @@ class OOMDP(MDP):
     def __init__(self, actions, objects, transition_func, reward_func, init_state, gamma=0.95):
         MDP.__init__(self, actions, transition_func, reward_func, init_state=init_state, gamma=gamma)
         self.objects = objects
+
+    

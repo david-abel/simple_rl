@@ -21,13 +21,14 @@ class Experiment(object):
     # Dumps the results in a directory called "results" in the current working dir.
     RESULTS_DIR = os.getcwdu() + "/results/"
 
-    def __init__(self, agents, mdp, params=None):
+    def __init__(self, agents, mdp, params=None, is_episodic=True):
         self.agents = agents
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.rewards = defaultdict(list)
         self.name = str(self.mdp)
         self.exp_directory = Experiment.RESULTS_DIR + self.name
+        self.is_episodic = is_episodic
         self._setup_files()
 
     def _setup_files(self):
@@ -48,7 +49,7 @@ class Experiment(object):
         Summary:
             Makes plots for the current experiment.
         '''
-        chart_utils.make_plots(self.exp_directory, self.agents)
+        chart_utils.make_plots(self.exp_directory, self.agents, episodic=self.is_episodic)
 
     def add_experience(self, agent, state, action, reward, next_state):
         '''
@@ -59,10 +60,17 @@ class Experiment(object):
 
     def end_of_episode(self, agent):
         '''
+        Args:
+            agent (str)
+
         Summary:
-            Writes episode data to file and resets the reward.
+            Writes reward data from this episode to file and resets the reward.
         '''
-        self.write_episode_reward_to_file(agent, sum(self.rewards[agent]))
+        if self.is_episodic:
+            self.write_reward_to_file(agent, sum(self.rewards[agent]))
+        else:
+            for step_reward in self.rewards[agent]:
+                self.write_reward_to_file(agent, step_reward)
         self.rewards[agent] = []
 
     def end_of_instance(self, agent):
@@ -74,7 +82,7 @@ class Experiment(object):
         out_file.write("\n")
         out_file.close()
 
-    def write_episode_reward_to_file(self, agent, reward):
+    def write_reward_to_file(self, agent, reward):
         '''
         Summary:
             Writes reward to file.

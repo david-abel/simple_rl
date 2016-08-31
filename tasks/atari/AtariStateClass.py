@@ -2,13 +2,21 @@
 
 # Local libs.
 from simple_rl.mdp.ImageStateClass import ImageState
+from simple_rl.mdp.oomdp.OOMDPImageStateClass import OOMDPImageState
 
-class AtariState(ImageState):
+class AtariState(OOMDPImageState, ImageState):
     ''' Class for Atari States '''
 
-    def __init__(self, image, ram_data, terminal=False):
-        ImageState.__init__(self, image=image, features=ram_data)
-    	self.state_id = _compute_state_id(ram_data)
+    def __init__(self, image, ram_data, terminal=False, objects_from_image=False):
+        if objects_from_image:
+            # Create the state as an OOMDP State.
+            # --> Extracts objects using color segmentation on the image.
+            OOMDPImageState.__init__(self, image=image)
+        else:
+            # Create the state based on the raw image/ram.
+            self.state_id = _compute_state_id(ram_data)
+            ImageState.__init__(self, image=image, features=ram_data)
+
         self._is_terminal = terminal
 
     def is_terminal(self):

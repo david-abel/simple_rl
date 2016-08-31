@@ -57,19 +57,19 @@ def average_data(data, cumulative=False):
     '''
 
     num_algorithms = len(data)
-    num_instances = len(data[0])
 
     result = [None for i in xrange(num_algorithms)] # [Alg][avgRewardEpisode], where avg is summed up to episode i if @cumulative=True
 
     for i, all_instances in enumerate(data):
 
         # Take the average.
+        num_instances = len(data[i])
         all_instances = numpy.array(all_instances)
         avged = None
         try:
             avged = all_instances.sum(axis=0)/float(num_instances)
         except TypeError:
-            print "Error: something went wrong. I couldn't find an algorithm or things were run a weird number of times."
+            print "Error: something went wrong. I couldn't find an algorithm or some algorithm was run under inconsinsent parameters (perhaps experiments are still running)."
             quit()
 
         if cumulative:
@@ -137,7 +137,7 @@ def compute_single_conf_interval(datum):
     return std_error
 
 
-def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False):
+def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -146,6 +146,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         conf_intervals (list of floats) [optional]: confidence intervals to display with the chart.
         use_cost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
+        episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -153,10 +154,12 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Some nice markers and colors for plotting.
     markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
-    colors = [[240, 163, 255], [184, 221, 255], [153, 63, 0],\
-            [76, 0, 92], [25, 25, 25], [0, 117, 220], [0, 92, 49],\
-            [255, 204, 153], [128, 128, 128], [148, 255, 181],\
-            [95, 37, 159]]
+    colors = [[240, 163, 255], [184, 221, 255], [113, 113, 198],\
+            [197, 193, 170],[113, 198, 113],[85, 85, 85],\
+            [198, 113, 113], [142, 56, 142], [125, 158, 192],\
+            [153, 63, 0], [142, 142, 56], [56, 142, 142]]
+
+    x_axis_unit = "episode" if episodic else "step"
 
     # Map them to floats in [0:1].
     colors = [[shade / 255.0 for shade in rgb] for rgb in colors]
@@ -185,7 +188,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
             bot = numpy.subtract(y_axis, alg_conf_interv)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.15)
 
-        print "Mean last episode: (" + str(agents[i]) + ") :", y_axis[-1], "(conf_interv:", alg_conf_interv[-1], ")"
+        print "Mean last " + x_axis_unit + ": (" + str(agents[i]) + ") :", y_axis[-1], "(conf_interv:", alg_conf_interv[-1], ")"
 
         marker_every = max(len(y_axis) / 30,1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=alg)
@@ -197,7 +200,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     plot_name = experiment_dir + "/all_" + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = plot_label + " " + unit + ": " + experiment_dir.split("/")[-1]
     y_axis_label = plot_label + " " + unit
-    pyplot.xlabel('Episode Number')
+    pyplot.xlabel(x_axis_unit[0].upper() + x_axis_unit[1:] + " Number")
     pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
@@ -210,13 +213,14 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     os.system("open " + plot_name)
 
 
-def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=True):
+def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True):
     '''
     Args:
         experiment_dir (str): path to results.
         experiment_agents (list): agent names (looks for "<agent-name>.csv").
-        cumulative (bool) [optional]: If true, plots show cumulative results.
-        use_cost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
+        cumulative (bool): If true, plots show cumulative results.
+        use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
+        episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
 
     Summary:
         Creates plots for all agents run under the experiment.
@@ -233,7 +237,7 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=True
     conf_intervals = compute_conf_intervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative)
+    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative, episodic=episodic)
 
 def main():
     '''

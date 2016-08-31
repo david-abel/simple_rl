@@ -2,6 +2,13 @@
 
 # Python imports.
 import numpy
+import plot_label
+import random
+import numpy
+import matplotlib.pyplot as plt
+from skimage.util import img_as_float
+from skimage.segmentation import felzenszwalb
+from skimage.segmentation import mark_boundaries
 
 # Local libs.
 from simple_rl.mdp.StateClass import State

@@ -36,17 +36,8 @@ class RMaxAgent(Agent):
         self.prev_action = None
 
     def act(self, state, reward):
-        
-        if self.prev_state != None and self.prev_action != None:
-            # s, a, r, s' : self.prev_state, self.prev_action, reward, state
-
-            if self.s_a_counts[(self.prev_state, self.prev_action)] < self.s_a_threshold:
-                # Add new data points if we haven't seen this s-a enough.
-                self.rewards[(self.prev_state, self.prev_action)] += [reward]
-                self.transitions[(self.prev_state, self.prev_action)][state] += 1
-
-            self.s_a_counts[(self.prev_state, self.prev_action)] += 1
-
+        # Update given s, a, r, s' : self.prev_state, self.prev_action, reward, state
+        self.update(self.prev_state, self.prev_action, reward, state)
 
         # Compute best action.
         action = self.get_max_q_action(state)
@@ -56,6 +47,24 @@ class RMaxAgent(Agent):
         self.prev_state = state
 
         return action
+
+    def update(self, state, action, reward, next_state):
+        '''
+        Args:
+            state (State)
+            action (str)
+            reward (float)
+            next_state (State)
+
+        Summary:
+            Updates T and R.
+        '''
+        if state != None and action != None:
+            if self.s_a_counts[(state, action)] < self.s_a_threshold:
+                # Add new data points if we haven't seen this s-a enough.
+                self.rewards[(state, action)] += [reward]
+                self.transitions[(state, action)][next_state] += 1
+            self.s_a_counts[(state, action)] += 1
 
     def _compute_max_qval_action_pair(self, state, horizon=None):
         '''

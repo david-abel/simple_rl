@@ -22,11 +22,12 @@ import argparse
 from collections import defaultdict
 
 # Local imports.
+from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
 from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
 from simple_rl.experiments import Experiment
 from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=10, num_episodes=20, num_steps=50):
+def run_agents_on_mdp(agents, mdp, num_instances=2, num_episodes=50, num_steps=100):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -55,11 +56,14 @@ def run_agents_on_mdp(agents, mdp, num_instances=10, num_episodes=20, num_steps=
         start = time.clock()
 
         # For each instance of the agent.
-        for instance in xrange(num_instances):
+        for instance in xrange(1, num_instances + 1):
             print "\tInstance " + str(instance) + " of " + str(num_instances) + "."
 
             # For each episode.
-            for episode in xrange(num_episodes):
+            for episode in xrange(1, num_episodes + 1):
+
+                if isinstance(mdp, AtariMDP):
+                    print "\t\tEpisode: " + str(episode) + "/" + str(num_episodes)
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
@@ -124,18 +128,18 @@ def choose_mdp(mdp_name, atari_game="centipede"):
 
     # Taxi MDP.
     agent = {"x":1, "y":1, "has_passenger":0}
-    passengers = [{"x":2, "y":2, "dest_x":1, "dest_y":2, "in_taxi":0}]
-    taxi_mdp = TaxiOOMDP(2, 2, agent_loc=agent, walls=[], passengers=passengers)
+    passengers = [{"x":3, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}]
+    taxi_mdp = TaxiOOMDP(5, 5, agent_loc=agent, walls=[], passengers=passengers)
 
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
-        try:
-            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-        except:
-            print "ERROR: you don't have the Arcade Learning Environment installed."
-            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            quit()
-        return AtariMDP(rom=atari_game)
+        # try:
+        from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+        # except:
+            # print "ERROR: you don't have the Arcade Learning Environment installed."
+            # print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            # quit()
+        return AtariMDP(rom=atari_game, grayscale=True)
     else:
         return {"grid":grid_mdp, "chain":chain_mdp, "taxi":taxi_mdp}[mdp_name]
 
@@ -162,14 +166,14 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    random_agent = RandomAgent(actions)
-    rmax_agent = RMaxAgent(actions, gamma=gamma)
-    qlearner_agent = QLearnerAgent(actions, gamma=gamma)
+    # random_agent = RandomAgent(actions)
+    # rmax_agent = RMaxAgent(actions, gamma=gamma)
+    # qlearner_agent = QLearnerAgent(actions, gamma=gamma)
     lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma)
-
+    grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="softmax")
+    
     # Run experiments.
-    run_agents_on_mdp([rmax_agent, random_agent, lin_approx_agent], mdp)
-
+    run_agents_on_mdp([lin_approx_agent], mdp)
 
 if __name__ == "__main__":
     main()

@@ -18,11 +18,13 @@ import ale_python_interface as ale_interface
 class AtariMDP(MDP):
     ''' Class for a Atari MDPs '''
 
-    def __init__(self, rom="breakout", display_game_screen=True):
+    def __init__(self, rom="breakout", display_game_screen=False, grayscale=False, image_to_object=False):
         '''
         Args:
             rom (str): path to a rom file. Put roms in the "/roms/" dir.
         '''
+        self.image_to_object = image_to_object
+        self.grayscale = grayscale
         self._setup_ale(rom, display_game_screen)
         MDP.__init__(self, self.actions, self._transition_func, self._reward_func, init_state=self.init_state)
 
@@ -62,10 +64,10 @@ class AtariMDP(MDP):
         # Get Ram, initial image info.
         ram = numpy.zeros((self.ram_size),dtype=numpy.uint8)
         ram_state = self.ale.getRAM(ram)
-        screen_data = numpy.zeros(self.screen_width*self.screen_height,dtype=numpy.uint32)
+        screen_data = self.ale.getScreenGrayscale() if self.grayscale else self.ale.getScreenRGB()
 
         # Make initial state.
-        self.init_state = AtariState(screen_data, ram_state)
+        self.init_state = AtariState(screen_data, ram_state, objects_from_image=self.image_to_object)
     
     def _reward_func(self, state, action):
         '''
@@ -95,9 +97,9 @@ class AtariMDP(MDP):
         ram_state = self.ale.getRAM(ram)
         
         # Get screen info.
-        screen_data = numpy.zeros(self.screen_width*self.screen_height,dtype=numpy.uint32)
+        screen_data = self.ale.getScreenGrayscale() if self.grayscale else self.ale.getScreenRGB()
 
-        return AtariState(screen_data, ram_state, terminal=self.ale.game_over())
+        return AtariState(screen_data, ram_state, terminal=self.ale.game_over(), objects_from_image=self.image_to_object)
 
     def reset(self):
         self.ale.reset_game()

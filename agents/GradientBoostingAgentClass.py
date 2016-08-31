@@ -25,11 +25,8 @@ class GradientBoostingAgent(QLearnerAgent):
         QLearnerAgent.__init__(self, actions=actions, name=name, gamma=gamma, explore=explore)
         self.weak_learners = []
         self.most_recent_episode = []
-
-        # Other options to add:
-            # Regressor per action
-            # Tree depth as a parameter
-            # Num trees per episode as a parameter.
+        self.max_state_features = 0
+        self.max_depth = len(actions)
 
     def update(self, state, action, reward, next_state):
         '''
@@ -43,6 +40,8 @@ class GradientBoostingAgent(QLearnerAgent):
             Updates the internal Q Function according to the Bellman Equation. (Classic Q Learning update)
         '''
         if None not in [state, action, reward, next_state]:
+            if len(state.features()) > self.max_state_features:
+                self.max_state_features = len(state.features())
             self.most_recent_episode.append((state, action, reward, next_state))
 
     def get_q_value(self, state, action):
@@ -60,12 +59,32 @@ class GradientBoostingAgent(QLearnerAgent):
         if len(self.weak_learners) == 0:
             # Default Q value.
             return 0
-        
+
+        features = self._pad_features_with_zeros(state, action)
+
         # Compute Q(s,a)
-        predictions = [h.predict(list(state.features()) + [self.actions.index(action)])[0] for h in self.weak_learners]
+        predictions = [h.predict(features)[0] for h in self.weak_learners]
         result = float(sum(predictions)) # Cast since we'll normally get a numpy float.
         
         return result
+
+    def _pad_features_with_zeros(self, state, action):
+        '''
+        Args:
+            features (iterable)
+
+        Returns:
+            (list): Of the same length as self.max_state_features
+        '''
+        features = state.features()
+        while len(features) < self.max_state_features:
+            features = np.append(features, 0)
+
+        # Reshape per update to cluster regression in sklearn 0.17.
+        reshaped_features = features.reshape(1, -1)
+
+        reshaped_features = np.append(reshaped_features, [self.actions.index(action)])
+        return reshaped_features
 
     def add_new_weak_learner(self):
         '''
@@ -76,25 +95,28 @@ class GradientBoostingAgent(QLearnerAgent):
 
         '''
         if len(self.most_recent_episode) == 0:
-            # If we spawned next to the goal/died, don't add anything.
+            # If this episode contains no data, don't do anything.
             return
 
         # Build up data sets of features and loss terms
-        X = []
-        total_loss = []
+        data = np.zeros((len(self.most_recent_episode), self.max_state_features + 1))
+        total_loss = np.zeros(len(self.most_recent_episode))
 
-        for experience in self.most_recent_episode:
+        for i, experience in enumerate(self.most_recent_episode):
+            # Grab the experience.
             s, a, r, s_prime = experience
-            features = list(s.features()) + [self.actions.index(a)]
-            loss = (r + self.gamma * self.get_max_q_value(s_prime) - self.get_q_value(s, a))
-            X.append(features)
-            total_loss.append(loss)
 
-        X = np.array(X)
-        
+            # Pad in case the state features are too short (as in Atari sometimes).
+            features = self._pad_features_with_zeros(s, a)
+            loss = (r + self.gamma * self.get_max_q_value(s_prime) - self.get_q_value(s, a))
+            
+            # Add to relevant lists.
+            data[i] = features
+            total_loss[i] = loss
+
         # Compute new regressor and add it to the weak learners.
-        estimator = GradientBoostingRegressor(loss='ls', n_estimators=1, max_depth=5)
-        estimator.fit(X, total_loss)
+        estimator = GradientBoostingRegressor(loss='ls', n_estimators=1, max_depth=self.max_depth)
+        estimator.fit(data, total_loss)
         self.weak_learners.append(estimator)
 
     def end_of_episode(self):

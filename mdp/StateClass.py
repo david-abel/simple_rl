@@ -5,6 +5,7 @@ class State(object):
 
     def __init__(self, data):
         self.data = data
+        self._is_terminal = False
 
     def features(self):
     	'''
@@ -12,11 +13,17 @@ class State(object):
     		Used by function approximators to represent the state.
     		Override this method in State subclasses to have functiona
     		approximators use a different set of features.
+
+        Returns:
+            (iterable)
     	'''
-    	return self.data
+        return self.data if hasattr(self.data, '__iter__') else [self.data]
 
     def is_terminal(self):
-    	return False
+    	return self._is_terminal
+
+    def set_terminal(self, is_term):
+        self._is_terminal = is_term
 
     def __str__(self):
         return "s." + str(self.data)
