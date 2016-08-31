@@ -19,15 +19,18 @@ Author: David Abel (cs.brown.edu/~dabel/)
 # Python imports.
 import time
 import argparse
+import os
+import sys
 from collections import defaultdict
 
 # Local imports.
-from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+SIMPLE_RL_PATH = os.getcwd() + "/../"
+sys.path.append(SIMPLE_RL_PATH)
 from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
 from simple_rl.experiments import Experiment
 from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=2, num_episodes=50, num_steps=100):
+def run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=50, num_steps=100):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -61,9 +64,6 @@ def run_agents_on_mdp(agents, mdp, num_instances=2, num_episodes=50, num_steps=1
 
             # For each episode.
             for episode in xrange(1, num_episodes + 1):
-
-                if isinstance(mdp, AtariMDP):
-                    print "\t\tEpisode: " + str(episode) + "/" + str(num_episodes)
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
@@ -130,16 +130,15 @@ def choose_mdp(mdp_name, atari_game="centipede"):
     agent = {"x":1, "y":1, "has_passenger":0}
     passengers = [{"x":3, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}]
     taxi_mdp = TaxiOOMDP(5, 5, agent_loc=agent, walls=[], passengers=passengers)
-
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
-        # try:
-        from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-        # except:
-            # print "ERROR: you don't have the Arcade Learning Environment installed."
-            # print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            # quit()
-        return AtariMDP(rom=atari_game, grayscale=True)
+        try:
+            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+            return AtariMDP(rom=atari_game, grayscale=True)
+        except:
+            print "ERROR: you don't have the Arcade Learning Environment installed."
+            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            quit()
     else:
         return {"grid":grid_mdp, "chain":chain_mdp, "taxi":taxi_mdp}[mdp_name]
 

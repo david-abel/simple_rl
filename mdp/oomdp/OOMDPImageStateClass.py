@@ -6,8 +6,6 @@ OOMDPImageStateClass.py: Contains implementation for creating an
 # Python imports.
 import itertools
 import numpy
-import skimage
-from skimage.segmentation import random_walker
 
 # Local imports.
 from simple_rl.mdp.oomdp.OOMDPStateClass import OOMDPState
