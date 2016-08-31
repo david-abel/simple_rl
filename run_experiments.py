@@ -166,14 +166,17 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    # random_agent = RandomAgent(actions)
-    # rmax_agent = RMaxAgent(actions, gamma=gamma)
-    # qlearner_agent = QLearnerAgent(actions, gamma=gamma)
+    random_agent = RandomAgent(actions)
+    rmax_agent = RMaxAgent(actions, gamma=gamma)
+    qlearner_agent = QLearnerAgent(actions, gamma=gamma)
     lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma)
     grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="softmax")
     
+    # Choose agents.
+    agents = [lin_approx_agent, random_agent]
+
     # Run experiments.
-    run_agents_on_mdp([lin_approx_agent], mdp)
+    run_agents_on_mdp(agents, mdp)
 
 if __name__ == "__main__":
     main()
