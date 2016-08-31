@@ -13,7 +13,7 @@ class State(object):
     		Override this method in State subclasses to have functiona
     		approximators use a different set of features.
     	'''
-    	return self.data
+    	return [a for l in self.data for a in l]
 
     def is_terminal(self):
     	return False
