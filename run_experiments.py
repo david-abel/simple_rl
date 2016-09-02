@@ -1,9 +1,9 @@
 '''
-Code for running experiments on an MDP.
+Code for running experiments where RL agents interact with an MDP.
 
 Instructions:
     (1) Set mdp in main.
-    (2) Create agent instances.
+    (2) Create agents.
     (3) Set experiment parameters (num_instances, num_episodes, num_steps).
     (4) Call run_agents_on_mdp(agents, mdp).
 
@@ -24,13 +24,12 @@ import sys
 from collections import defaultdict
 
 # Local imports.
-SIMPLE_RL_PATH = os.getcwd() + "/../"
-sys.path.append(SIMPLE_RL_PATH)
+sys.path.append(os.getcwd() + "/../") # Jenky way to make sure simple_rl is a package.
 from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
 from simple_rl.experiments import Experiment
 from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=50, num_steps=100):
+def run_agents_on_mdp(agents, mdp, num_instances=20, num_episodes=2000, num_steps=50):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -67,6 +66,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=50, num_steps=1
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
+                print "init:", state
                 reward = 0
 
                 for step in xrange(num_steps):
@@ -128,8 +128,8 @@ def choose_mdp(mdp_name, atari_game="centipede"):
 
     # Taxi MDP.
     agent = {"x":1, "y":1, "has_passenger":0}
-    passengers = [{"x":3, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}]
-    taxi_mdp = TaxiOOMDP(5, 5, agent_loc=agent, walls=[], passengers=passengers)
+    passengers = [{"x":5, "y":5, "dest_x":3, "dest_y":3, "in_taxi":0}]
+    taxi_mdp = TaxiOOMDP(6, 6, agent_loc=agent, walls=[], passengers=passengers)
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
         try:

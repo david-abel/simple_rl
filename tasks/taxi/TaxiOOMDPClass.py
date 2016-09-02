@@ -109,6 +109,11 @@ class TaxiOOMDP(OOMDP):
             state = taxi_action_helpers.agent_dropoff(state)
         elif action == "pickup":
             state = taxi_action_helpers.agent_pickup(state)
+        
+        # Make terminal.
+        if is_taxi_terminal_state(state):
+            state.set_terminal(True)
+        
         return state
 
     def __str__(self):

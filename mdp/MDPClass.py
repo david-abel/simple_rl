@@ -38,4 +38,4 @@ class MDP(object):
         return reward, next_state
 
     def reset(self):
-        self.cur_state = self.init_state
+        pass
