@@ -1,8 +1,8 @@
 ''' GridWorldMDPClass.py: Contains the GridWorldMDP class. '''
 
 # Local imports.
-from simple_rl.mdp.MDPClass import MDP
-from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
+from ...mdp.MDPClass import MDP
+from GridWorldStateClass import GridWorldState
 
 # Python imports.
 import random

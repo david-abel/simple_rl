@@ -1,8 +1,8 @@
 ''' ChainMDPClass.py: Contains the ChainMDPClass class. '''
 
 # Local libs.
-from simple_rl.mdp.MDPClass import MDP
-from simple_rl.tasks.chain.ChainStateClass import ChainState
+from ...mdp.MDPClass import MDP
+from ChainStateClass import ChainState
 
 class ChainMDP(MDP):
     ''' Imeplementation for a standard Chain MDP '''

@@ -5,7 +5,7 @@ import random
 import numpy
 
 # Local classes
-from simple_rl.agents.AgentClass import Agent
+from AgentClass import Agent
 
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''

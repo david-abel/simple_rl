@@ -3,9 +3,9 @@ AtariMDPClass.py: Contains implementation for MDPs of the Atari Learning Environ
 '''
 
 # Local imports.
-from simple_rl.mdp.MDPClass import MDP
-from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
-from simple_rl.tasks.atari.AtariStateClass import AtariState
+from MDPClass import MDP
+from grid_world.GridWorldStateClass import GridWorldState
+from atari.AtariStateClass import AtariState
 
 # Python imports.
 import numpy

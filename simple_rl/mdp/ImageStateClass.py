@@ -1,7 +1,7 @@
 ''' ImageStateClass.py: Contains the ImageState Class. '''
 
 # Local libs.
-from simple_rl.mdp.StateClass import State
+from StateClass import State
 
 class ImageState(State):
     ''' Abstract State class '''

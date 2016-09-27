@@ -9,10 +9,10 @@ Implementations of standard RL agents:
 '''
 
 # Grab classes.
-from simple_rl.agents.AgentClass import Agent
-from simple_rl.agents.QLearnerAgentClass import QLearnerAgent
-from simple_rl.agents.LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
-from simple_rl.agents.RandomAgentClass import RandomAgent
-from simple_rl.agents.RMaxAgentClass import RMaxAgent
-from simple_rl.agents.GradientBoostingAgentClass import GradientBoostingAgent
+from AgentClass import Agent
+from QLearnerAgentClass import QLearnerAgent
+from LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
+from RandomAgentClass import RandomAgent
+from RMaxAgentClass import RMaxAgent
+from GradientBoostingAgentClass import GradientBoostingAgent
 

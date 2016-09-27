@@ -10,10 +10,10 @@ Author: David Abel (cs.brown.edu/~dabel/)
 '''
 
 # simple_rl imports.
-from simple_rl.mdp.oomdp.OOMDPClass import OOMDP
-from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
-from simple_rl.tasks.taxi.TaxiStateClass import TaxiState
-from simple_rl.tasks.taxi import taxi_action_helpers
+from ...mdp.oomdp.OOMDPClass import OOMDP
+from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
+from TaxiStateClass import TaxiState
+import taxi_action_helpers
 
 class TaxiOOMDP(OOMDP):
     ''' Class for a Taxi OO-MDP '''

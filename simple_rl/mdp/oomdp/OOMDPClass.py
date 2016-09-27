@@ -8,8 +8,7 @@ From:
 '''
 
 # Local libs.
-from simple_rl.mdp.MDPClass import MDP
-from simple_rl.tasks.chain.ChainStateClass import ChainState
+from ..MDPClass import MDP
 
 class OOMDP(MDP):
     ''' Abstract class for an Object Oriented Markov Decision Process. '''
