@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
   name = 'simple_rl',
-  packages = [],
+  packages = ['simple_rl'],
   version = '0.51',
   description = 'A simple framework for experimenting with Reinforcement Learning in Python 2.7',
   author = 'David Abel',
