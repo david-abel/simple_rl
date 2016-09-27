@@ -5,7 +5,7 @@ Contains implementation for a Q Learner with a Linear Function Approximator.
 '''
 
 # Local classes
-from simple_rl.agents import QLearnerAgent
+from QLearnerAgentClass import QLearnerAgent
 
 # Python libs.
 import numpy

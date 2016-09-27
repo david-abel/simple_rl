@@ -14,7 +14,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 
 # simple_rl classes.
-from simple_rl.agents.QLearnerAgentClass import QLearnerAgent
+from QLearnerAgentClass import QLearnerAgent
 
 class GradientBoostingAgent(QLearnerAgent):
     '''

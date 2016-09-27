@@ -9,7 +9,7 @@ import random
 from collections import defaultdict
 
 # Local classes.
-from simple_rl.agents.AgentClass import Agent
+from AgentClass import Agent
 
 class RMaxAgent(Agent):
     '''
