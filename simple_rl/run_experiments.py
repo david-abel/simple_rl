@@ -28,7 +28,7 @@ from tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
 from experiments import Experiment
 from agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=300, num_steps=50):
+def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=50):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -62,8 +62,6 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=300, num_steps=
 
             # For each episode.
             for episode in xrange(1, num_episodes + 1):
-                print "\t\tEpisode " + str(episode)
-
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
@@ -172,7 +170,7 @@ def main():
     grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="softmax")
     
     # Choose agents.
-    agents = [grad_boost_agent, random_agent]
+    agents = [qlearner_agent, random_agent]
 
     # Run experiments.
     run_agents_on_mdp(agents, mdp)
