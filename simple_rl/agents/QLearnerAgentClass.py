@@ -184,11 +184,3 @@ class QLearnerAgent(Agent):
         softmax = [numpy.exp(qv) / total for qv in all_q_vals]
 
         return softmax
-
-    def end_of_episode(self):
-        '''
-        Summary:
-            Performs miscellaneous end of episode tasks (printing out useful information, saving stuff, etc.)
-        '''
-        self.update()
-        Agent.end_of_episode(self)

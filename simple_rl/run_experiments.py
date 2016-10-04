@@ -84,6 +84,9 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
                     # Update pointer.
                     state = next_state
 
+                # A final update.
+                action = agent.act(state, reward)
+
                 # Process experiment info at end of episode.
                 experiment.end_of_episode(agent)
 
@@ -170,7 +173,7 @@ def main():
     grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="softmax")
     
     # Choose agents.
-    agents = [qlearner_agent, random_agent]
+    agents = [qlearner_agent, lin_approx_agent, random_agent]
 
     # Run experiments.
     run_agents_on_mdp(agents, mdp)
