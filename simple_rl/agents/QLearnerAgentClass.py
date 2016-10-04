@@ -154,7 +154,6 @@ class QLearnerAgent(Agent):
         '''
         return self._compute_max_qval_action_pair(state)[0]
 
-
     def get_q_value(self, state, action):
         '''
         Args:
@@ -185,3 +184,11 @@ class QLearnerAgent(Agent):
         softmax = [numpy.exp(qv) / total for qv in all_q_vals]
 
         return softmax
+
+    def end_of_episode(self):
+        '''
+        Summary:
+            Performs miscellaneous end of episode tasks (printing out useful information, saving stuff, etc.)
+        '''
+        self.update()
+        Agent.end_of_episode(self)

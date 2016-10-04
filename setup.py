@@ -8,7 +8,7 @@ setup(
       'scipy',
       'matplotlib'
   ],
-  version = '0.51',
+  version = '0.6',
   description = 'A simple framework for experimenting with Reinforcement Learning in Python 2.7',
   author = 'David Abel',
   author_email = 'dabel@cs.brown.com',

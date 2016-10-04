@@ -1,3 +1,6 @@
+# Python imports
+import numpy
+
 ''' StateClass.py: Contains the State Class. '''
 
 class State(object):
@@ -17,7 +20,7 @@ class State(object):
         Returns:
             (iterable)
     	'''
-        return self.data if hasattr(self.data, '__iter__') else [self.data]
+        return numpy.array(self.data) # if hasattr(self.data, '__iter__') else [self.data]
 
     def is_terminal(self):
     	return self._is_terminal

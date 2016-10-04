@@ -1,7 +1,7 @@
 ''' ChainMDPClass.py: Contains the ChainMDPClass class. '''
 
 # Local libs.
-from ...mdp.MDPClass import MDP
+from mdp.MDPClass import MDP
 from ChainStateClass import ChainState
 
 class ChainMDP(MDP):

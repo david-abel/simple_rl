@@ -10,23 +10,27 @@ From:
 '''
 
 # Python imports.
+import random
+import math
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
 
 # simple_rl classes.
 from QLearnerAgentClass import QLearnerAgent
+from AgentClass import Agent
 
 class GradientBoostingAgent(QLearnerAgent):
     '''
     QLearnerAgent that uses gradient boosting with additive regression trees to approximate the Q Function.
     '''
 
-    def __init__(self, actions, name="grad_boost", gamma=0.95, explore="softmax"):
+    def __init__(self, actions, name="grad_boost", gamma=0.95, explore="softmax", sample=True):
         QLearnerAgent.__init__(self, actions=actions, name=name, gamma=gamma, explore=explore)
         self.weak_learners = []
         self.most_recent_episode = []
         self.max_state_features = 0
         self.max_depth = len(actions)
+        self.sampler = sample # Will sample 1/10th of the available trees
 
     def update(self, state, action, reward, next_state):
         '''
@@ -62,8 +66,14 @@ class GradientBoostingAgent(QLearnerAgent):
 
         features = self._pad_features_with_zeros(state, action)
 
+        self.temp = self.weak_learners[:]
+        
+        if self.sampler:
+            num_sampled_trees = int(math.ceil(len(self.weak_learners) / 30.0))
+            self.temp = random.sample(self.weak_learners, num_sampled_trees)
+
         # Compute Q(s,a)
-        predictions = [h.predict(features)[0] for h in self.weak_learners]
+        predictions = [h.predict(features)[0] for h in self.temp]
         result = float(sum(predictions)) # Cast since we'll normally get a numpy float.
         
         return result
@@ -81,9 +91,9 @@ class GradientBoostingAgent(QLearnerAgent):
             features = np.append(features, 0)
 
         # Reshape per update to cluster regression in sklearn 0.17.
-        reshaped_features = features.reshape(1, -1)
+        reshaped_features = np.append(features, [self.actions.index(action)])
+        reshaped_features = reshaped_features.reshape(1, -1)
 
-        reshaped_features = np.append(reshaped_features, [self.actions.index(action)])
         return reshaped_features
 
     def add_new_weak_learner(self):
@@ -126,4 +136,4 @@ class GradientBoostingAgent(QLearnerAgent):
         '''
         self.add_new_weak_learner()
         self.most_recent_episode = []
-        QLearnerAgent.end_of_episode(self)
+        Agent.end_of_episode(self)

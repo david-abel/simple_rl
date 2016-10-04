@@ -10,8 +10,8 @@ Author: David Abel (cs.brown.edu/~dabel/)
 '''
 
 # simple_rl imports.
-from ...mdp.oomdp.OOMDPClass import OOMDP
-from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
+from mdp.oomdp.OOMDPClass import OOMDP
+from mdp.oomdp.OOMDPObjectClass import OOMDPObject
 from TaxiStateClass import TaxiState
 import taxi_action_helpers
 

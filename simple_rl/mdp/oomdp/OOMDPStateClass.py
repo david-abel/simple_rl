@@ -1,7 +1,7 @@
 ''' OOMDPStateClass.py: Contains the OOMDP State Class. '''
 
 # Local libs.
-from ..StateClass import State
+from mdp.StateClass import State
 
 class OOMDPState(State):
     ''' OOMDP State class '''
