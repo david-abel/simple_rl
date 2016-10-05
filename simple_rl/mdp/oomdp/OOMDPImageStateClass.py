@@ -8,9 +8,9 @@ import itertools
 import numpy
 
 # Local imports.
-from oomdp.OOMDPStateClass import OOMDPState
-from oomdp.OOMDPObjectClass import OOMDPObject
-from ImageStateClass import ImageState
+from OOMDPStateClass import OOMDPState
+from OOMDPObjectClass import OOMDPObject
+from ..ImageStateClass import ImageState
 
 class OOMDPImageState(OOMDPState, ImageState):
     ''' OOMDP State from an Image class '''

@@ -12,8 +12,8 @@ import os
 from collections import defaultdict
 
 # Local libs.
-from utils import chart_utils
-from experiments.ExperimentParametersClass import ExperimentParameters
+from ..utils import chart_utils
+from ExperimentParametersClass import ExperimentParameters
 
 class Experiment(object):
     ''' Experiment Class for RL Experiments '''

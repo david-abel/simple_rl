@@ -35,5 +35,5 @@ class State(object):
         return isinstance(other, State) and self.data == other.data
 
     def __hash__(self):
-        d = tuple(map(tuple, self.data))
+        d = tuple(self.data)
         return hash((d, self._is_terminal))

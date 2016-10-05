@@ -1,1 +1,1 @@
-from experiments.ExperimentClass import Experiment
+from ExperimentClass import Experiment

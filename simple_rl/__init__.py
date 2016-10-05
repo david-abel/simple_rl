@@ -27,3 +27,4 @@ Last Updated: July 14th, 2016
 Contact: dabel@cs.brown.edu
 License: MIT
 '''
+import run_experiments

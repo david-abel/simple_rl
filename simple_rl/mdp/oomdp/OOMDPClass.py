@@ -8,7 +8,8 @@ From:
 '''
 
 # Local libs.
-from mdp.MDPClass import MDP
+from ...mdp.MDPClass import MDP
+
 
 class OOMDP(MDP):
     ''' Abstract class for an Object Oriented Markov Decision Process. '''

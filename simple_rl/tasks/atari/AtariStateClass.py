@@ -1,8 +1,8 @@
 ''' GridWorldStateClass.py: Contains the GridWorldState class. '''
 
 # Local libs.
-from ImageStateClass import ImageState
-from oomdp.OOMDPImageStateClass import OOMDPImageState
+from ...mdp.ImageStateClass import ImageState
+from ...mdp.oomdp.OOMDPImageStateClass import OOMDPImageState
 
 class AtariState(OOMDPImageState, ImageState):
     ''' Class for Atari States '''

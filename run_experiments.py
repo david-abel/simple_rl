@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Code for running experiments where RL agents interact with an MDP.
 
@@ -24,9 +25,9 @@ import sys
 from collections import defaultdict
 
 # Local imports.
-from tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
-from experiments import Experiment
-from agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
+from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
+from simple_rl.experiments import Experiment
+from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
 def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=50):
     '''
@@ -133,13 +134,13 @@ def choose_mdp(mdp_name, atari_game="centipede"):
     taxi_mdp = TaxiOOMDP(6, 6, agent_loc=agent, walls=[], passengers=passengers)
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
-        try:
-            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-            return AtariMDP(rom=atari_game, grayscale=True)
-        except:
-            print "ERROR: you don't have the Arcade Learning Environment installed."
-            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            quit()
+        # try:
+        from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+        return AtariMDP(rom=atari_game, grayscale=True)
+        # except:
+            # print "ERROR: you don't have the Arcade Learning Environment installed."
+            # print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            # quit()
     else:
         return {"grid":grid_mdp, "chain":chain_mdp, "taxi":taxi_mdp}[mdp_name]
 
@@ -171,9 +172,11 @@ def main():
     qlearner_agent = QLearnerAgent(actions, gamma=gamma)
     lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma)
     grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="softmax")
-    
-    # Choose agents.
-    agents = [qlearner_agent, lin_approx_agent, random_agent]
+
+    # Choose agents.    
+    agents = [qlearner_agent, random_agent]
+    if "task" == "atari":
+        agents = [grad_boost_agent, lin_approx_agent, random_agent]
 
     # Run experiments.
     run_agents_on_mdp(agents, mdp)
