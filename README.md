@@ -22,7 +22,7 @@ Alternatively, you can download simple_rl [here](https://github.com/david-abel/s
 
 * (_agents_): Code for some basic agents (a random actor, _Q_-learner, [[R-Max]](http://www.jmlr.org/papers/volume3/brafman02a/brafman02a.pdf), _Q_-learner with a Linear Approximator, etc.).
 
-* (_experiments_): Code for an Experiment class to easily reproduce results.
+* (_experiments_): Code for an Experiment class to reproduce results.
 
 * (_mdp_): Code for a basic MDP and MDPState class. Also contains OO-MDP implementation [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf).
 
@@ -33,7 +33,7 @@ Alternatively, you can download simple_rl [here](https://github.com/david-abel/s
 
 ## Making a New MDP
 
-Make a directory in _tasks/_. Then make an MDP subclass, which needs:
+Make an MDP subclass, which needs:
 
 * A static variable, _ACTIONS_, which is a list of strings denoting each action.
 
@@ -46,7 +46,7 @@ Make a directory in _tasks/_. Then make an MDP subclass, which needs:
 
 ## Making a New Agent
 
-Make an Agent subclass in _agents/_. Requires:
+Make an Agent subclass, which requires:
 
 * A method, _act(self, state, reward)_, that returns an action.
 

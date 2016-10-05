@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'simple_rl',
   packages = ['simple_rl'],
-  scripts=['run_experiments.py']
+  scripts=['run_experiments.py'],
   install_requires=[
       'numpy',
       'sklearn',
