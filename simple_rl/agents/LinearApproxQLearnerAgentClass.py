@@ -18,7 +18,7 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
     def __init__(self, actions, name="lin_q_approx", alpha=0.05, gamma=0.95, epsilon=0.01, explore="uniform"):
         self.name = "linear-" + explore
         QLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore)
-        self.weights = numpy.array([0 for x in xrange(self.num_features*len(self.actions))])
+        self.num_features = 0
 
     def update(self, state, action, reward, next_state):
         '''
@@ -33,8 +33,10 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
         '''
         # If this is the first state, initialize state-relevant data and return.
         if state is None:
+            if self.num_features == 0:
+                self.num_features = len(next_state.features())
+                self.weights = numpy.array([0 for x in xrange(self.num_features*len(self.actions))])
             self.prev_state = next_state
-            self.num_features = len(next_state.features())
             return
 
         self._update_weights(reward, next_state)
