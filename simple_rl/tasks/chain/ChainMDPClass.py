@@ -7,7 +7,7 @@ from ChainStateClass import ChainState
 class ChainMDP(MDP):
     ''' Imeplementation for a standard Chain MDP '''
 
-    ACTIONS = ["forward", "reset", "burn"]
+    ACTIONS = ["forward", "reset"]
 
     def __init__(self, num_states=5):
         '''
@@ -31,8 +31,6 @@ class ChainMDP(MDP):
             return 1
         elif action == "reset":
             return 0.01
-        elif action == "burn":
-            return -2
         else:
             return 0
 
@@ -52,8 +50,6 @@ class ChainMDP(MDP):
                 return state
         elif action == "reset":
             return ChainState(1)
-        elif action == "burn":
-            return state
         else:
             print "Error: Unrecognized action! (" + action + ")"
             quit()

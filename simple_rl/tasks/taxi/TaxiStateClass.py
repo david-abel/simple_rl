@@ -14,3 +14,4 @@ class TaxiState(OOMDPState):
 
     def get_agent_x(self):
         return self.objects["agent"][0]["x"]
+

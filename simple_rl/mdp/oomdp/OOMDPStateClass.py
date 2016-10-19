@@ -12,17 +12,21 @@ class OOMDPState(State):
             objects (dict of OOMDPObject instances): {key=object class (str):val = object instances}
         '''
         self.objects = objects
+        self._update()
 
+        State.__init__(self, data=self.data)
+
+    def get_objects(self):
+        return self.objects
+
+    def _update(self):
         # Turn object attributes into a feature list.
         state_vec = []
         for obj_class in self.objects.keys():
             for obj in self.objects[obj_class]:
                 state_vec += obj.get_obj_state()
 
-        State.__init__(self, data=state_vec)
-
-    def get_objects(self):
-        return self.objects
+        self.data = tuple(state_vec)
 
     def __str__(self):
         result = ""

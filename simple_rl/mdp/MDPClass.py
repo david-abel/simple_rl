@@ -1,5 +1,7 @@
 ''' MDPClass.py: Contains the MDP Class. '''
 
+import copy
+
 class MDP(object):
     ''' Abstract class for a Markov Decision Process. '''
     def __init__(self, actions, transition_func, reward_func, init_state, gamma=0.95):
@@ -7,7 +9,7 @@ class MDP(object):
         self.transition_func = transition_func
         self.reward_func = reward_func
         self.gamma = gamma
-        self.init_state = init_state
+        self.init_state = copy.deepcopy(init_state)
         self.cur_state = init_state
 
     def get_init_state(self):
@@ -30,7 +32,6 @@ class MDP(object):
         Returns:
             (tuple: <float,State>): reward, State
         '''
-
         reward = self.reward_func(self.cur_state, action)
         next_state = self.transition_func(self.cur_state, action)
         self.cur_state = next_state
@@ -38,4 +39,4 @@ class MDP(object):
         return reward, next_state
 
     def reset(self):
-        pass
+        self.cur_state = copy.deepcopy(self.init_state)

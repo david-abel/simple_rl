@@ -1,6 +1,9 @@
 ''' Helper functions for executing actions in the Taxi Problem '''
 
-def move_agent(state, dx=0, dy=0):
+import random
+import copy
+
+def move_agent(state, slip_prob=0, dx=0, dy=0):
     '''
     Args:
         state (TaxiState)
@@ -10,9 +13,9 @@ def move_agent(state, dx=0, dy=0):
     Returns:
         (TaxiState)
     '''
-    # if _is_wall_in_the_way(state, dx=dx, dy=dy):
+    if _is_wall_in_the_way(state, dx=dx, dy=dy):
         # There's a wall in the way.
-        # return state
+        return state
 
     new_state = _move_passenger_in_taxi(state, x=dx, y=dy)
     new_state.objects["agent"][0]["x"] += dx
@@ -46,12 +49,14 @@ def _move_passenger_in_taxi(state, x=0, y=0):
     Returns
         (TaxiState)
     '''
+    new_state = copy.deepcopy(state)
+
     for i, passenger in enumerate(state.objects["passenger"]):
         if passenger["in_taxi"] == 1:
-            state.objects["passenger"][i]["x"] += x
-            state.objects["passenger"][i]["y"] += y
+            new_state.objects["passenger"][i]["x"] += x
+            new_state.objects["passenger"][i]["y"] += y
     
-    return state
+    return new_state
 
 def agent_pickup(state):
     '''

@@ -47,17 +47,21 @@ class GridWorldMDP(MDP):
         Returns:
             (bool): True iff the state-action pair send the agent to the goal state.
         '''
-        if action == "left" and (state.x == self.goal_state.x + 1) \
-            or (state.x == 1 == self.goal_state.x):
+        if (action == "left" and (state.x == self.goal_state.x + 1) \
+            or (state.x == 1 == self.goal_state.x)) \
+            and (state.y == self.goal_state.y):
             return True
-        elif action == "right" and (state.x == self.goal_state.x + 1) \
-            or (state.x == self.width == self.goal_state.x):
+        elif (action == "right" and (state.x == self.goal_state.x - 1) \
+            or (state.x == self.width == self.goal_state.x)) \
+            and (state.y == self.goal_state.y):
             return True
-        elif action == "down" and (state.y == self.goal_state.y - 1) \
-            or (state.y == 1 == self.goal_state.y):
+        elif (action == "down" and (state.y == self.goal_state.y + 1) \
+            or (state.y == 1 == self.goal_state.y)) \
+            and (state.x == self.goal_state.x):
             return True
-        elif action == "up" and (state.y == self.goal_state.y + 1) \
-            or (state.y == self.height == self.goal_state.y):
+        elif (action == "up" and (state.y == self.goal_state.y - 1) \
+            or (state.y == self.height == self.goal_state.y)) \
+            and (state.x == self.goal_state.x):
             return True
         else:
             return False
@@ -74,15 +78,20 @@ class GridWorldMDP(MDP):
         _error_check(state, action)
 
         if action == "up" and state.y < self.height:
-            return GridWorldState(state.x, state.y + 1)
+            next_state = GridWorldState(state.x, state.y + 1)
         elif action == "down" and state.y > 1:
-            return GridWorldState(state.x, state.y - 1)
+            next_state = GridWorldState(state.x, state.y - 1)
         elif action == "right" and state.x < self.width:
-            return GridWorldState(state.x + 1, state.y)
+            next_state = GridWorldState(state.x + 1, state.y)
         elif action == "left" and state.x > 1:
-            return GridWorldState(state.x - 1, state.y)
+            next_state = GridWorldState(state.x - 1, state.y)
         else:
-            return GridWorldState(state.x, state.y)
+            next_state = GridWorldState(state.x, state.y)
+
+        if next_state == self.goal_state:
+            next_state.set_terminal(True)
+
+        return next_state
 
     def __str__(self):
         return "gridworld_h-" + str(self.height) + "_w-" + str(self.width)

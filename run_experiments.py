@@ -22,6 +22,7 @@ import time
 import argparse
 import os
 import sys
+import copy
 from collections import defaultdict
 
 # Local imports.
@@ -29,7 +30,7 @@ from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
 from simple_rl.experiments import Experiment
 from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
 
-def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=50):
+def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=250, num_steps=150):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -63,24 +64,25 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
 
             # For each episode.
             for episode in xrange(1, num_episodes + 1):
-
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
                 reward = 0
 
                 for step in xrange(num_steps):
+
                     # Compute the agent's policy.
                     action = agent.act(state, reward)
 
-                    # Execute the action in the MDP.
+                    # Terminal check.
+                    if state.is_terminal():
+                        experiment.add_experience(agent, state, action, 0, state)
+                        continue
+
+                    # Execute in MDP.
                     reward, next_state = mdp.execute_agent_action(action)
 
                     # Record the experience.
                     experiment.add_experience(agent, state, action, reward, next_state)
-
-                    # Check if terminal state.
-                    if next_state.is_terminal():
-                        break
 
                     # Update pointer.
                     state = next_state
@@ -130,17 +132,18 @@ def choose_mdp(mdp_name, atari_game="centipede"):
 
     # Taxi MDP.
     agent = {"x":1, "y":1, "has_passenger":0}
-    passengers = [{"x":5, "y":5, "dest_x":3, "dest_y":3, "in_taxi":0}]
-    taxi_mdp = TaxiOOMDP(6, 6, agent_loc=agent, walls=[], passengers=passengers)
+    passengers = [{"x":4, "y":3, "dest_x":7, "dest_y":2, "in_taxi":0}]
+    walls = []
+    taxi_mdp = TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers)
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
-        # try:
-        from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-        return AtariMDP(rom=atari_game, grayscale=True)
-        # except:
-            # print "ERROR: you don't have the Arcade Learning Environment installed."
-            # print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            # quit()
+        try:
+            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+            return AtariMDP(rom=atari_game, grayscale=True)
+        except:
+            print "ERROR: you don't have the Arcade Learning Environment installed."
+            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            quit()
     else:
         return {"grid":grid_mdp, "chain":chain_mdp, "taxi":taxi_mdp}[mdp_name]
 
@@ -149,6 +152,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-mdp", type = str, nargs = '?', help = "Select the mdp. Options: {atari, grid, chain, taxi}")
     parser.add_argument("-rom", type = str, nargs = '?', help = "Select the Atari Game to run: {centipede, breakout, etc.}")
+    # parser.add_argument("-debug", type = bool, nargs = '?', help = "Toggle debugging which will print out <s,a,r,s'> during learning.}")
     args = parser.parse_args()
 
     # Fix variables based on options.
@@ -168,15 +172,16 @@ def main():
 
     # Setup agents.
     random_agent = RandomAgent(actions)
-    rmax_agent = RMaxAgent(actions, gamma=gamma)
-    qlearner_agent = QLearnerAgent(actions, gamma=gamma)
+    rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4)
+    qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
+    softmax_qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="softmax")
     lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma)
     grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="softmax")
 
     # Choose agents.    
-    agents = [qlearner_agent, random_agent]
+    agents = [qlearner_agent, softmax_qlearner_agent, random_agent]
     if "task" == "atari":
-        agents = [grad_boost_agent, lin_approx_agent, random_agent]
+        agents = [lin_approx_agent, random_agent]
 
     # Run experiments.
     run_agents_on_mdp(agents, mdp)

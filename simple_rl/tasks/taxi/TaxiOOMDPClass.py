@@ -9,6 +9,10 @@ From:
 Author: David Abel (cs.brown.edu/~dabel/)
 '''
 
+# Python imports.
+import random
+import copy
+
 # simple_rl imports.
 from ...mdp.oomdp.OOMDPClass import OOMDP
 from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
@@ -23,11 +27,12 @@ class TaxiOOMDP(OOMDP):
     ATTRIBUTES = ["x", "y", "has_passenger", "in_taxi", "dest_x", "dest_y"]
     CLASSES = ["agent", "wall", "passenger"]
 
-    def __init__(self, height, width, agent_loc, walls, passengers):
+    def __init__(self, width, height, agent_loc, walls, passengers, slip_prob=0):
         init_state = self._create_init_state(height, width, agent_loc, walls, passengers)
-        OOMDP.__init__(self, TaxiOOMDP.ACTIONS, self.objects, self._transition_func, self._reward_func, init_state=init_state)
+        OOMDP.__init__(self, TaxiOOMDP.ACTIONS, self.objects, self._taxi_transition_func, self._taxi_reward_func, init_state=init_state)
         self.height = height
         self.width = width
+        self.slip_prob = slip_prob
 
     def _create_init_state(self, height, width, agent_loc, walls, passengers):
         '''
@@ -69,8 +74,7 @@ class TaxiOOMDP(OOMDP):
 
         return TaxiState(self.objects)
 
-
-    def _reward_func(self, state, action):
+    def _taxi_reward_func(self, state, action):
         '''
         Args:
             state (OOMDP State)
@@ -81,12 +85,14 @@ class TaxiOOMDP(OOMDP):
         '''
         _error_check(state, action)
 
-        if is_taxi_terminal_state(state):
-            return 1
-        else:
-            return 0
+        next_state = self._taxi_transition_func(state, action)
 
-    def _transition_func(self, state, action):
+        if next_state.is_terminal():
+            return 10
+        else:
+            return -0.01
+
+    def _taxi_transition_func(self, state, action):
         '''
         Args:
             state (State)
@@ -97,14 +103,25 @@ class TaxiOOMDP(OOMDP):
         '''
         _error_check(state, action)
 
+        if self.slip_prob > random.random():
+            # Flip dir.
+            if action == "up":
+                action = "down"
+            elif action == "down":
+                action = "up"
+            elif action == "left":
+                action = "right"
+            elif action == "right":
+                action = "left"
+
         if action == "up" and state.get_agent_y() < self.height:
-            state = taxi_action_helpers.move_agent(state, dy=1)
+            state = taxi_action_helpers.move_agent(state, self.slip_prob, dy=1)
         elif action == "down" and state.get_agent_y() > 1:
-            state = taxi_action_helpers.move_agent(state, dy=-1)
+            state = taxi_action_helpers.move_agent(state, self.slip_prob, dy=-1)
         elif action == "right" and state.get_agent_x() < self.width:
-            state = taxi_action_helpers.move_agent(state, dx=1)
+            state = taxi_action_helpers.move_agent(state, self.slip_prob, dx=1)
         elif action == "left" and state.get_agent_x() > 1:
-            state = taxi_action_helpers.move_agent(state, dx=-1)
+            state = taxi_action_helpers.move_agent(state, self.slip_prob, dx=-1)
         elif action == "dropoff":
             state = taxi_action_helpers.agent_dropoff(state)
         elif action == "pickup":
@@ -113,6 +130,9 @@ class TaxiOOMDP(OOMDP):
         # Make terminal.
         if is_taxi_terminal_state(state):
             state.set_terminal(True)
+        
+        # All OOMDP states must be updated.
+        state._update()
         
         return state
 
@@ -125,10 +145,10 @@ def is_taxi_terminal_state(state):
         state (OOMDPState)
 
     Returns:
-        (bool): True iff all passengers at at their destinations.
+        (bool): True iff all passengers at at their destinations, not in the taxi.
     '''
     for p in state.objects["passenger"]:
-        if p.get_attribute("x") != p.get_attribute("dest_x") or \
+        if p.get_attribute("in_taxi") == 1 or p.get_attribute("x") != p.get_attribute("dest_x") or \
             p.get_attribute("y") != p.get_attribute("dest_y"):
             return False
     return True

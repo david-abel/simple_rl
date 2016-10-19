@@ -152,6 +152,9 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         Makes (and opens) a single reward chart plotting all of the data in @data.
     '''
 
+    if experiment_dir[-1] == "/":
+        experiment_dir = experiment_dir[:-1]
+
     # Some nice markers and colors for plotting.
     markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
     colors = [[240, 163, 255], [184, 221, 255], [113, 113, 198],\

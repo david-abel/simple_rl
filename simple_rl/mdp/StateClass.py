@@ -36,4 +36,4 @@ class State(object):
 
     def __hash__(self):
         d = tuple(self.data)
-        return hash((d, self._is_terminal))
+        return hash(d)

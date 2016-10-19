@@ -17,7 +17,7 @@ import ale_python_interface as ale_interface
 class AtariMDP(MDP):
     ''' Class for a Atari MDPs '''
 
-    def __init__(self, rom="breakout", display_game_screen=False, grayscale=False, image_to_object=False):
+    def __init__(self, rom="breakout", display_game_screen=True, grayscale=False, image_to_object=False):
         '''
         Args:
             rom (str): path to a rom file. Put roms in the "/roms/" dir.

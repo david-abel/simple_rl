@@ -35,7 +35,7 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
         if state is None:
             if self.num_features == 0:
                 self.num_features = len(next_state.features())
-                self.weights = numpy.array([0 for x in xrange(self.num_features*len(self.actions))])
+                self.weights = numpy.zeros(self.num_features*len(self.actions))
             self.prev_state = next_state
             return
 

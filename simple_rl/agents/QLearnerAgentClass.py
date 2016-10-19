@@ -10,7 +10,7 @@ from AgentClass import Agent
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="qlearner", alpha=0.05, gamma=0.95, epsilon=0.01, explore="softmax"):
+    def __init__(self, actions, name="qlearner", alpha=0.1, gamma=0.99, epsilon=0.2, explore="softmax"):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -20,7 +20,7 @@ class QLearnerAgent(Agent):
             epsilon (float): Exploration term.
             explore (str): One of {softmax, uniform}. Denotes explore policy.
         '''
-        Agent.__init__(self, name=name, actions=actions, gamma=gamma)
+        Agent.__init__(self, name=name + "-" + explore, actions=actions, gamma=gamma)
 
         # Set/initialize parameters and other relevant classwide data
         self.alpha = alpha

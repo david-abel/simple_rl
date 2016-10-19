@@ -16,7 +16,7 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=5):
+    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=1):
         Agent.__init__(self, name="rmax-h" + str(horizon), actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
@@ -168,7 +168,7 @@ class RMaxAgent(Agent):
         numerator = float(sum(self.transitions[(state,action)].values()))
         state_weights = defaultdict(float)
         next_state_dict = self.transitions[(state, action)]
-        for next_state in next_state_dict:
+        for next_state in next_state_dict.keys():
             count = next_state_dict[next_state]
             state_weights[next_state] = (count / numerator)
 
