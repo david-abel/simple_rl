@@ -51,7 +51,7 @@ class ChainMDP(MDP):
         elif action == "reset":
             return ChainState(1)
         else:
-            print "Error: Unrecognized action! (" + action + ")"
+            #print "Error: Unrecognized action! (" + action + ")"
             quit()
 
     def __str__(self):

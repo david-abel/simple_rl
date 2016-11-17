@@ -108,11 +108,11 @@ def _error_check(state, action):
     '''
 
     if action not in GridWorldMDP.ACTIONS:
-        print "Error: the action provided (" + str(action) + ") was invalid."
+        #print "Error: the action provided (" + str(action) + ") was invalid."
         quit()
 
     if not isinstance(state, GridWorldState):
-        print "Error: the given state (" + str(state) + ") was not of the correct class."
+        #print "Error: the given state (" + str(state) + ") was not of the correct class."
         quit()
 
 

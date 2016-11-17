@@ -60,7 +60,7 @@ class RMaxAgent(Agent):
             Updates T and R.
         '''
         if state != None and action != None:
-            if self.s_a_counts[(state, action)] < self.s_a_threshold:
+            if self.s_a_counts[(state, action)] <= self.s_a_threshold:
                 # Add new data points if we haven't seen this s-a enough.
                 self.rewards[(state, action)] += [reward]
                 self.transitions[(state, action)][next_state] += 1
@@ -174,10 +174,6 @@ class RMaxAgent(Agent):
 
         weighted_future_returns = [self.get_max_q_value(next_state, horizon-1)*state_weights[next_state] for next_state in next_state_dict.keys()]
 
-        # print "w", weighted_future_returns
-        # if len(state_weights.keys()) > 1:
-        #     print state, action, self.transitions[(state, action)]
-
         return sum(weighted_future_returns)
 
 
@@ -191,9 +187,9 @@ class RMaxAgent(Agent):
             Believed reward of executing @action in @state. If R(s,a) is unknown
             for this s,a pair, return self.rmax. Otherwise, return the MLE.
         '''
-        if self.s_a_counts[(state,action)] > self.s_a_threshold:
+        if len(self.rewards[(state, action)]) >= self.s_a_threshold:
             # Compute MLE if we've seen this s,a pair enough.
-            return float(sum(self.rewards[(state,action)])) / len(self.rewards[(state,action)])
+            return float(sum(self.rewards[(state, action)])) / len(self.rewards[(state, action)])
         else:
             # Otherwise return rmax.
             return self.rmax

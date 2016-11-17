@@ -6,13 +6,14 @@ Implementation for a Q Learner with Gradient Boosting for an approximator.
 From:
     Abel, D., Agarwal, A., Diaz, F., Krishnamurthy, A., & Schapire, R. E.
     (2016). Exploratory Gradient Boosting for Reinforcement Learning in Complex Domains.
-    ICML Workshop on RL and Abstraction (2016). arXiv preprint arXiv:1603.04119.
+    ICML Workshop on RL and Abstraction (2016). arXiv pre#print arXiv:1603.04119.
 '''
 
 # Python imports.
 import random
 import math
 import numpy as np
+import time
 from sklearn.ensemble import GradientBoostingRegressor
 
 # simple_rl classes.
@@ -24,13 +25,15 @@ class GradientBoostingAgent(QLearnerAgent):
     QLearnerAgent that uses gradient boosting with additive regression trees to approximate the Q Function.
     '''
 
-    def __init__(self, actions, name="grad_boost", gamma=0.95, explore="softmax", sample=True):
+    def __init__(self, actions, name="grad_boost", gamma=0.95, explore="softmax", markov_window=20):
+        name += "-m" if markov_window > 0 else ""
         QLearnerAgent.__init__(self, actions=actions, name=name, gamma=gamma, explore=explore)
         self.weak_learners = []
+        self.model = []
         self.most_recent_episode = []
         self.max_state_features = 0
         self.max_depth = len(actions)
-        self.sampler = sample # Will sample 1/10th of the available trees
+        self.markov_window = markov_window
 
     def update(self, state, action, reward, next_state):
         '''
@@ -66,14 +69,8 @@ class GradientBoostingAgent(QLearnerAgent):
 
         features = self._pad_features_with_zeros(state, action)
 
-        self.temp = self.weak_learners[:]
-        
-        if self.sampler:
-            num_sampled_trees = int(math.ceil(len(self.weak_learners) / 30.0))
-            self.temp = random.sample(self.weak_learners, num_sampled_trees)
-
         # Compute Q(s,a)
-        predictions = [h.predict(features)[0] for h in self.temp]
+        predictions = [h.predict(features)[0] for h in self.model]
         result = float(sum(predictions)) # Cast since we'll normally get a numpy float.
         
         return result
@@ -132,8 +129,18 @@ class GradientBoostingAgent(QLearnerAgent):
     def end_of_episode(self):
         '''
         Summary:
-            Performs miscellaneous end of episode tasks (printing out useful information, saving stuff, etc.)
+            Performs miscellaneous end of episode tasks (#printing out useful information, saving stuff, etc.)
         '''
+
+        # self.model = self.weak_learners
         self.add_new_weak_learner()
         self.most_recent_episode = []
+
+        if self.markov_window > 0:
+            # num_sampled_trees = int(math.ceil(len(self.weak_learners) / 10.0))
+            # self.model = random.sample(self.weak_learners, num_sampled_trees)
+            self.model = self.weak_learners[-self.markov_window:]
+        else:
+            self.model = self.weak_learners
+
         Agent.end_of_episode(self)

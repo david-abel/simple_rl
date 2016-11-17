@@ -108,7 +108,7 @@ class AtariMDP(MDP):
 
 def main():
     if len(sys.argv) < 2:
-        print 'Usage:', sys.argv[0], 'rom_file'
+        #print 'Usage:', sys.argv[0], 'rom_file'
         sys.exit()
 
     AtariMDP(rom=sys.argv[1])

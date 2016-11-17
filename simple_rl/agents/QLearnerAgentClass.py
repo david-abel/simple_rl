@@ -3,6 +3,7 @@
 # Misc. python libs
 import random
 import numpy
+import time
 
 # Local classes
 from AgentClass import Agent
@@ -46,7 +47,7 @@ class QLearnerAgent(Agent):
             a=self.prev_action, r=reward, s'=state)
         '''
         self.update(self.prev_state, self.prev_action, reward, state)
-
+        
         if self.explore == "softmax":
             # Softmax exploration
             action = self.soft_max_policy(state)
@@ -56,6 +57,7 @@ class QLearnerAgent(Agent):
 
         self.prev_state = state
         self.prev_action = action
+
         return action
 
     def epsilon_greedy_q_policy(self, state):

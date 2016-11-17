@@ -73,6 +73,7 @@ class Experiment(object):
                 self.write_reward_to_file(agent, step_reward)
         self.rewards[agent] = []
 
+
     def end_of_instance(self, agent):
         '''
         Summary:
