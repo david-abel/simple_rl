@@ -18,6 +18,21 @@ The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just
 
 Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.58).
 
+## Example
+
+To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ method from _simple_rl.run_experiments_ and call it with some agents for a given MDP. For example:
+
+	# Imports
+	from simple_rl.run_experiments import run_agents_on_mdp
+	from simple_rl.tasks import GridWorldMDP
+	from simple_rl.agents import QLearnerAgent
+
+	# Run Experiment
+	mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
+	agent = QLearnerAgent(mdp.actions)
+	run_agents_on_mdp([agent], mdp)
+
+
 ## Overview
 
 * (_agents_): Code for some basic agents (a random actor, _Q_-learner, [[R-Max]](http://www.jmlr.org/papers/volume3/brafman02a/brafman02a.pdf), _Q_-learner with a Linear Approximator, etc.).

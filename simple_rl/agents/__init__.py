@@ -18,5 +18,5 @@ from RMaxAgentClass import RMaxAgent
 
 # Only grab the Gradient Booster if sklearn is installed.
 import sys
-if sklearn in sys.modules:
+if "sklearn" in sys.modules:
 	from GradientBoostingAgentClass import GradientBoostingAgent
