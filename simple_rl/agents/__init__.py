@@ -15,4 +15,8 @@ from QLearnerAgentClass import QLearnerAgent
 from LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
 from RandomAgentClass import RandomAgent
 from RMaxAgentClass import RMaxAgent
-from GradientBoostingAgentClass import GradientBoostingAgent
+
+# Only grab the Gradient Booster if sklearn is installed.
+import sys
+if sklearn in sys.modules:
+	from GradientBoostingAgentClass import GradientBoostingAgent
