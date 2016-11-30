@@ -27,7 +27,7 @@ from collections import defaultdict
 
 from simple_rl.experiments import Experiment
 
-def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=500, num_steps=100):
+def run_agents_on_mdp(agents, mdp, num_instances=100, num_episodes=50, num_steps=10):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -125,19 +125,12 @@ def choose_mdp(mdp_name, atari_game="centipede"):
     '''
 
     # Local imports.
-    from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP
-
-    # Grid World MDP.
-    grid_mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
-
-    # Chain MDP.
-    chain_mdp = ChainMDP(15)
+    from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP
 
     # Taxi MDP.
     agent = {"x":1, "y":1, "has_passenger":0}
     passengers = [{"x":4, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}]
     walls = []
-    taxi_mdp = TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers)
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
         try:
@@ -148,7 +141,10 @@ def choose_mdp(mdp_name, atari_game="centipede"):
             print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
             quit()
     else:
-        return {"grid":grid_mdp, "chain":chain_mdp, "taxi":taxi_mdp}[mdp_name]
+        return {"grid":GridWorldMDP(10, 10, (1, 1), (10, 10)),
+                "chain":ChainMDP(15),
+                "taxi":TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers),
+                "random":RandomMDP(num_states=40, num_rand_trans=20)}[mdp_name]
 
 def parse_args():
     # Add all arguments
