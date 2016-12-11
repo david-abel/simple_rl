@@ -1,12 +1,12 @@
 # simple_rl
-A simple framework for experimenting with Reinforcement Learning in Python 2.7 (brief tutorial [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html)).
+A simple framework for experimenting with Reinforcement Learning in Python 2.7.
 
 There are loads of other great libraries out there for RL. The aim of this one is twofold:
 
 1. Simplicity.
 2. Reproducibility of results.
 
-See _run_experiments.py_ to run some basic experiments.
+A brief tutorial is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).
 
 Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). If you want to use the [Gradient Booster](http://arxiv.org/abs/1603.04119) agent, you'll need [sklearn](http://scikit-learn.org/stable/).
 
