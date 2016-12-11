@@ -1,5 +1,5 @@
 # simple_rl
-A simple framework for experimenting with Reinforcement Learning in Python 2.7.
+A simple framework for experimenting with Reinforcement Learning in Python 2.7 (brief tutorial [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).)
 
 There are loads of other great libraries out there for RL. The aim of this one is twofold:
 
@@ -31,8 +31,6 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	mdp = GridWorldMDP(10, 10, (1, 1), (10, 10))
 	agent = QLearnerAgent(mdp.actions)
 	run_agents_on_mdp([agent], mdp)
-
-A full tutorial is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).
 
 ## Overview
 
