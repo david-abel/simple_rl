@@ -32,7 +32,7 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	agent = QLearnerAgent(mdp.actions)
 	run_agents_on_mdp([agent], mdp)
 
-A full tutorial is available [here](http://cs.brown.edu/~dabel/blog.html).
+A full tutorial is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).
 
 ## Overview
 
