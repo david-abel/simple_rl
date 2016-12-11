@@ -1,5 +1,5 @@
 # simple_rl
-A simple framework for experimenting with Reinforcement Learning in Python 2.7 (brief tutorial [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).).
+A simple framework for experimenting with Reinforcement Learning in Python 2.7 (brief tutorial [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html)).
 
 There are loads of other great libraries out there for RL. The aim of this one is twofold:
 
