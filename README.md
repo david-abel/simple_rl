@@ -16,7 +16,7 @@ The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just
 
 	pip install simple_rl
 
-Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.59).
+Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.6).
 
 ## Example
 
@@ -32,6 +32,7 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	agent = QLearnerAgent(mdp.actions)
 	run_agents_on_mdp([agent], mdp)
 
+A full tutorial is available [here](http://cs.brown.edu/~dabel/blog.html).
 
 ## Overview
 

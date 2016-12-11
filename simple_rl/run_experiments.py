@@ -27,7 +27,7 @@ from collections import defaultdict
 
 from simple_rl.experiments import Experiment
 
-def run_agents_on_mdp(agents, mdp, num_instances=100, num_episodes=50, num_steps=10):
+def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps=200):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -44,7 +44,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=100, num_episodes=50, num_steps
 
     # Experiment (for reproducibility, plotting).
     exp_params = {"num_instances":num_instances, "num_episodes":num_episodes, "num_steps":num_steps}
-    experiment = Experiment(agents=agents, mdp=mdp, params=exp_params)
+    experiment = Experiment(agents=agents, mdp=mdp, params=exp_params, is_episodic= num_episodes > 1)
 
     # Record how long each agent spends learning.
     times = defaultdict(float)
@@ -64,6 +64,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=100, num_episodes=50, num_steps
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
+
                 reward = 0
                 episode_start_time = time.clock()
 
@@ -133,13 +134,13 @@ def choose_mdp(mdp_name, atari_game="centipede"):
     walls = []
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
-        try:
-            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-            return AtariMDP(rom=atari_game, grayscale=True)
-        except ImportError:
-            print "ERROR: you don't have the Arcade Learning Environment installed."
-            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            quit()
+        # try:
+        from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+        return AtariMDP(rom=atari_game, grayscale=True)
+        # except ImportError:
+            # print "ERROR: you don't have the Arcade Learning Environment installed."
+            # print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            # quit()
     else:
         return {"grid":GridWorldMDP(10, 10, (1, 1), (10, 10)),
                 "chain":ChainMDP(15),
@@ -170,17 +171,15 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, GradientBoostingAgent
+    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent
     random_agent = RandomAgent(actions)
     rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
     softmax_qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="softmax")
-    lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma)
-    sample_grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="uniform", markov_window=5)
-    grad_boost_agent = GradientBoostingAgent(actions, gamma=gamma, explore="uniform", markov_window=0)
+    lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
 
     # Choose agents.    
-    agents = [qlearner_agent, softmax_qlearner_agent, random_agent]
+    agents = [lin_approx_agent]
     if "task" == "atari":
         agents = [lin_approx_agent, random_agent]
 

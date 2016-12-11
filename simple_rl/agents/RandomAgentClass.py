@@ -1,9 +1,9 @@
 ''' RandomAgentClass.py: Class for a randomly acting RL Agent '''
 
-# Python libs.
+# Python imports.
 import random
 
-# Local libs.
+# Local imports.
 from AgentClass import Agent
 
 class RandomAgent(Agent):

@@ -4,7 +4,7 @@ ExperimentParametersClass.py: Contains the ExperimentParameters Class.
 Purpose: Bundles all relevant parameters into an object that can be written to a file.
 '''
 
-# Python libs.
+# Python imports.
 from collections import defaultdict
 
 class ExperimentParameters(object):

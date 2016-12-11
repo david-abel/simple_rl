@@ -1,10 +1,13 @@
 ''' ImageStateClass.py: Contains the ImageState Class. '''
 
-# Local libs.
+# Python imports.
+import numpy
+
+# Local imports.
 from StateClass import State
 
 class ImageState(State):
-    ''' Abstract State class '''
+    ''' Abstract Image State class '''
 
     def __init__(self, image, features=None):
         '''

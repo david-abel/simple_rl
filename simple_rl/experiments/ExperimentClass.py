@@ -7,11 +7,11 @@ Purpose:
     - Can document learning activity.
 '''
 
-# Python libs.
+# Python imports.
 import os
 from collections import defaultdict
 
-# Local libs.
+# Local imports.
 from ..utils import chart_utils
 from ExperimentParametersClass import ExperimentParameters
 

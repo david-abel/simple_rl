@@ -7,18 +7,20 @@ Contains implementation for a Q Learner with a Linear Function Approximator.
 # Local classes
 from QLearnerAgentClass import QLearnerAgent
 
-# Python libs.
+# Python imports.
 import numpy
+import math
 
 class LinearApproxQLearnerAgent(QLearnerAgent):
     '''
     QLearnerAgent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, name="lin_q_approx", alpha=0.05, gamma=0.95, epsilon=0.01, explore="uniform"):
+    def __init__(self, actions, name="lin_q_approx", alpha=0.05, gamma=0.95, epsilon=0.01, explore="uniform", rbf=False):
         self.name = "linear-" + explore
         QLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore)
         self.num_features = 0
+        self.rbf = rbf
 
     def update(self, state, action, reward, next_state):
         '''
@@ -57,7 +59,12 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
         blank_vec = [0 for i in xrange(self.num_features * (len(self.actions) - 1))]
         act_index = self.actions.index(action)
 
-        return numpy.array(blank_vec[:act_index*self.num_features] + list(state.features()) + blank_vec[(act_index)*self.num_features:])
+        basis_feats = list(state.features())
+
+        if self.rbf:
+            basis_feats = [_rbf(f) for f in basis_feats]
+
+        return numpy.array(blank_vec[:act_index*self.num_features] + basis_feats + blank_vec[(act_index)*self.num_features:])
 
     def _update_weights(self, reward, curr_state):
         '''
@@ -102,3 +109,6 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
         # Return linear approximation of Q value
         sa_feats = self._phi(state, action)
         return numpy.dot(self.weights, sa_feats)
+
+def _rbf(x):
+    return math.exp(-(x)**2)

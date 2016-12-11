@@ -1,6 +1,6 @@
 ''' AgentClass.py: Class for a basic RL Agent '''
 
-# Python libs.
+# Python imports.
 from collections import defaultdict
 
 class Agent(object):

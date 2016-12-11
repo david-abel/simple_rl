@@ -11,7 +11,7 @@ Functions:
     main: Loads data from a given path and creates plot.
 '''
 
-# Python libs.
+# Python imports.
 import math
 import sys
 import os

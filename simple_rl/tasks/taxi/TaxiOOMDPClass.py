@@ -47,7 +47,7 @@ class TaxiOOMDP(OOMDP):
             (OOMDP State)
         '''
 
-        self.objects = {attr : [] for attr in TaxiOOMDP.CLASSES}
+        self.objects = {c : [] for c in TaxiOOMDP.CLASSES}
 
         # Make agent.
         agent_attributes = {}

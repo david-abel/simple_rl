@@ -4,7 +4,7 @@ Notes:
     - Assumes WLOG reward function codomain is [0,1] (so RMAX is 1.0)
 '''
 
-# Python libs.
+# Python imports.
 import random
 from collections import defaultdict
 

@@ -1,8 +1,7 @@
 ''' GridWorldStateClass.py: Contains the GridWorldState class. '''
 
-# Local libs.
+# Local imports.
 from ...mdp.StateClass import State
-
 
 class GridWorldState(State):
     ''' Class for Grid World States '''

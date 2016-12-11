@@ -1,6 +1,6 @@
 ''' FixedPolicyAgentClass.py: Class for a basic RL Agent '''
 
-# Python libs.
+# Python imports.
 from AgentClass import Agent
 
 class FixedPolicyAgent(Agent):

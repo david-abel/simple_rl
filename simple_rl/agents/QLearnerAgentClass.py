@@ -122,7 +122,7 @@ class QLearnerAgent(Agent):
             (tuple) --> (float, str): where the float is the Qval, str is the action.
         '''
         # Grab random initial action in case all equal
-        best_action = None
+        best_action = random.choice(self.actions)
         max_q_val = float("-inf")
         shuffled_action_list = self.actions[:]
         random.shuffle(shuffled_action_list)
@@ -165,6 +165,7 @@ class QLearnerAgent(Agent):
         Returns:
             (float): denoting the q value of the (@state, @action) pair.
         '''
+        print state, action
         return self.q_func[(state, action)]
 
     def get_action_distr(self, state):
