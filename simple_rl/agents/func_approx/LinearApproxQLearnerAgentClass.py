@@ -5,7 +5,7 @@ Contains implementation for a Q Learner with a Linear Function Approximator.
 '''
 
 # Local classes
-from QLearnerAgentClass import QLearnerAgent
+from ..QLearnerAgentClass import QLearnerAgent
 
 # Python imports.
 import numpy
@@ -16,9 +16,9 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
     QLearnerAgent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, name="lin_q_approx", alpha=0.05, gamma=0.95, epsilon=0.01, explore="uniform", rbf=False):
-        self.name = "linear-" + explore
-        QLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore)
+    def __init__(self, actions, name="ql-linear", alpha=0.05, gamma=0.95, epsilon=0.01, explore="uniform", rbf=False, anneal=True):
+        name = name + "-rbf" if (name == "ql-linear" and rbf) else name
+        QLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
         self.num_features = 0
         self.rbf = rbf
 

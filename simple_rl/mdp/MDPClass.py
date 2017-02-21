@@ -4,7 +4,7 @@ import copy
 
 class MDP(object):
     ''' Abstract class for a Markov Decision Process. '''
-    def __init__(self, actions, transition_func, reward_func, init_state, gamma=0.95):
+    def __init__(self, actions, transition_func, reward_func, init_state, gamma=0.99):
         self.actions = actions
         self.transition_func = transition_func
         self.reward_func = reward_func

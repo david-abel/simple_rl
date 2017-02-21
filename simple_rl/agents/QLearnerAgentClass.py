@@ -1,17 +1,18 @@
 ''' QLearningAgentClass.py: Class for a basic QLearningAgent '''
 
-# Misc. python libs
+# Python imports.
 import random
 import numpy
 import time
+from collections import defaultdict
 
-# Local classes
+# Local imports.
 from AgentClass import Agent
 
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="qlearner", alpha=0.1, gamma=0.99, epsilon=0.2, explore="softmax"):
+    def __init__(self, actions, name="qlearner", alpha=0.1, gamma=0.99, epsilon=0.2, explore="softmax", anneal=False):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -21,11 +22,15 @@ class QLearnerAgent(Agent):
             epsilon (float): Exploration term.
             explore (str): One of {softmax, uniform}. Denotes explore policy.
         '''
-        Agent.__init__(self, name=name + "-" + explore, actions=actions, gamma=gamma)
+        Agent.__init__(self, name=name, actions=actions, gamma=gamma)
 
         # Set/initialize parameters and other relevant classwide data
-        self.alpha = alpha
-        self.epsilon = epsilon
+        self.alpha, self.alpha_init = alpha, alpha
+        self.epsilon, self.epsilon_init = epsilon, epsilon
+        self.step_number = 0
+        self.anneal = anneal
+        self.default_q = 0.0
+        self.q_func = defaultdict(lambda: self.default_q)
 
         # Choose explore type. Can also be "uniform" for \epsilon-greedy.
         self.explore = explore
@@ -57,6 +62,11 @@ class QLearnerAgent(Agent):
 
         self.prev_state = state
         self.prev_action = action
+        self.step_number += 1
+
+        # Anneal params.
+        if self.anneal and self.step_number % 1000 == 0:
+            self._anneal()
 
         return action
 
@@ -113,6 +123,12 @@ class QLearnerAgent(Agent):
         prev_q_val = self.get_q_value(state, action)
         self.q_func[(state, action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
 
+    def _anneal(self):
+        # Taken from "Note on learning rate schedules for stochastic optimization, by Darken and Moody (Yale)":
+        self.alpha = self.alpha_init / (1.0 +  self.step_number / 2000.0 )
+        self.epsilon = self.epsilon_init / (1.0 + self.step_number / 2000.0 )
+        print "annealing", round(self.alpha,2), round(self.epsilon,2)
+
     def _compute_max_qval_action_pair(self, state):
         '''
         Args:
@@ -165,7 +181,6 @@ class QLearnerAgent(Agent):
         Returns:
             (float): denoting the q value of the (@state, @action) pair.
         '''
-        print state, action
         return self.q_func[(state, action)]
 
     def get_action_distr(self, state):
@@ -187,3 +202,18 @@ class QLearnerAgent(Agent):
         softmax = [numpy.exp(qv) / total for qv in all_q_vals]
 
         return softmax
+
+    def reset(self):
+        self.step_number = 0
+        self.q_func = defaultdict(lambda: self.default_q)
+        Agent.reset(self)
+
+    def end_of_episode(self):
+        '''
+        Summary:
+            Resets the agents prior pointers.
+        '''
+        if self.anneal:
+            self._anneal()
+        Agent.reset(self)
+

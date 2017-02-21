@@ -13,8 +13,6 @@ class Agent(object):
 
         self.prev_state = None
         self.prev_action = None
-        self.default_q = 0.0
-        self.q_func = defaultdict(lambda: self.default_q)
 
     def act(self, state, reward):
         '''
@@ -34,7 +32,6 @@ class Agent(object):
         '''
         self.prev_state = None
         self.prev_action = None
-        self.q_func = defaultdict(lambda: self.default_q)
 
     def end_of_episode(self):
         '''
@@ -43,6 +40,9 @@ class Agent(object):
         '''
         self.prev_state = None
         self.prev_action = None
+
+    def set_name(self, name):
+        self.name = name
 
     def __str__(self):
         return str(self.name)

@@ -17,23 +17,23 @@ import time
 from sklearn.ensemble import GradientBoostingRegressor
 
 # simple_rl classes.
-from QLearnerAgentClass import QLearnerAgent
-from AgentClass import Agent
+from ..QLearnerAgentClass import QLearnerAgent
 
 class GradientBoostingAgent(QLearnerAgent):
     '''
     QLearnerAgent that uses gradient boosting with additive regression trees to approximate the Q Function.
     '''
 
-    def __init__(self, actions, name="grad_boost", gamma=0.95, explore="softmax", markov_window=20):
+    def __init__(self, actions, name="grad_boost", gamma=0.99, explore="softmax", markov_window=20, update_window=500):
         name += "-m" if markov_window > 0 else ""
         QLearnerAgent.__init__(self, actions=actions, name=name, gamma=gamma, explore=explore)
         self.weak_learners = []
         self.model = []
         self.most_recent_episode = []
         self.max_state_features = 0
-        self.max_depth = len(actions)
+        self.max_depth = len(actions)*2
         self.markov_window = markov_window
+        self.update_window = 500
 
     def update(self, state, action, reward, next_state):
         '''
@@ -46,6 +46,17 @@ class GradientBoostingAgent(QLearnerAgent):
         Summary:
             Updates the internal Q Function according to the Bellman Equation. (Classic Q Learning update)
         '''
+
+        # Update on a per step basis.
+        if self.step_number > 0 and self.step_number % self.update_window == 0:
+            self.add_new_weak_learner()
+            self.most_recent_episode = []
+
+            if self.markov_window > 0:
+                self.model = self.weak_learners[-self.markov_window:]
+            else:
+                self.model = self.weak_learners
+
         if None not in [state, action, reward, next_state]:
             if len(state.features()) > self.max_state_features:
                 self.max_state_features = len(state.features())

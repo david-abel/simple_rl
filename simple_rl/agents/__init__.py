@@ -12,11 +12,10 @@ Implementations of standard RL agents:
 from AgentClass import Agent
 from FixedPolicyAgentClass import FixedPolicyAgent
 from QLearnerAgentClass import QLearnerAgent
-from LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
 from RandomAgentClass import RandomAgent
 from RMaxAgentClass import RMaxAgent
 
-# Only grab the Gradient Booster if sklearn is installed.
-import sys
-if "sklearn" in sys.modules:
-	from GradientBoostingAgentClass import GradientBoostingAgent
+from func_approx.LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
+from func_approx.LinearApproxSarsaAgentClass import LinearApproxSarsaAgent
+# from func_approx.GradientBoostingAgentClass import GradientBoostingAgent
+from bandits.LinUCBAgentClass import LinUCBAgent

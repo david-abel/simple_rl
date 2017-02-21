@@ -26,8 +26,84 @@ import copy
 from collections import defaultdict
 
 from simple_rl.experiments import Experiment
+from simple_rl.mdp import MarkovGameMDP
 
-def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps=200):
+def play_markov_game(agent_dict, markov_game_mdp, num_instances=10, num_episodes=100, num_steps=30):
+    '''
+    Args:
+        agent_dict (dict of Agents): See agents/AgentClass.py (and friends).
+        markov_game_mdp (MarkovGameMDP): See mdp/markov_games/MarkovGameMDPClass.py.
+        num_instances (int) [opt]: Number of times to run each agent (for confidence intervals).
+        num_episodes (int) [opt]: Number of episodes for each learning instance.
+        num_steps (int) [opt]: Number of times to run each agent (for confidence intervals).
+    '''
+
+    # Experiment (for reproducibility, plotting).
+    exp_params = {"num_instances":num_instances} #, "num_episodes":num_episodes, "num_steps":num_steps}
+    experiment = Experiment(agents=agent_dict, mdp=markov_game_mdp, params=exp_params, is_episodic=num_episodes > 1, is_markov_game=True)
+
+    # Record how long each agent spends learning.
+    print "Running experiment: \n" + str(experiment)
+    start = time.clock()
+
+    # For each instance of the agent.
+    for instance in xrange(1, num_instances + 1):
+        print "\tInstance " + str(instance) + " of " + str(num_instances) + "."
+
+        reward_dict = defaultdict(str)
+        action_dict = {}
+
+        for episode in xrange(1, num_episodes + 1):
+            print "\t\tEpisode " + str(episode ) + " of " + str(num_episodes) + "."
+            # Compute initial state/reward.
+            state = markov_game_mdp.get_init_state()
+
+            for step in xrange(num_steps):
+
+                # Compute each agent's policy.
+                for a in agent_dict.values():
+                    agent_reward = reward_dict[a.name]
+                    agent_action = a.act(state, agent_reward)
+                    action_dict[a.name] = agent_action
+
+                # Terminal check.
+                if state.is_terminal():
+                    experiment.add_experience(agent_dict, state, action_dict, defaultdict(int), state)
+                    continue
+
+                # Execute in MDP.
+                reward_dict, next_state = markov_game_mdp.execute_agent_action(action_dict)
+
+                # Record the experience.
+                experiment.add_experience(agent_dict, state, action_dict, reward_dict, next_state)
+
+                # Update pointer.
+                state = next_state
+
+            # A final update.
+            for a in agent_dict.values():
+                agent_reward = reward_dict[a.name]
+                agent_action = a.act(state, agent_reward)
+                action_dict[a.name] = agent_action
+
+                # Process that learning instance's info at end of learning.
+                experiment.end_of_episode(a.name)
+
+            # Reset the MDP, tell the agent the episode is over.
+            markov_game_mdp.reset()
+
+        # A final update.
+        for a in agent_dict.values():
+            # Reset the agent and track experiment info.
+            experiment.end_of_instance(a.name)
+            a.reset()
+
+    # Time stuff.
+    print "Experiment took " + str(time.clock() - start) + " seconds."
+
+    experiment.make_plots(cumulative=True)
+
+def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=200, clear_old_results=True):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -35,6 +111,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps
         num_instances (int) [opt]: Number of times to run each agent (for confidence intervals).
         num_episodes (int) [opt]: Number of episodes for each learning instance.
         num_steps (int) [opt]: Number of steps per episode.
+        clear_old_results (bool) [opt]: If true, removes all results files in the relevant results dir.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
@@ -44,7 +121,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps
 
     # Experiment (for reproducibility, plotting).
     exp_params = {"num_instances":num_instances, "num_episodes":num_episodes, "num_steps":num_steps}
-    experiment = Experiment(agents=agents, mdp=mdp, params=exp_params, is_episodic= num_episodes > 1)
+    experiment = Experiment(agents=agents, mdp=mdp, params=exp_params, is_episodic= num_episodes > 1, clear_old_results=clear_old_results)
 
     # Record how long each agent spends learning.
     times = defaultdict(float)
@@ -61,6 +138,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps
 
             # For each episode.
             for episode in xrange(1, num_episodes + 1):
+                print "\t\tEpisode " + str(episode)
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
@@ -75,6 +153,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps
 
                     # Terminal check.
                     if state.is_terminal():
+                        # Self loop if in a terminal state.
                         experiment.add_experience(agent, state, action, 0, state)
                         continue
 
@@ -115,18 +194,18 @@ def run_agents_on_mdp(agents, mdp, num_instances=1, num_episodes=2000, num_steps
 
     experiment.make_plots()
 
-def choose_mdp(mdp_name, atari_game="centipede"):
+def choose_mdp(mdp_name, env_name="CartPole-v0"):
     '''
     Args:
         mdp_name (str): one of {atari, grid, chain, taxi}
-        atari_game (str): one of {centipede, breakout, etc.}
+        gym_env_name (str): gym environment name, like 'CartPole-v0'
 
     Returns:
         (MDP)
     '''
 
     # Local imports.
-    from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP
+    from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP, PrisonersDilemmaMDP, RockPaperScissorsMDP, GridGameMDP
 
     # Taxi MDP.
     agent = {"x":1, "y":1, "has_passenger":0}
@@ -134,32 +213,38 @@ def choose_mdp(mdp_name, atari_game="centipede"):
     walls = []
     if mdp_name == "atari":
         # Atari import is here in case users don't have the Arcade Learning Environment.
-        # try:
-        from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-        return AtariMDP(rom=atari_game, grayscale=True)
-        # except ImportError:
-            # print "ERROR: you don't have the Arcade Learning Environment installed."
-            # print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            # quit()
+        try:
+            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
+            return AtariMDP(rom=env_name, grayscale=True)
+        except ImportError:
+            print "Error: you don't have the Arcade Learning Environment installed."
+            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
+            quit()
+    elif mdp_name == "gym":
+            from simple_rl.tasks.gym.GymMDPClass import GymMDP
+            return GymMDP(env_name)
     else:
         return {"grid":GridWorldMDP(10, 10, (1, 1), (10, 10)),
                 "chain":ChainMDP(15),
                 "taxi":TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers),
-                "random":RandomMDP(num_states=40, num_rand_trans=20)}[mdp_name]
+                "random":RandomMDP(num_states=40, num_rand_trans=20),
+                "prison":PrisonersDilemmaMDP(),
+                "rps":RockPaperScissorsMDP(),
+                "grid_game":GridGameMDP()}[mdp_name]
 
 def parse_args():
     # Add all arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-mdp", type = str, nargs = '?', help = "Select the mdp. Options: {atari, grid, chain, taxi}")
-    parser.add_argument("-rom", type = str, nargs = '?', help = "Select the Atari Game to run: {centipede, breakout, etc.}")
+    parser.add_argument("-env", type = str, nargs = '?', help = "Select the Atari Game or Gym environment.")
     # parser.add_argument("-debug", type = bool, nargs = '?', help = "Toggle debugging which will #print out <s,a,r,s'> during learning.}")
     args = parser.parse_args()
 
     # Fix variables based on options.
     task = args.mdp if args.mdp else "grid"
-    atari_rom = args.rom if args.rom else "breakout"
+    env_name = args.env if args.env else "CartPole-v0"
 
-    return task, atari_rom
+    return task, env_name
 
 def main():
     # Command line args.
@@ -171,20 +256,25 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent
+    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, LinUCBAgent
     random_agent = RandomAgent(actions)
-    rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4)
+    rmax_agent_a = RMaxAgent(actions, gamma=gamma, horizon=4)
+    rmax_agent_b = RMaxAgent(actions, gamma=gamma, horizon=3)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
     softmax_qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="softmax")
     lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
 
-    # Choose agents.    
-    agents = [lin_approx_agent]
-    if "task" == "atari":
-        agents = [lin_approx_agent, random_agent]
+    lin_ucb_agent = LinUCBAgent(actions)
 
     # Run experiments.
-    run_agents_on_mdp(agents, mdp)
+    if isinstance(mdp, MarkovGameMDP):
+        # Markov game.
+        agent_dict = {rmax_agent_a.name:rmax_agent_a, rmax_agent_b.name:rmax_agent_b}
+        play_markov_game(agent_dict, mdp, num_instances=10, num_episodes=50, num_steps=50)
+    else:
+        # Single agent task.
+        agents = [random_agent]
+        run_agents_on_mdp(agents, mdp)
 
 if __name__ == "__main__":
     main()

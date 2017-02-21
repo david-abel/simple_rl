@@ -6,9 +6,9 @@ import numpy
 class State(object):
     ''' Abstract State class '''
 
-    def __init__(self, data):
+    def __init__(self, data=[], is_terminal=False):
         self.data = data
-        self._is_terminal = False
+        self._is_terminal = is_terminal
 
     def features(self):
     	'''
@@ -37,3 +37,9 @@ class State(object):
     def __hash__(self):
         d = tuple(self.data)
         return hash(d)
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __len__(self):
+        return len(self.data)

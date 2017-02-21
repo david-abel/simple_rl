@@ -7,6 +7,9 @@ from random.RandomMDPClass import RandomMDP
 from random.RandomStateClass import RandomState
 from taxi.TaxiOOMDPClass import TaxiOOMDP
 from taxi.TaxiStateClass import TaxiState
+from prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
+from rock_paper_scissors.RockPaperScissorsMDPClass import RockPaperScissorsMDP
+from grid_game.GridGameMDPClass import GridGameMDP
 
 # Only grab the ALE if it's installed.
 import sys
