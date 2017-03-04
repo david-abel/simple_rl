@@ -5,7 +5,7 @@ setup(
   'simple_rl.agents', 'simple_rl.agents.func_approx', 'simple_rl.experiments', 'simple_rl.tasks',\
   'simple_rl.tasks.chain', 'simple_rl.tasks.random', 'simple_rl.tasks.atari',\
   'simple_rl.tasks.grid_world', 'simple_rl.tasks.taxi', 'simple_rl.mdp.markov_game', 'simple_rl.tasks.gym',\
-  'simple_rl.tasks.grid_game', 'simple_rl.tasks.rock_paper_scissors'],
+  'simple_rl.tasks.grid_game', 'simple_rl.tasks.rock_paper_scissors', 'simple_rl.tasks.prisoners'],
   scripts=['simple_rl/run_experiments.py'],
   install_requires=[
       'numpy',
