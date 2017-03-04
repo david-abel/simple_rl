@@ -22,11 +22,11 @@ class GymMDP(MDP):
         Args:
             env_name (str)
         '''
+        self.env_name = env_name
         self.env = gym.make(env_name)
         if render:
             self.env.render()
-        self.env.reset()
-        MDP.__init__(self, xrange(self.env.action_space.n), self._transition_func, self._reward_func, init_state=GymState())
+        MDP.__init__(self, xrange(self.env.action_space.n), self._transition_func, self._reward_func, init_state=GymState(self.env.reset()))
     
     def _reward_func(self, state, action):
         '''
@@ -58,5 +58,5 @@ class GymMDP(MDP):
         self.env.reset()
 
     def __str__(self):
-        return "gym"
+        return "gym-" + str(self.env_name)
 

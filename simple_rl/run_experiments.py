@@ -256,25 +256,27 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, LinUCBAgent
+    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, LinUCBAgent, MCTSAgent
     random_agent = RandomAgent(actions)
     rmax_agent_a = RMaxAgent(actions, gamma=gamma, horizon=4)
     rmax_agent_b = RMaxAgent(actions, gamma=gamma, horizon=3)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
     softmax_qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="softmax")
     lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
+    
+    mcts_agent = MCTSAgent(actions, mdp.transition_func, mdp.reward_func)
 
     lin_ucb_agent = LinUCBAgent(actions)
 
     # Run experiments.
     if isinstance(mdp, MarkovGameMDP):
         # Markov game.
-        agent_dict = {rmax_agent_a.name:rmax_agent_a, rmax_agent_b.name:rmax_agent_b}
-        play_markov_game(agent_dict, mdp, num_instances=10, num_episodes=50, num_steps=50)
+        agent_dict = {qlearner_agent.name:qlearner_agent, softmax_qlearner_agent.name:softmax_qlearner_agent}
+        play_markov_game(agent_dict, mdp, num_instances=3, num_episodes=10, num_steps=200)
     else:
         # Single agent task.
-        agents = [random_agent]
-        run_agents_on_mdp(agents, mdp)
+        agents = [mcts_agent, random_agent]
+        run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=1, num_steps=1000)
 
 if __name__ == "__main__":
     main()

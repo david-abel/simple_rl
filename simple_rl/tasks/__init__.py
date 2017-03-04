@@ -16,3 +16,5 @@ import sys
 if "ale_python_interface" in sys.modules:
 	from atari.AtariMDPClass import AtariMDP
 	from atari.AtariStateClass import AtariState
+# if "gym" in sys.modules:
+from gym.GymMDPClass import GymMDP

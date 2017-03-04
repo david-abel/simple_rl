@@ -34,9 +34,8 @@ class State(object):
     def __eq__(self, other):
         return isinstance(other, State) and self.data == other.data
 
-    def __hash__(self):
-        d = tuple(self.data)
-        return hash(d)
+    # def __hash__(self):
+    #     return hash(tuple(self.data))
 
     def __getitem__(self, index):
         return self.data[index]
