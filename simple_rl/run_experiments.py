@@ -197,7 +197,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
 def choose_mdp(mdp_name, env_name="CartPole-v0"):
     '''
     Args:
-        mdp_name (str): one of {atari, grid, chain, taxi}
+        mdp_name (str): one of {gym, grid, chain, taxi, ...}
         gym_env_name (str): gym environment name, like 'CartPole-v0'
 
     Returns:
@@ -211,16 +211,7 @@ def choose_mdp(mdp_name, env_name="CartPole-v0"):
     agent = {"x":1, "y":1, "has_passenger":0}
     passengers = [{"x":4, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}]
     walls = []
-    if mdp_name == "atari":
-        # Atari import is here in case users don't have the Arcade Learning Environment.
-        try:
-            from simple_rl.tasks.atari.AtariMDPClass import AtariMDP
-            return AtariMDP(rom=env_name, grayscale=True)
-        except ImportError:
-            print "Error: you don't have the Arcade Learning Environment installed."
-            print "\tTry here: https://github.com/mgbellemare/Arcade-Learning-Environment."
-            quit()
-    elif mdp_name == "gym":
+    if mdp_name == "gym":
             from simple_rl.tasks.gym.GymMDPClass import GymMDP
             return GymMDP(env_name)
     else:
@@ -256,27 +247,12 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent, LinUCBAgent, MCTSAgent
+    from simple_rl.agents import RandomAgent, QLearnerAgent
     random_agent = RandomAgent(actions)
-    rmax_agent_a = RMaxAgent(actions, gamma=gamma, horizon=4)
-    rmax_agent_b = RMaxAgent(actions, gamma=gamma, horizon=3)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
-    softmax_qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="softmax")
-    lin_approx_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
     
-    mcts_agent = MCTSAgent(actions, mdp.transition_func, mdp.reward_func)
-
-    lin_ucb_agent = LinUCBAgent(actions)
-
-    # Run experiments.
-    if isinstance(mdp, MarkovGameMDP):
-        # Markov game.
-        agent_dict = {qlearner_agent.name:qlearner_agent, softmax_qlearner_agent.name:softmax_qlearner_agent}
-        play_markov_game(agent_dict, mdp, num_instances=3, num_episodes=10, num_steps=200)
-    else:
-        # Single agent task.
-        agents = [mcts_agent, random_agent]
-        run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=1, num_steps=1000)
+    agents = [random_agent, qlearner_agent]
+    run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=1, num_steps=1000)
 
 if __name__ == "__main__":
     main()

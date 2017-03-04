@@ -10,11 +10,3 @@ from taxi.TaxiStateClass import TaxiState
 from prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
 from rock_paper_scissors.RockPaperScissorsMDPClass import RockPaperScissorsMDP
 from grid_game.GridGameMDPClass import GridGameMDP
-
-# Only grab the ALE if it's installed.
-import sys
-if "ale_python_interface" in sys.modules:
-	from atari.AtariMDPClass import AtariMDP
-	from atari.AtariStateClass import AtariState
-# if "gym" in sys.modules:
-from gym.GymMDPClass import GymMDP
