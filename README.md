@@ -10,6 +10,9 @@ A brief tutorial is available [here](http://cs.brown.edu/~dabel/blog/posts/simpl
 
 Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). If you want to use the [Gradient Booster](http://arxiv.org/abs/1603.04119) agent, you'll need [sklearn](http://scikit-learn.org/stable/).
 
+Now includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs).
+
+
 ## Installation
 
 The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just run:
@@ -17,8 +20,6 @@ The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just
 	pip install simple_rl
 
 Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.71).
-
-Now includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs).
 
 ## Example
 
