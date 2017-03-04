@@ -14,7 +14,11 @@ import random
 import math
 import numpy as np
 import time
-from sklearn.ensemble import GradientBoostingRegressor
+try:
+    from sklearn.ensemble import GradientBoostingRegressor
+except ImportError:
+    print "Error: sklearn not installed. See: http://scikit-learn.org/stable/install.html"
+    quit()
 
 # simple_rl classes.
 from ..QLearnerAgentClass import QLearnerAgent
