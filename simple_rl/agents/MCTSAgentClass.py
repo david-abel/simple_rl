@@ -11,7 +11,7 @@ from simple_rl.tasks.gym.GymStateClass import GymState
 
 class MCTSAgent(Agent):
 
-    def __init__(self, actions, env_model, explore_param=m.sqrt(2), rollout_depth=150, num_rollouts_per_step=3, name="mcts", gamma=0.99):
+    def __init__(self, actions, env_model, explore_param=m.sqrt(2), rollout_depth=200, num_rollouts_per_step=50, name="mcts", gamma=0.99):
         self.env_model = env_model
         self.rollout_depth = rollout_depth
         self.num_rollouts_per_step = num_rollouts_per_step
