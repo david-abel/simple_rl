@@ -147,7 +147,6 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
                 episode_start_time = time.clock()
 
                 for step in xrange(num_steps):
-                    print "step", step
 
                     # Compute the agent's policy.
                     action = agent.act(state, reward)
@@ -160,8 +159,6 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
 
                     # Execute in MDP.
                     reward, next_state = mdp.execute_agent_action(action)
-
-                    reward = round(reward)
 
                     # Record the experience.
                     experiment.add_experience(agent, state, action, reward, next_state)
