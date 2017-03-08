@@ -103,7 +103,7 @@ def play_markov_game(agent_dict, markov_game_mdp, num_instances=10, num_episodes
 
     experiment.make_plots(cumulative=True)
 
-def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=200, clear_old_results=True):
+def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=200, clear_old_results=True, open_plot=True):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -147,6 +147,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
                 episode_start_time = time.clock()
 
                 for step in xrange(num_steps):
+                    print "step", step
 
                     # Compute the agent's policy.
                     action = agent.act(state, reward)
@@ -159,6 +160,8 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
 
                     # Execute in MDP.
                     reward, next_state = mdp.execute_agent_action(action)
+
+                    reward = round(reward)
 
                     # Record the experience.
                     experiment.add_experience(agent, state, action, reward, next_state)
@@ -192,7 +195,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
         print str(agent) + " agent took " + str(times[agent]) + " seconds."
     print "-------------\n"
 
-    experiment.make_plots()
+    experiment.make_plots(open_plot=open_plot)
 
 def choose_mdp(mdp_name, env_name="CartPole-v0"):
     '''

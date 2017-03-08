@@ -45,12 +45,12 @@ class Experiment(object):
                     os.remove(self.exp_directory + "/" + str(agent) + ".csv")
         self.write_exp_info_to_file()
 
-    def make_plots(self, cumulative=True):
+    def make_plots(self, cumulative=True, open_plot=True):
         '''
         Summary:
             Makes plots for the current experiment.
         '''
-        chart_utils.make_plots(self.exp_directory, self.agents, episodic=self.is_episodic, cumulative=cumulative)
+        chart_utils.make_plots(self.exp_directory, self.agents, episodic=self.is_episodic, cumulative=cumulative, open_plot=open_plot)
 
     def add_experience(self, agent, state, action, reward, next_state):
         '''

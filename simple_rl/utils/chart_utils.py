@@ -137,7 +137,7 @@ def compute_single_conf_interval(datum):
     return std_error
 
 
-def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True):
+def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -213,7 +213,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     pyplot.cla() # Clears.
 
     # Open it.
-    os.system("open " + plot_name)
+    if open_plot:
+        os.system("open " + plot_name)
 
 
 def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True):
