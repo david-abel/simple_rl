@@ -210,6 +210,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Save the plot.
     pyplot.savefig(plot_name, format="pdf")
+    os.system("open " + plot_name)
+    
     pyplot.cla() # Clears.
 
 def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=False):
@@ -237,10 +239,6 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
 
     # Create plot.
     plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative, episodic=episodic)
-
-    # Open it.
-    if open_plot:
-        os.system("open " + plot_name)
 
 
 def main():
