@@ -25,8 +25,9 @@ class MCTSAgent(Agent):
         # value_estimate = {k : None for k in self.actions}
 
         for i in xrange(self.num_rollouts_per_step):
-            for a in self.actions:
-                self._rollout(state, a)
+            # for a in self.actions:
+            a = self._next_action(state)
+            self._rollout(state, a)
 
         return self._next_action(state)
 
@@ -34,11 +35,13 @@ class MCTSAgent(Agent):
         best_action = self.actions[0]
         best_score = 0
 
-        t = sum([self.visitation_counts[(state, a)] for a in self.actions])
+        total_visits = [self.visitation_counts[(state, a)] for a in self.actions]
 
-        if t == 0:
+        if 0 in total_visits:
+            # Insufficient stats, return random.
             return random.choice(self.actions)
 
+        # Else choose according to the UCT explore method.
         for cur_action in self.actions:
             w = self.value_total[(state, cur_action)]
             n = self.visitation_counts[(state, cur_action)]
@@ -58,8 +61,7 @@ class MCTSAgent(Agent):
         total_discounted_reward = []
         for i in range(self.rollout_depth):
 
-            # If we do UCB like things, do it here.
-            next_action = self._next_action(state)
+            next_action = self._next_action(state) #self._next_action(state)
 
             # Simulate next.
             next_obs, next_reward, is_terminal, _ = self.env_model._step(next_action)
