@@ -21,12 +21,14 @@ Author: David Abel (cs.brown.edu/~dabel/)
 import time
 import argparse
 import os
+import math
 import sys
 import copy
 from collections import defaultdict
 
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
+
 
 def play_markov_game(agent_dict, markov_game_mdp, num_instances=10, num_episodes=100, num_steps=30):
     '''
@@ -138,7 +140,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
 
             # For each episode.
             for episode in xrange(1, num_episodes + 1):
-                print "\t\tEpisode " + str(episode)
+                print "\t\tEpisode " + str(episode),
 
                 # Compute initial state/reward.
                 state = mdp.get_init_state()
@@ -146,7 +148,12 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
                 reward = 0
                 episode_start_time = time.clock()
 
+                prog_bar_len = _make_step_progress_bar()
+
                 for step in xrange(num_steps):
+                    # print "\t  Step " + str(step)
+                    if int(prog_bar_len*float(step) / num_steps) > int(prog_bar_len*float(step-1) / num_steps):
+                        _increment_bar()
 
                     # Compute the agent's policy.
                     action = agent.act(state, reward)
@@ -165,6 +172,9 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
 
                     # Update pointer.
                     state = next_state
+
+                _increment_bar()
+                sys.stdout.write("\n")
 
                 # A final update.
                 action = agent.act(state, reward)
@@ -193,6 +203,25 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
     print "-------------\n"
 
     experiment.make_plots(open_plot=open_plot)
+
+
+def _make_step_progress_bar():
+    '''
+    Summary:
+        Prints a step progress bar for experiments.
+
+    Returns:
+        (int): Length of the progress bar (in characters).
+    '''
+    progress_bar_width = 30
+    sys.stdout.write("  [%s]" % (" " * progress_bar_width))
+    sys.stdout.flush()
+    sys.stdout.write("\b" * (progress_bar_width+1)) # return to start of line, after '['
+    return progress_bar_width
+
+def _increment_bar():
+    sys.stdout.write("-")
+    sys.stdout.flush()
 
 def choose_mdp(mdp_name, env_name="CartPole-v0"):
     '''
@@ -237,6 +266,8 @@ def parse_args():
 
     return task, env_name
 
+
+
 def main():
     # Command line args.
     task, rom = parse_args()
@@ -252,7 +283,7 @@ def main():
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
     
     agents = [random_agent, qlearner_agent]
-    run_agents_on_mdp(agents, mdp, num_instances=3, num_episodes=1, num_steps=1000)
+    run_agents_on_mdp(agents, mdp, num_instances=10, num_episodes=1, num_steps=1000)
 
 if __name__ == "__main__":
     main()
