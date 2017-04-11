@@ -13,4 +13,5 @@ from grid_game.GridGameMDPClass import GridGameMDP
 try:
 	from gym.GymMDPClass import GymMDP
 except ImportError:
+	print "Warning: OpenAI gym not installed."
 	pass
