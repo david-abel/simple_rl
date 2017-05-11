@@ -43,7 +43,7 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 
 * (_mdp_): Code for a basic MDP and MDPState class. Also contains OO-MDP implementation [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf).
 
-* (_tasks_): Implementations for a few standard MDPs (grid world, n-chain, and Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf)). Recently added support for the [OpenAI Gym](gym.openai.com).
+* (_tasks_): Implementations for a few standard MDPs (grid world, n-chain, and Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf)). Recently added support for the [OpenAI Gym](https://gym.openai.com/envs).
 
 * (_utils_): Code for charting utilities.
 
