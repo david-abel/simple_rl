@@ -13,14 +13,23 @@ class GridWorldMDP(MDP):
     # Static constants.
     ACTIONS = ["up", "down", "left", "right"]
 
-    def __init__(self, height, width, init_loc, goal_loc):
+    def __init__(self, width=5, height=3, init_loc=(1,1), goal_locs=[(5,3)]):
+        '''
+        Args:
+            height (int)
+            width (int)
+            init_loc (tuple: (int, int))
+            goal_locs (list of tuples: [(int, int)...])
+        '''
         MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=GridWorldState(init_loc[0], init_loc[1]))
-        self.height = height
+        if type(goal_locs) is not list:
+            print "Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
+            quit()
         self.width = width
+        self.height = height
         self.init_loc = init_loc
-        self.goal_loc = goal_loc
+        self.goal_locs = goal_locs
         self.cur_state = GridWorldState(init_loc[0], init_loc[1])
-        self.goal_state = GridWorldState(goal_loc[0], goal_loc[1])
 
     def _reward_func(self, state, action):
         '''
@@ -47,21 +56,13 @@ class GridWorldMDP(MDP):
         Returns:
             (bool): True iff the state-action pair send the agent to the goal state.
         '''
-        if (action == "left" and (state.x == self.goal_state.x + 1) \
-            or (state.x == 1 == self.goal_state.x)) \
-            and (state.y == self.goal_state.y):
+        if action == "left" and (state.x - 1, state.y) in self.goal_locs:
             return True
-        elif (action == "right" and (state.x == self.goal_state.x - 1) \
-            or (state.x == self.width == self.goal_state.x)) \
-            and (state.y == self.goal_state.y):
+        elif action == "right" and (state.x + 1, state.y) in self.goal_locs:
             return True
-        elif (action == "down" and (state.y == self.goal_state.y + 1) \
-            or (state.y == 1 == self.goal_state.y)) \
-            and (state.x == self.goal_state.x):
+        elif action == "down" and (state.x, state.y - 1) in self.goal_locs:
             return True
-        elif (action == "up" and (state.y == self.goal_state.y - 1) \
-            or (state.y == self.height == self.goal_state.y)) \
-            and (state.x == self.goal_state.x):
+        elif action == "up" and (state.x, state.y + 1) in self.goal_locs:
             return True
         else:
             return False
@@ -82,13 +83,14 @@ class GridWorldMDP(MDP):
         elif action == "down" and state.y > 1:
             next_state = GridWorldState(state.x, state.y - 1)
         elif action == "right" and state.x < self.width:
+
             next_state = GridWorldState(state.x + 1, state.y)
         elif action == "left" and state.x > 1:
             next_state = GridWorldState(state.x - 1, state.y)
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if next_state == self.goal_state:
+        if (next_state.x, next_state.y) in self.goal_locs:
             next_state.set_terminal(True)
 
         return next_state
@@ -108,13 +110,12 @@ def _error_check(state, action):
     '''
 
     if action not in GridWorldMDP.ACTIONS:
-        #print "Error: the action provided (" + str(action) + ") was invalid."
+        print "Error: the action provided (" + str(action) + ") was invalid."
         quit()
 
     if not isinstance(state, GridWorldState):
-        #print "Error: the given state (" + str(state) + ") was not of the correct class."
+        print "Error: the given state (" + str(state) + ") was not of the correct class."
         quit()
-
 
 
 def main():

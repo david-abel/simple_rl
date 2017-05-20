@@ -5,7 +5,7 @@ Notes:
 '''
 
 # Python imports.
-import random
+import random as r
 from collections import defaultdict
 
 # Local classes.
@@ -16,13 +16,12 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=4):
+    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=10):
         Agent.__init__(self, name="rmax-h" + str(horizon), actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
         self.s_a_threshold = s_a_threshold
         self.reset()
-
 
     def reset(self):
         '''
@@ -31,9 +30,18 @@ class RMaxAgent(Agent):
         '''
         self.rewards = defaultdict(list) # keys are (s, a) pairs, value is int.
         self.transitions = defaultdict(lambda : defaultdict(int)) # key is (s, a) pair, val is a dict of <k:states,v:count>
-        self.s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
+        self.r_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
+        self.t_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
+        self.q_func = defaultdict(float)
         self.prev_state = None
         self.prev_action = None
+        self.should_update_q = defaultdict(bool)
+
+    def get_num_known_sa(self):
+        return sum([self.is_known(s,a) for s,a in self.r_s_a_counts.keys()])
+
+    def is_known(self, s, a):
+        return self.r_s_a_counts[(s,a)] >= self.s_a_threshold and self.t_s_a_counts[(s,a)] >= self.s_a_threshold
 
     def act(self, state, reward):
         # Update given s, a, r, s' : self.prev_state, self.prev_action, reward, state
@@ -60,11 +68,16 @@ class RMaxAgent(Agent):
             Updates T and R.
         '''
         if state != None and action != None:
-            if self.s_a_counts[(state, action)] <= self.s_a_threshold:
+            if self.r_s_a_counts[(state, action)] <= self.s_a_threshold:
                 # Add new data points if we haven't seen this s-a enough.
                 self.rewards[(state, action)] += [reward]
+                self.r_s_a_counts[(state, action)] += 1
+                self.should_update_q[(state, action)] = True
+
+            if self.t_s_a_counts[(state, action)] <= self.s_a_threshold:
                 self.transitions[(state, action)][next_state] += 1
-            self.s_a_counts[(state, action)] += 1
+                self.t_s_a_counts[(state, action)] += 1
+                self.should_update_q[(state, action)] = True
 
     def _compute_max_qval_action_pair(self, state, horizon=None):
         '''
@@ -80,13 +93,11 @@ class RMaxAgent(Agent):
             horizon = self.horizon 
 
         # Grab random initial action in case all equal
-        best_action = None
-        max_q_val = float("-inf")
-        shuffled_action_list = self.actions[:]
-        random.shuffle(shuffled_action_list)
+        best_action = r.choice(self.actions)
+        max_q_val = self.get_q_value(state, best_action, horizon)
 
         # Find best action (action w/ current max predicted Q value)
-        for action in shuffled_action_list:
+        for action in self.actions:
             q_s_a = self.get_q_value(state, action, horizon)
             if q_s_a > max_q_val:
                 max_q_val = q_s_a
@@ -135,20 +146,25 @@ class RMaxAgent(Agent):
             (float)
         '''
 
+        if not self.should_update_q[(state, action)]:
+            # If we don't need to update, we can return our most recently computed value.
+            return self.q_func[(state, action)]
+
         # If this is the first call, use the default horizon.
         if horizon is None:
             horizon = self.horizon
 
         if horizon <= 0:
-            # If we're not looking any further..
+            # If we're not looking any further.
             return self._get_reward(state, action)
 
         # Compute future return.
         expected_future_return = self.gamma*self._compute_exp_future_return(state, action, horizon)
 
-        q_val = self._get_reward(state, action) + expected_future_return
+        self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
+        self.should_update_q[(state, action)] = False
 
-        return q_val
+        return self.q_func[(state, action)]
 
     def _compute_exp_future_return(self, state, action, horizon=None):
         '''
@@ -165,17 +181,17 @@ class RMaxAgent(Agent):
         if horizon is None:
             horizon = self.horizon
 
-        numerator = float(sum(self.transitions[(state,action)].values()))
-        state_weights = defaultdict(float)
         next_state_dict = self.transitions[(state, action)]
+
+        denominator = float(sum(next_state_dict.values()))
+        state_weights = defaultdict(float)
         for next_state in next_state_dict.keys():
             count = next_state_dict[next_state]
-            state_weights[next_state] = (count / numerator)
+            state_weights[next_state] = (count / denominator)
 
-        weighted_future_returns = [self.get_max_q_value(next_state, horizon-1)*state_weights[next_state] for next_state in next_state_dict.keys()]
+        weighted_future_returns = [self.get_max_q_value(next_state, horizon-1) * state_weights[next_state] for next_state in next_state_dict.keys()]
 
         return sum(weighted_future_returns)
-
 
     def _get_reward(self, state, action):
         '''
@@ -187,9 +203,18 @@ class RMaxAgent(Agent):
             Believed reward of executing @action in @state. If R(s,a) is unknown
             for this s,a pair, return self.rmax. Otherwise, return the MLE.
         '''
-        if len(self.rewards[(state, action)]) >= self.s_a_threshold:
+        # if not self.r_s_a_counts[(state, action)] == len(self.rewards[(state, action)]):
+        #     print self.r_s_a_counts[(state, action)], len(self.rewards[(state, action)])
+        if self.r_s_a_counts[(state, action)] >= self.s_a_threshold:
             # Compute MLE if we've seen this s,a pair enough.
-            return float(sum(self.rewards[(state, action)])) / len(self.rewards[(state, action)])
+            rewards_s_a = self.rewards[(state, action)]
+            return float(sum(rewards_s_a)) / len(rewards_s_a)
         else:
             # Otherwise return rmax.
             return self.rmax
+
+    def _reset_reward(self):
+        self.rewards = defaultdict(list) # keys are (s, a) pairs, value is int.
+        self.r_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
+        self.should_update_q = defaultdict(bool)
+

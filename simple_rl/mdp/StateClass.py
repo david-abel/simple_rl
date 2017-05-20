@@ -20,7 +20,10 @@ class State(object):
         Returns:
             (iterable)
     	'''
-        return numpy.array(self.data) # if hasattr(self.data, '__iter__') else [self.data]
+        return numpy.array(self.data)
+
+    def __hash__(self):
+        return hash(self.data)
 
     def is_terminal(self):
     	return self._is_terminal
@@ -32,10 +35,8 @@ class State(object):
         return "s." + str(self.data)
 
     def __eq__(self, other):
-        return isinstance(other, State) and self.data == other.data
-
-    # def __hash__(self):
-    #     return hash(tuple(self.data))
+        # isinstance(other, State) and 
+        return self.data == other.data
 
     def __getitem__(self, index):
         return self.data[index]

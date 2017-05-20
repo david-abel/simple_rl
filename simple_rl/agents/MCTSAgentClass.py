@@ -41,6 +41,8 @@ class MCTSAgent(Agent):
             # Insufficient stats, return random.
             return random.choice(self.actions)
 
+        t = sum(total_visits)
+
         # Else choose according to the UCT explore method.
         for cur_action in self.actions:
             w = self.value_total[(state, cur_action)]

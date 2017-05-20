@@ -35,3 +35,6 @@ class OOMDPState(State):
                 result += "\t" + str(obj)
             result += "\n"
         return result
+
+    # def __hash__(self):
+    #     return hash(tuple(self.objects))

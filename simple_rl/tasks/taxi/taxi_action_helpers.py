@@ -49,14 +49,14 @@ def _move_passenger_in_taxi(state, x=0, y=0):
     Returns
         (TaxiState)
     '''
-    new_state = copy.deepcopy(state)
+    # new_state = copy.deepcopy(state)
 
     for i, passenger in enumerate(state.objects["passenger"]):
         if passenger["in_taxi"] == 1:
-            new_state.objects["passenger"][i]["x"] += x
-            new_state.objects["passenger"][i]["y"] += y
+            state.objects["passenger"][i]["x"] += x
+            state.objects["passenger"][i]["y"] += y
     
-    return new_state
+    return state
 
 def agent_pickup(state):
     '''

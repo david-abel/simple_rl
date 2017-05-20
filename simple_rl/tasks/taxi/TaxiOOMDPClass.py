@@ -88,9 +88,9 @@ class TaxiOOMDP(OOMDP):
         next_state = self._taxi_transition_func(state, action)
 
         if next_state.is_terminal():
-            return 10
+            return 1
         else:
-            return -0.01
+            return 0
 
     def _taxi_transition_func(self, state, action):
         '''
@@ -114,27 +114,31 @@ class TaxiOOMDP(OOMDP):
             elif action == "right":
                 action = "left"
 
+        next_state = copy.deepcopy(state)
+
         if action == "up" and state.get_agent_y() < self.height:
-            state = taxi_action_helpers.move_agent(state, self.slip_prob, dy=1)
+            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dy=1)
         elif action == "down" and state.get_agent_y() > 1:
-            state = taxi_action_helpers.move_agent(state, self.slip_prob, dy=-1)
+            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dy=-1)
         elif action == "right" and state.get_agent_x() < self.width:
-            state = taxi_action_helpers.move_agent(state, self.slip_prob, dx=1)
+            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dx=1)
         elif action == "left" and state.get_agent_x() > 1:
-            state = taxi_action_helpers.move_agent(state, self.slip_prob, dx=-1)
+            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dx=-1)
         elif action == "dropoff":
-            state = taxi_action_helpers.agent_dropoff(state)
+            next_state = taxi_action_helpers.agent_dropoff(next_state)
         elif action == "pickup":
-            state = taxi_action_helpers.agent_pickup(state)
+            next_state = taxi_action_helpers.agent_pickup(next_state)
+        else:
+            next_state = next_state
         
         # Make terminal.
-        if is_taxi_terminal_state(state):
-            state.set_terminal(True)
+        if is_taxi_terminal_state(next_state):
+            next_state.set_terminal(True)
         
         # All OOMDP states must be updated.
-        state._update()
+        next_state._update()
         
-        return state
+        return next_state
 
     def __str__(self):
         return "taxi_h-" + str(self.height) + "_w-" + str(self.width)

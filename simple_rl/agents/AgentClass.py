@@ -10,7 +10,7 @@ class Agent(object):
         self.name = name
         self.actions = list(actions) # Just in case we're given a numpy array (like from Atari).
         self.gamma = gamma
-
+        self.episode_number = 0
         self.prev_state = None
         self.prev_action = None
 
@@ -40,6 +40,7 @@ class Agent(object):
         '''
         self.prev_state = None
         self.prev_action = None
+        self.episode_number += 1
 
     def set_name(self, name):
         self.name = name

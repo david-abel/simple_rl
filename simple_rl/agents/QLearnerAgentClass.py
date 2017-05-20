@@ -65,7 +65,7 @@ class QLearnerAgent(Agent):
         self.step_number += 1
 
         # Anneal params.
-        if self.anneal and self.step_number % 1000 == 0:
+        if self.episode_number == 0 and self.anneal and self.step_number % 1000 == 0:
             self._anneal()
 
         return action
@@ -125,9 +125,8 @@ class QLearnerAgent(Agent):
 
     def _anneal(self):
         # Taken from "Note on learning rate schedules for stochastic optimization, by Darken and Moody (Yale)":
-        self.alpha = self.alpha_init / (1.0 +  self.step_number / 2000.0 )
-        self.epsilon = self.epsilon_init / (1.0 + self.step_number / 2000.0 )
-        print "annealing", round(self.alpha,2), round(self.epsilon,2)
+        self.alpha = self.alpha_init / (1.0 +  self.step_number*(self.episode_number + 1) / 2000.0 )
+        self.epsilon = self.epsilon_init / (1.0 + self.step_number*(self.episode_number + 1) / 2000.0 )
 
     def _compute_max_qval_action_pair(self, state):
         '''

@@ -24,6 +24,12 @@ class MDP(object):
     def get_gamma(self):
         return self.gamma
 
+    def get_reward_func(self):
+        return self.reward_func
+
+    def get_transition_func(self):
+        return self.transition_func
+
     def execute_agent_action(self, action):
         '''
         Args:

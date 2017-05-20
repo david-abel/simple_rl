@@ -5,7 +5,7 @@ Code for running experiments where RL agents interact with an MDP.
 Instructions:
     (1) Set mdp in main.
     (2) Create agents.
-    (3) Set experiment parameters (num_instances, num_episodes, num_steps).
+    (3) Set experiment parameters (instances, episodes, steps).
     (4) Call run_agents_on_mdp(agents, mdp).
 
     -> Runs all experiments and will open a plot with results when finished.
@@ -24,43 +24,147 @@ import os
 import math
 import sys
 import copy
+import numpy as np
 from collections import defaultdict
 
+# Non-standard imports.
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
+from simple_rl.utils.visualize_mdp import visualize_mdp
+from rl_abstraction.AbstractionWrapperClass import AbstractionWrapper
 
+def run_agents_multi_task(agents, mdp_distr, instances, num_switches, steps, clear_old_results=True):
+    # Experiment (for reproducibility, plotting).
+    exp_params = {"instances":instances, "steps":steps}
+    experiment = Experiment(agents=agents, mdp=mdp_distr, params=exp_params, is_multi_task=True, clear_old_results=clear_old_results)
 
-def play_markov_game(agent_dict, markov_game_mdp, num_instances=10, num_episodes=100, num_steps=30):
+    # Record how long each agent spends learning.
+    print "Running experiment: \n" + str(experiment)
+    start = time.clock()
+
+    times = defaultdict(float)
+
+    # Learn.
+    for agent in agents:
+        print str(agent) + " is learning."
+        start = time.clock()
+
+        # For each instance of the agent.
+        for instance in xrange(1, instances + 1):
+            print "\tInstance " + str(instance) + " of " + str(instances) + "."
+
+            # --- SAMPLE NEW MDP ---
+            for new_task in xrange(num_switches):
+                mdp_id = np.random.multinomial(1, mdp_distr.keys()).tolist().index(1)
+                mdp = mdp_distr[mdp_distr.keys()[mdp_id]]
+
+                # Compute initial state/reward.
+                state = mdp.get_init_state()
+
+                reward = 0
+                episode_start_time = time.clock()
+
+                prog_bar_len = _make_step_progress_bar()
+                # print prog_bar_len, steps
+                for step in xrange(steps):
+                    # print "\t  Step " + str(step)
+                    if int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
+                        _increment_bar()
+
+                    # Compute the agent's policy.
+                    action = agent.act(state, reward)
+
+                    # Terminal check.
+                    if state.is_terminal():
+                        # Self loop if in a terminal state.
+                        experiment.add_experience(agent, state, action, 0, state)
+                        continue
+
+                    # Execute in MDP.
+                    reward, next_state = mdp.execute_agent_action(action)
+
+                    # Record the experience.
+                    experiment.add_experience(agent, state, action, reward, next_state)
+
+                    # Update pointer.
+                    state = next_state
+
+                if "-sa" in agent.name:
+                    # Visualize uncompressed
+                    # visualize_mdp(mdp, file_name="mdp-" + str(instance) + ".png")
+
+                    # Visualize compressed
+                    # visualize_mdp(mdp, agent.state_abs.phi, file_name="abstr-mdp-" + str(instance) + ".png")
+
+                    # print "Reset reward model for new MDP."
+                    agent.new_task()
+
+                elif "rmax" in agent.name:
+                    # print "Reset reward model for new MDP."
+                    agent._reset_reward()
+
+                # _increment_bar()
+                sys.stdout.write("\n")
+
+                # A final update.
+                action = agent.act(state, reward)
+
+                # Process experiment info at end of episode.
+                experiment.end_of_episode(agent)
+
+                # Reset the MDP, tell the agent the episode is over.
+                mdp.reset()
+                agent.end_of_episode()
+
+            # Process that learning instance's info at end of learning.
+            experiment.end_of_instance(agent)
+
+            # Reset the agent.
+            agent.reset()
+
+        # Track how much time this agent took.
+        end = time.clock()
+        times[agent] = round(end - start, 3)
+
+    # Time stuff.
+    print "\n--- TIMES ---"
+    for agent in times.keys():
+        print str(agent) + " agent took " + str(times[agent]) + " seconds."
+    print "-------------\n"
+
+    experiment.make_plots(open_plot=True)
+
+def play_markov_game(agent_dict, markov_game_mdp, instances=10, episodes=100, steps=30):
     '''
     Args:
         agent_dict (dict of Agents): See agents/AgentClass.py (and friends).
         markov_game_mdp (MarkovGameMDP): See mdp/markov_games/MarkovGameMDPClass.py.
-        num_instances (int) [opt]: Number of times to run each agent (for confidence intervals).
-        num_episodes (int) [opt]: Number of episodes for each learning instance.
-        num_steps (int) [opt]: Number of times to run each agent (for confidence intervals).
+        instances (int) [opt]: Number of times to run each agent (for confidence intervals).
+        episodes (int) [opt]: Number of episodes for each learning instance.
+        steps (int) [opt]: Number of times to run each agent (for confidence intervals).
     '''
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"num_instances":num_instances} #, "num_episodes":num_episodes, "num_steps":num_steps}
-    experiment = Experiment(agents=agent_dict, mdp=markov_game_mdp, params=exp_params, is_episodic=num_episodes > 1, is_markov_game=True)
+    exp_params = {"instances":instances} #, "episodes":episodes, "steps":steps}
+    experiment = Experiment(agents=agent_dict, mdp=markov_game_mdp, params=exp_params, is_episodic=episodes > 1, is_markov_game=True)
 
     # Record how long each agent spends learning.
     print "Running experiment: \n" + str(experiment)
     start = time.clock()
 
     # For each instance of the agent.
-    for instance in xrange(1, num_instances + 1):
-        print "\tInstance " + str(instance) + " of " + str(num_instances) + "."
+    for instance in xrange(1, instances + 1):
+        print "\tInstance " + str(instance) + " of " + str(instances) + "."
 
         reward_dict = defaultdict(str)
         action_dict = {}
 
-        for episode in xrange(1, num_episodes + 1):
-            print "\t\tEpisode " + str(episode ) + " of " + str(num_episodes) + "."
+        for episode in xrange(1, episodes + 1):
+            print "\t\tEpisode " + str(episode ) + " of " + str(episodes) + "."
             # Compute initial state/reward.
             state = markov_game_mdp.get_init_state()
 
-            for step in xrange(num_steps):
+            for step in xrange(steps):
 
                 # Compute each agent's policy.
                 for a in agent_dict.values():
@@ -105,14 +209,14 @@ def play_markov_game(agent_dict, markov_game_mdp, num_instances=10, num_episodes
 
     experiment.make_plots(cumulative=True)
 
-def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=200, clear_old_results=True, open_plot=True):
+def run_agents_on_mdp(agents, mdp, instances=5, episodes=100, steps=200, clear_old_results=True):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
         mdp (MDP): See mdp/MDPClass.py for the abstract class. Specific MDPs in tasks/*.
-        num_instances (int) [opt]: Number of times to run each agent (for confidence intervals).
-        num_episodes (int) [opt]: Number of episodes for each learning instance.
-        num_steps (int) [opt]: Number of steps per episode.
+        instances (int) [opt]: Number of times to run each agent (for confidence intervals).
+        episodes (int) [opt]: Number of episodes for each learning instance.
+        steps (int) [opt]: Number of steps per episode.
         clear_old_results (bool) [opt]: If true, removes all results files in the relevant results dir.
 
     Summary:
@@ -122,12 +226,32 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
     '''
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"num_instances":num_instances, "num_episodes":num_episodes, "num_steps":num_steps}
-    experiment = Experiment(agents=agents, mdp=mdp, params=exp_params, is_episodic= num_episodes > 1, clear_old_results=clear_old_results)
+    exp_params = {"instances":instances, "episodes":episodes, "steps":steps}
+    experiment = Experiment(agents=agents, mdp=mdp, params=exp_params, is_episodic= episodes > 1, clear_old_results=clear_old_results)
 
     # Record how long each agent spends learning.
-    times = defaultdict(float)
     print "Running experiment: \n" + str(experiment)
+
+    times = _main_experiment_loop(agents, mdp, instances, episodes, steps, experiment,)
+
+    # Time stuff.
+    print "\n--- TIMES ---"
+    for agent in times.keys():
+        print str(agent) + " agent took " + str(times[agent]) + " seconds."
+    print "-------------\n"
+
+    experiment.make_plots(open_plot=True)
+
+def _main_experiment_loop(agents, mdp, instances, episodes, steps, experiment):
+    '''
+    Summary:
+        Main loop of a single MDP experiment.
+
+    Returns:
+        (dict): {key=agent, val=time}
+    '''
+
+    times = defaultdict(float)
 
     # Learn.
     for agent in agents:
@@ -135,11 +259,11 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
         start = time.clock()
 
         # For each instance of the agent.
-        for instance in xrange(1, num_instances + 1):
-            print "\tInstance " + str(instance) + " of " + str(num_instances) + "."
+        for instance in xrange(1, instances + 1):
+            print "\tInstance " + str(instance) + " of " + str(instances) + "."
 
             # For each episode.
-            for episode in xrange(1, num_episodes + 1):
+            for episode in xrange(1, episodes + 1):
                 print "\t\tEpisode " + str(episode),
 
                 # Compute initial state/reward.
@@ -149,10 +273,10 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
                 episode_start_time = time.clock()
 
                 prog_bar_len = _make_step_progress_bar()
-
-                for step in xrange(num_steps):
+                # print prog_bar_len, steps
+                for step in xrange(steps):
                     # print "\t  Step " + str(step)
-                    if int(prog_bar_len*float(step) / num_steps) > int(prog_bar_len*float(step-1) / num_steps):
+                    if int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
                         _increment_bar()
 
                     # Compute the agent's policy.
@@ -173,7 +297,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
                     # Update pointer.
                     state = next_state
 
-                _increment_bar()
+                # _increment_bar()
                 sys.stdout.write("\n")
 
                 # A final update.
@@ -196,13 +320,7 @@ def run_agents_on_mdp(agents, mdp, num_instances=5, num_episodes=100, num_steps=
         end = time.clock()
         times[agent] = round(end - start, 3)
 
-    # Time stuff.
-    print "\n--- TIMES ---"
-    for agent in times.keys():
-        print str(agent) + " agent took " + str(times[agent]) + " seconds."
-    print "-------------\n"
-
-    experiment.make_plots(open_plot=open_plot)
+    return times
 
 
 def _make_step_progress_bar():
@@ -213,7 +331,7 @@ def _make_step_progress_bar():
     Returns:
         (int): Length of the progress bar (in characters).
     '''
-    progress_bar_width = 30
+    progress_bar_width = 20
     sys.stdout.write("  [%s]" % (" " * progress_bar_width))
     sys.stdout.flush()
     sys.stdout.write("\b" * (progress_bar_width+1)) # return to start of line, after '['
@@ -244,13 +362,14 @@ def choose_mdp(mdp_name, env_name="CartPole-v0"):
             from simple_rl.tasks.gym.GymMDPClass import GymMDP
             return GymMDP(env_name)
     else:
-        return {"grid":GridWorldMDP(10, 10, (1, 1), (10, 10)),
-                "chain":ChainMDP(15),
+        return {"grid":GridWorldMDP(5, 3, (1, 1), goal_locs=[(3, 5)]),
+                "chain":ChainMDP(5),
                 "taxi":TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers),
                 "random":RandomMDP(num_states=40, num_rand_trans=20),
                 "prison":PrisonersDilemmaMDP(),
                 "rps":RockPaperScissorsMDP(),
-                "grid_game":GridGameMDP()}[mdp_name]
+                "grid_game":GridGameMDP(),
+                "multi":{0.5:RandomMDP(num_states=40, num_rand_trans=20), 0.5:RandomMDP(num_states=40, num_rand_trans=5)}}[mdp_name]
 
 def parse_args():
     # Add all arguments
@@ -267,23 +386,31 @@ def parse_args():
     return task, env_name
 
 
-
 def main():
     # Command line args.
     task, rom = parse_args()
 
     # Setup the MDP.
     mdp = choose_mdp(task, rom)
-    actions = mdp.get_actions()
-    gamma = mdp.get_gamma()
+    if type(mdp) == dict:
+        actions = mdp.values()[0].actions
+        gamma = mdp.values()[0].gamma
+    else:
+        actions = mdp.get_actions()
+        gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, QLearnerAgent
+    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent
     random_agent = RandomAgent(actions)
+    rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4, s_a_threshold=2)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
+    lqlearner_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
     
-    agents = [random_agent, qlearner_agent]
-    run_agents_on_mdp(agents, mdp, num_instances=10, num_episodes=1, num_steps=1000)
+    agents = [rmax_agent, qlearner_agent, random_agent]#, lqlearner_agent]
+    if type(mdp) == dict:
+        run_agents_multi_task(agents, mdp, instances=25, num_switches=10, steps=20)
+    else:
+        run_agents_on_mdp(agents, mdp, instances=30, episodes=25, steps=20)
 
 if __name__ == "__main__":
     main()

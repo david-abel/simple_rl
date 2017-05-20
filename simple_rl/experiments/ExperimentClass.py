@@ -21,12 +21,18 @@ class Experiment(object):
     # Dumps the results in a directory called "results" in the current working dir.
     RESULTS_DIR = os.getcwdu() + "/results/"
 
-    def __init__(self, agents, mdp, params=None, is_episodic=True, is_markov_game=False, clear_old_results=False):
+    def __init__(self, agents, mdp, params=None, is_episodic=False, is_markov_game=False, is_multi_task=False, clear_old_results=True):
         self.agents = agents
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
+        self.is_multi_task = is_multi_task
+
+        if self.is_multi_task:
+            self.name = "multi_task"
+        else:
+            self.name = str(self.mdp)
+            
         self.rewards = defaultdict(list)
-        self.name = str(self.mdp)
         self.exp_directory = Experiment.RESULTS_DIR + self.name
         self.is_episodic = is_episodic
         self.is_markov_game = is_markov_game
@@ -115,7 +121,7 @@ class Experiment(object):
             (str): contains the AGENT-names, the MDP-names, and PARAMETER-information.
         '''
         mdp_text = "(Markov Game MDP)" if self.is_markov_game else "(MDP)"
-        mdp_string = mdp_text + "\n\t" + str(self.mdp) + "\n"
+        mdp_string = mdp_text + "\n\t" + self.name + "\n"
         agent_string = "(Agents)\n"
         for agent in self.agents:
             agent_string += "\t" + str(agent) + "\n"

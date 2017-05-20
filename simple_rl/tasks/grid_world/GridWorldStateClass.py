@@ -25,7 +25,7 @@ class GridWorldState(State):
                 y_str = "0" + y_str
 
         # Concatenate and return.
-        return int(y_str + x_str)
+        return int(x_str + y_str)
 
     def __str__(self):
         return "s: (" + str(self.x) + "," + str(self.y) + ")"

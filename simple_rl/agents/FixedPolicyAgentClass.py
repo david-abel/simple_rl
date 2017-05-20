@@ -11,6 +11,7 @@ class FixedPolicyAgent(Agent):
         Args:
             policy (func: S ---> A)
         '''
+        Agent.__init__(self, name=name, actions=[])
         self.policy = policy
         self.name = name
 
