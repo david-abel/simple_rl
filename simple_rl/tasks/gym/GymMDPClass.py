@@ -10,12 +10,7 @@ import os
 import random
 
 # Local imports.
-try:
-    import gym
-except ImportError:
-    print "Error: you do not have gym installed. See https://github.com/openai/gym."
-    quit()
-
+import gym
 from ...mdp.MDPClass import MDP
 from GymStateClass import GymState
 
