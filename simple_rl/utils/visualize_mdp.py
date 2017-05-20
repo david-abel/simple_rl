@@ -6,7 +6,11 @@ import os
 
 # Non-standard imports.
 from simple_rl.tasks import ChainMDP, GridWorldMDP
-import networkx as nx
+try:
+	import networkx as nx
+except:
+	print "Error: package networkx is required to use the visualize_mdp script."
+	quit()
 
 colors = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
             [113, 198, 113],[85, 85, 85], [198, 113, 113],\

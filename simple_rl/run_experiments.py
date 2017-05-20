@@ -30,7 +30,6 @@ from collections import defaultdict
 # Non-standard imports.
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
-from simple_rl.utils.visualize_mdp import visualize_mdp
 from rl_abstraction.AbstractionWrapperClass import AbstractionWrapper
 
 def run_agents_multi_task(agents, mdp_distr, instances, num_switches, steps, clear_old_results=True):
@@ -90,17 +89,8 @@ def run_agents_multi_task(agents, mdp_distr, instances, num_switches, steps, cle
                     state = next_state
 
                 if "-sa" in agent.name:
-                    # Visualize uncompressed
-                    # visualize_mdp(mdp, file_name="mdp-" + str(instance) + ".png")
-
-                    # Visualize compressed
-                    # visualize_mdp(mdp, agent.state_abs.phi, file_name="abstr-mdp-" + str(instance) + ".png")
-
-                    # print "Reset reward model for new MDP."
                     agent.new_task()
-
                 elif "rmax" in agent.name:
-                    # print "Reset reward model for new MDP."
                     agent._reset_reward()
 
                 # _increment_bar()
