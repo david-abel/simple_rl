@@ -28,14 +28,13 @@ class RMaxAgent(Agent):
         Summary:
             Resets the agent back to its tabula rasa config.
         '''
+
         self.rewards = defaultdict(list) # keys are (s, a) pairs, value is int.
         self.transitions = defaultdict(lambda : defaultdict(int)) # key is (s, a) pair, val is a dict of <k:states,v:count>
         self.r_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
         self.t_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
-        self.q_func = defaultdict(float)
         self.prev_state = None
         self.prev_action = None
-        self.should_update_q = defaultdict(bool)
 
     def get_num_known_sa(self):
         return sum([self.is_known(s,a) for s,a in self.r_s_a_counts.keys()])
@@ -72,12 +71,17 @@ class RMaxAgent(Agent):
                 # Add new data points if we haven't seen this s-a enough.
                 self.rewards[(state, action)] += [reward]
                 self.r_s_a_counts[(state, action)] += 1
-                self.should_update_q[(state, action)] = True
 
             if self.t_s_a_counts[(state, action)] <= self.s_a_threshold:
                 self.transitions[(state, action)][next_state] += 1
                 self.t_s_a_counts[(state, action)] += 1
-                self.should_update_q[(state, action)] = True
+
+        # unique_states = set([])
+        # for s,a in self.r_s_a_counts.keys():
+        #     if s not in unique_states:
+        #         unique_states.add(s)
+
+        # print "Num unique states:", len(unique_states)
 
     def _compute_max_qval_action_pair(self, state, horizon=None):
         '''
@@ -146,25 +150,20 @@ class RMaxAgent(Agent):
             (float)
         '''
 
-        if not self.should_update_q[(state, action)]:
-            # If we don't need to update, we can return our most recently computed value.
-            return self.q_func[(state, action)]
-
         # If this is the first call, use the default horizon.
         if horizon is None:
             horizon = self.horizon
 
-        if horizon <= 0:
+        if horizon <= 0 or state.is_terminal():
             # If we're not looking any further.
             return self._get_reward(state, action)
 
         # Compute future return.
         expected_future_return = self.gamma*self._compute_exp_future_return(state, action, horizon)
 
-        self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
-        self.should_update_q[(state, action)] = False
+        q_val = self._get_reward(state, action) + expected_future_return# self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
 
-        return self.q_func[(state, action)]
+        return q_val # self.q_func[(state, action)]
 
     def _compute_exp_future_return(self, state, action, horizon=None):
         '''
@@ -203,8 +202,7 @@ class RMaxAgent(Agent):
             Believed reward of executing @action in @state. If R(s,a) is unknown
             for this s,a pair, return self.rmax. Otherwise, return the MLE.
         '''
-        # if not self.r_s_a_counts[(state, action)] == len(self.rewards[(state, action)]):
-        #     print self.r_s_a_counts[(state, action)], len(self.rewards[(state, action)])
+
         if self.r_s_a_counts[(state, action)] >= self.s_a_threshold:
             # Compute MLE if we've seen this s,a pair enough.
             rewards_s_a = self.rewards[(state, action)]
@@ -216,5 +214,4 @@ class RMaxAgent(Agent):
     def _reset_reward(self):
         self.rewards = defaultdict(list) # keys are (s, a) pairs, value is int.
         self.r_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
-        self.should_update_q = defaultdict(bool)
 
