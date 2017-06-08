@@ -30,7 +30,6 @@ from collections import defaultdict
 # Non-standard imports.
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
-from rl_abstraction.AbstractionWrapperClass import AbstractionWrapper
 
 def run_agents_multi_task(agents, mdp_distr, instances, num_switches, steps, clear_old_results=True):
     # Experiment (for reproducibility, plotting).
@@ -265,7 +264,6 @@ def _main_experiment_loop(agents, mdp, instances, episodes, steps, experiment):
                 prog_bar_len = _make_step_progress_bar()
                 # print prog_bar_len, steps
                 for step in xrange(steps):
-                    # print "\t  Step " + str(step)
                     if int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
                         _increment_bar()
 
@@ -284,6 +282,7 @@ def _main_experiment_loop(agents, mdp, instances, episodes, steps, experiment):
                     # Record the experience.
                     experiment.add_experience(agent, state, action, reward, next_state)
 
+                    # print state, action, next_state, "\n"
                     # Update pointer.
                     state = next_state
 
@@ -353,6 +352,7 @@ def choose_mdp(mdp_name, env_name="CartPole-v0"):
             return GymMDP(env_name)
     else:
         return {"grid":GridWorldMDP(5, 3, (1, 1), goal_locs=[(3, 5)]),
+                "four_room":FourRoomMDP(),
                 "chain":ChainMDP(5),
                 "taxi":TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers),
                 "random":RandomMDP(num_states=40, num_rand_trans=20),
@@ -382,12 +382,8 @@ def main():
 
     # Setup the MDP.
     mdp = choose_mdp(task, rom)
-    if type(mdp) == dict:
-        actions = mdp.values()[0].actions
-        gamma = mdp.values()[0].gamma
-    else:
-        actions = mdp.get_actions()
-        gamma = mdp.get_gamma()
+    actions = mdp.get_actions()
+    gamma = mdp.get_gamma()
 
     # Setup agents.
     from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent
@@ -395,12 +391,10 @@ def main():
     rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4, s_a_threshold=2)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
     lqlearner_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
-    
-    agents = [rmax_agent, qlearner_agent, random_agent]#, lqlearner_agent]
-    if type(mdp) == dict:
-        run_agents_multi_task(agents, mdp, instances=25, num_switches=10, steps=20)
-    else:
-        run_agents_on_mdp(agents, mdp, instances=30, episodes=25, steps=20)
+    agents = [qlearner_agent, random_agent]#, lqlearner_agent]
+
+    # Run Agents.
+    run_agents_on_mdp(agents, mdp, instances=1, episodes=10, steps=50)
 
 if __name__ == "__main__":
     main()
