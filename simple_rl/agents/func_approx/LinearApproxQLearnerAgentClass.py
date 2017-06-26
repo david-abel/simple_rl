@@ -40,7 +40,6 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
                 self.weights = numpy.zeros(self.num_features*len(self.actions))
             self.prev_state = next_state
             return
-
         self._update_weights(reward, next_state)
 
     def _phi(self, state, action):
@@ -56,15 +55,17 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
             The resulting feature vector multiplies the state vector by |A| (size of action space), and only the action passed in retains
             the original vector, all other values are set to namespaceAIX.EMPTYFEATURE
         '''
-        blank_vec = [0 for i in xrange(self.num_features * (len(self.actions) - 1))]
+        result = [0 for i in xrange(self.num_features * len(self.actions))]
         act_index = self.actions.index(action)
 
-        basis_feats = list(state.features())
+        basis_feats = state.features()
 
         if self.rbf:
             basis_feats = [_rbf(f) for f in basis_feats]
 
-        return numpy.array(blank_vec[:act_index*self.num_features] + basis_feats + blank_vec[(act_index)*self.num_features:])
+        result[act_index*self.num_features:(act_index + 1)*self.num_features] = basis_feats
+
+        return numpy.array(result)
 
     def _update_weights(self, reward, curr_state):
         '''

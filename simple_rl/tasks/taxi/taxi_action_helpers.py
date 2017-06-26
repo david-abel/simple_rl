@@ -49,8 +49,6 @@ def _move_passenger_in_taxi(state, x=0, y=0):
     Returns
         (TaxiState)
     '''
-    # new_state = copy.deepcopy(state)
-
     for i, passenger in enumerate(state.objects["passenger"]):
         if passenger["in_taxi"] == 1:
             state.objects["passenger"][i]["x"] += x

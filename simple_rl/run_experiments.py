@@ -92,7 +92,7 @@ def run_agents_multi_task(agents, mdp_distr, instances, num_switches, steps, cle
                 elif "rmax" in agent.name:
                     agent._reset_reward()
 
-                # _increment_bar()
+                _increment_bar()
                 sys.stdout.write("\n")
 
                 # A final update.
@@ -262,10 +262,13 @@ def _main_experiment_loop(agents, mdp, instances, episodes, steps, experiment):
                 episode_start_time = time.clock()
 
                 prog_bar_len = _make_step_progress_bar()
-                # print prog_bar_len, steps
+
                 for step in xrange(steps):
                     if int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
                         _increment_bar()
+
+                    # step time
+                    step_start = time.clock()
 
                     # Compute the agent's policy.
                     action = agent.act(state, reward)
@@ -273,20 +276,18 @@ def _main_experiment_loop(agents, mdp, instances, episodes, steps, experiment):
                     # Terminal check.
                     if state.is_terminal():
                         # Self loop if in a terminal state.
-                        experiment.add_experience(agent, state, action, 0, state)
+                        experiment.add_experience(agent, state, action, 0, state, time_taken=time.clock()-step_start)
                         continue
 
                     # Execute in MDP.
                     reward, next_state = mdp.execute_agent_action(action)
 
                     # Record the experience.
-                    experiment.add_experience(agent, state, action, reward, next_state)
+                    experiment.add_experience(agent, state, action, reward, next_state, time_taken=time.clock()-step_start)
 
-                    # print state, action, next_state, "\n"
                     # Update pointer.
                     state = next_state
 
-                # _increment_bar()
                 sys.stdout.write("\n")
 
                 # A final update.
@@ -330,7 +331,7 @@ def _increment_bar():
     sys.stdout.write("-")
     sys.stdout.flush()
 
-def choose_mdp(mdp_name, env_name="CartPole-v0"):
+def choose_mdp(mdp_name, env_name="Asteroids-v0"):
     '''
     Args:
         mdp_name (str): one of {gym, grid, chain, taxi, ...}
@@ -349,10 +350,10 @@ def choose_mdp(mdp_name, env_name="CartPole-v0"):
     walls = []
     if mdp_name == "gym":
             from simple_rl.tasks.gym.GymMDPClass import GymMDP
-            return GymMDP(env_name)
+            return GymMDP(env_name, render=True)
     else:
-        return {"grid":GridWorldMDP(5, 3, (1, 1), goal_locs=[(3, 5)]),
-                "four_room":FourRoomMDP(),
+        return {"grid":GridWorldMDP(5, 3, (1, 1), goal_locs=[(5, 3)]),
+                # "four_room":FourRoomMDP(),
                 "chain":ChainMDP(5),
                 "taxi":TaxiOOMDP(10, 10, slip_prob=0.0, agent_loc=agent, walls=walls, passengers=passengers),
                 "random":RandomMDP(num_states=40, num_rand_trans=20),
@@ -387,14 +388,22 @@ def main():
 
     # Setup agents.
     from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearApproxQLearnerAgent
+    
     random_agent = RandomAgent(actions)
     rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4, s_a_threshold=2)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
     lqlearner_agent = LinearApproxQLearnerAgent(actions, gamma=gamma, explore="uniform")
-    agents = [qlearner_agent, random_agent]#, lqlearner_agent]
+    agents = [lqlearner_agent, qlearner_agent, random_agent]
 
     # Run Agents.
-    run_agents_on_mdp(agents, mdp, instances=1, episodes=10, steps=50)
+    if isinstance(mdp, MarkovGameMDP):
+        # Markov Game.
+        agents = {qlearner_agent.name: qlearner_agent, random_agent.name:random_agent}
+        play_markov_game(agents, mdp, instances=30, episodes=10, steps=50)
+    else:
+        # Regular experiment.
+        run_agents_on_mdp(agents, mdp, instances=20, episodes=1, steps=500)
+
 
 if __name__ == "__main__":
     main()

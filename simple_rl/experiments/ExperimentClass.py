@@ -33,6 +33,7 @@ class Experiment(object):
             self.name = str(self.mdp)
             
         self.rewards = defaultdict(list)
+        self.times = defaultdict(list)
         self.exp_directory = Experiment.RESULTS_DIR + self.name
         self.is_episodic = is_episodic
         self.is_markov_game = is_markov_game
@@ -58,7 +59,7 @@ class Experiment(object):
         '''
         chart_utils.make_plots(self.exp_directory, self.agents, episodic=self.is_episodic, cumulative=cumulative, open_plot=open_plot)
 
-    def add_experience(self, agent, state, action, reward, next_state):
+    def add_experience(self, agent, state, action, reward, next_state, time_taken=0):
         '''
         Args:
             agent (agent OR dict): if self.is_markov_game, contains a dict of agents
@@ -70,6 +71,7 @@ class Experiment(object):
                 self.rewards[a] += [reward[a]]
         else:
             self.rewards[agent] += [reward]
+            self.times[agent] += [time_taken]
 
     def end_of_episode(self, agent):
         '''
@@ -80,29 +82,37 @@ class Experiment(object):
             Writes reward data from this episode to file and resets the reward.
         '''
         if self.is_episodic:
-            self.write_reward_to_file(agent, sum(self.rewards[agent]))
+            self.write_datum_to_file(agent, sum(self.rewards[agent]))
+            self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
         else:
             for step_reward in self.rewards[agent]:
-                self.write_reward_to_file(agent, step_reward)
+                self.write_datum_to_file(agent, step_reward)
         self.rewards[agent] = []
-
 
     def end_of_instance(self, agent):
         '''
         Summary:
             Adds a new line to indicate we're onto a new instance.
         '''
+        #
         out_file = open(self.exp_directory + "/" + str(agent) + ".csv", "a+")
         out_file.write("\n")
         out_file.close()
 
-    def write_reward_to_file(self, agent, reward):
+        if os.path.isdir(self.exp_directory + "/times/"):
+            out_file = open(self.exp_directory + "/times/" + str(agent) + ".csv", "a+")
+            out_file.write("\n")
+            out_file.close()
+
+    def write_datum_to_file(self, agent, datum, extra_dir=""):
         '''
         Summary:
-            Writes reward to file.
+            Writes datum to file.
         '''
-        out_file = open(self.exp_directory + "/" + str(agent) + ".csv", "a+")
-        out_file.write(str(reward) + ",")
+        if extra_dir != "" and not os.path.isdir(self.exp_directory + "/" + extra_dir):
+            os.makedirs(self.exp_directory + "/" + extra_dir)
+        out_file = open(self.exp_directory + "/" + extra_dir + str(agent) + ".csv", "a+")
+        out_file.write(str(datum) + ",")
         out_file.close()
 
     def write_exp_info_to_file(self):

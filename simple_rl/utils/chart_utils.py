@@ -18,7 +18,6 @@ import os
 import matplotlib.pyplot as pyplot
 import numpy
 
-
 def load_data(experiment_dir, experiment_agents):
     '''
     Args:
@@ -166,7 +165,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Map them to floats in [0:1].
     colors = [[shade / 255.0 for shade in rgb] for rgb in colors]
-    
+
     # Puts the legend into the best location in the plot and use a tight layout.
     pyplot.rcParams['legend.loc'] = 'best'
     pyplot.xlim(0, len(results[0]) - 1)
@@ -200,6 +199,10 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
     plot_label = "Cumulative" if cumulative else "Average"
+    if "times" in experiment_dir:
+        # If it's a time plot.
+        unit = "Time"
+        experiment_dir = experiment_dir.replace("times", "")
     plot_name = experiment_dir + "/all_" + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = plot_label + " " + unit + ": " + experiment_dir.split("/")[-1]
     y_axis_label = plot_label + " " + unit
@@ -210,6 +213,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Save the plot.
     pyplot.savefig(plot_name, format="pdf")
+
     os.system("open " + plot_name)
     
     pyplot.cla() # Clears.

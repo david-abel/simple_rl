@@ -12,7 +12,7 @@ from AgentClass import Agent
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="qlearner", alpha=0.1, gamma=0.99, epsilon=0.2, explore="softmax", anneal=False):
+    def __init__(self, actions, name="qlearner", alpha=0.1, gamma=0.99, epsilon=0.2, explore="uniform", anneal=False):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -121,7 +121,7 @@ class QLearnerAgent(Agent):
         # Update the Q Function.
         max_q_curr_state = self.get_max_q_value(next_state)
         prev_q_val = self.get_q_value(state, action)
-        self.q_func[(state, action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
+        self.q_func[(hash(state), action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
 
     def _anneal(self):
         # Taken from "Note on learning rate schedules for stochastic optimization, by Darken and Moody (Yale)":
@@ -180,7 +180,7 @@ class QLearnerAgent(Agent):
         Returns:
             (float): denoting the q value of the (@state, @action) pair.
         '''
-        return self.q_func[(state, action)]
+        return self.q_func[(hash(state), action)]
 
     def get_action_distr(self, state):
         '''

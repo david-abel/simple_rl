@@ -20,10 +20,16 @@ class State(object):
         Returns:
             (iterable)
     	'''
-        return numpy.array(self.data)
+        return numpy.array(self.data).flatten()
 
     def __hash__(self):
-        return hash(self.data)
+        if type(self.data).__module__ == numpy.__name__:
+            # Numpy arrays
+            return hash(str(self.data))
+        elif self.data.__hash__ is None:
+            return hash(tuple(self.data))
+        else:
+            return hash(self.data)
 
     def is_terminal(self):
     	return self._is_terminal

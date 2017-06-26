@@ -24,8 +24,7 @@ class GymMDP(MDP):
         '''
         self.env_name = env_name
         self.env = gym.make(env_name)
-        if render:
-            self.env.render()
+        self.render = render
         MDP.__init__(self, xrange(self.env.action_space.n), self._transition_func, self._reward_func, init_state=GymState(self.env.reset()))
     
     def _reward_func(self, state, action):
@@ -38,6 +37,9 @@ class GymMDP(MDP):
             (float)
         '''
         obs, reward, is_terminal, info = self.env.step(action)
+
+        if self.render:
+            self.env.render()
 
         self.next_state = GymState(obs, is_terminal=is_terminal)
 
