@@ -12,17 +12,11 @@ class GridWorldState(State):
         self.y = y
 
     def __hash__(self):
-        # The X coordinate takes the first three digits.
-        if len(str(self.x)) < 3:
-            x_str = str(self.x)
-            while len(x_str) < 3:
-                x_str = "0" + x_str
+        # The X coordinate takes the first chunk of digits.
+        x_str = "0" + str(self.x)
 
-        # The Y coordinate takes the next three digits.
-        if len(str(self.y)) < 3:
-            y_str = str(self.y)
-            while len(y_str) < 3:
-                y_str = "0" + y_str
+        # The Y coordinate takes the next chunk of digits.
+        y_str = "0" + str(self.x)
 
         # Concatenate and return.
         return int(x_str + y_str)
@@ -31,4 +25,5 @@ class GridWorldState(State):
         return "s: (" + str(self.x) + "," + str(self.y) + ")"
 
     def __eq__(self, other):
+        # print self.x, other.x, self.y, other.y, isinstance(other, GridWorldState) and self.x == other.x and self.y == other.y
         return isinstance(other, GridWorldState) and self.x == other.x and self.y == other.y

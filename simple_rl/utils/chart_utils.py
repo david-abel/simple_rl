@@ -136,7 +136,7 @@ def compute_single_conf_interval(datum):
     return std_error
 
 
-def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True):
+def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -146,6 +146,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         use_cost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
+        open_plot (bool)
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -214,7 +215,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     # Save the plot.
     pyplot.savefig(plot_name, format="pdf")
 
-    os.system("open " + plot_name)
+    if open_plot:
+        os.system("open " + plot_name)
     
     pyplot.cla() # Clears.
 
@@ -232,6 +234,8 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
         Stores the plot in results/<experiment_name>/results.pdf
     '''
 
+    # experiment_agents.sort()
+
     # Load the data.
     data = load_data(experiment_dir, experiment_agents) # [alg][instance][episode]
 
@@ -242,7 +246,7 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
     conf_intervals = compute_conf_intervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative, episodic=episodic)
+    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative, episodic=episodic, open_plot=open_plot)
 
 
 def main():

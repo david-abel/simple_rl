@@ -6,7 +6,7 @@ from collections import defaultdict
 class Agent(object):
     ''' Abstract Agent class. '''
 
-    def __init__(self, name, actions, gamma=0.95):
+    def __init__(self, name, actions, gamma=0.99):
         self.name = name
         self.actions = list(actions) # Just in case we're given a numpy array (like from Atari).
         self.gamma = gamma

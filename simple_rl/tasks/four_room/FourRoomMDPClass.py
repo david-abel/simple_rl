@@ -14,7 +14,7 @@ class FourRoomMDP(MDP):
     # Static constants.
     ACTIONS = ["up", "down", "left", "right"]
 
-    def __init__(self, width=6, height=6, init_loc=(1,1), goal_loc=(6,6)):
+    def __init__(self, width=6, height=6, init_loc=(1,1), goal_locs=[(6,6)]):
         '''
         Args:
             height (int)
@@ -27,7 +27,7 @@ class FourRoomMDP(MDP):
         self.width = width
         self.height = height
         self.init_loc = init_loc
-        self.goal_loc = goal_loc
+        self.goal_locs = goal_locs
         self.cur_state = GridWorldState(init_loc[0], init_loc[1])
 
         self.walls = self._compute_walls()
@@ -55,13 +55,13 @@ class FourRoomMDP(MDP):
         Returns:
             (bool): True iff the state-action pair send the agent to the goal state.
         '''
-        if action == "left" and (state.x - 1, state.y) == self.goal_loc:
+        if action == "left" and (state.x - 1, state.y) in self.goal_locs:
             return True
-        elif action == "right" and (state.x + 1, state.y) == self.goal_loc:
+        elif action == "right" and (state.x + 1, state.y) in self.goal_locs:
             return True
-        elif action == "down" and (state.x, state.y - 1) == self.goal_loc:
+        elif action == "down" and (state.x, state.y - 1) in self.goal_locs:
             return True
-        elif action == "up" and (state.x, state.y + 1) == self.goal_loc:
+        elif action == "up" and (state.x, state.y + 1) in self.goal_locs:
             return True
         else:
             return False
@@ -86,7 +86,7 @@ class FourRoomMDP(MDP):
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if (next_state.x, next_state.y) == self.goal_loc:
+        if (next_state.x, next_state.y) in self.goal_locs:
             next_state.set_terminal(True)
 
         return next_state

@@ -21,8 +21,6 @@ class TaxiState(OOMDPState):
 
     	state_hash = str(ax) + str(ay) + "0"
 
-    	passengers = []
-
     	for p in self.objects["passenger"]:
     		state_hash += str(p["x"]) + str(p["y"]) + "0" + str(p["in_taxi"]) + "0" + str(p["dest_x"]) + str(p["dest_y"])
 

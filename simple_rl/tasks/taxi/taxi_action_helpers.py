@@ -1,7 +1,6 @@
 ''' Helper functions for executing actions in the Taxi Problem '''
 
 import random
-import copy
 
 def move_agent(state, slip_prob=0, dx=0, dy=0):
     '''

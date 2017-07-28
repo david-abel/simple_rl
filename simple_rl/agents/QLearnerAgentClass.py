@@ -30,7 +30,11 @@ class QLearnerAgent(Agent):
         self.step_number = 0
         self.anneal = anneal
         self.default_q = 0.0
-        self.q_func = defaultdict(lambda: self.default_q)
+        # Key: state
+        # Val: dict
+            # Key: action
+            # Val: q-value
+        self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
 
         # Choose explore type. Can also be "uniform" for \epsilon-greedy.
         self.explore = explore
@@ -121,7 +125,7 @@ class QLearnerAgent(Agent):
         # Update the Q Function.
         max_q_curr_state = self.get_max_q_value(next_state)
         prev_q_val = self.get_q_value(state, action)
-        self.q_func[(hash(state), action)] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
+        self.q_func[state][action] = (1 - self.alpha) * prev_q_val + self.alpha * (reward + self.gamma*max_q_curr_state)
 
     def _anneal(self):
         # Taken from "Note on learning rate schedules for stochastic optimization, by Darken and Moody (Yale)":
@@ -180,7 +184,7 @@ class QLearnerAgent(Agent):
         Returns:
             (float): denoting the q value of the (@state, @action) pair.
         '''
-        return self.q_func[(hash(state), action)]
+        return self.q_func[state][action]
 
     def get_action_distr(self, state):
         '''
@@ -204,7 +208,7 @@ class QLearnerAgent(Agent):
 
     def reset(self):
         self.step_number = 0
-        self.q_func = defaultdict(lambda: self.default_q)
+        self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
         Agent.reset(self)
 
     def end_of_episode(self):
@@ -214,5 +218,5 @@ class QLearnerAgent(Agent):
         '''
         if self.anneal:
             self._anneal()
-        Agent.reset(self)
+        Agent.end_of_episode(self)
 

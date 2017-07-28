@@ -16,7 +16,7 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=10):
+    def __init__(self, actions, gamma=0.99, horizon=4, s_a_threshold=4):
         Agent.__init__(self, name="rmax-h" + str(horizon), actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
@@ -29,10 +29,10 @@ class RMaxAgent(Agent):
             Resets the agent back to its tabula rasa config.
         '''
 
-        self.rewards = defaultdict(list) # keys are (s, a) pairs, value is int.
-        self.transitions = defaultdict(lambda : defaultdict(int)) # key is (s, a) pair, val is a dict of <k:states,v:count>
-        self.r_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
-        self.t_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
+        self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
+        self.transitions = defaultdict(lambda : defaultdict(lambda : defaultdict(int))) # S --> A --> S' --> counts
+        self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
+        self.t_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #ts
         self.prev_state = None
         self.prev_action = None
 
@@ -40,7 +40,7 @@ class RMaxAgent(Agent):
         return sum([self.is_known(s,a) for s,a in self.r_s_a_counts.keys()])
 
     def is_known(self, s, a):
-        return self.r_s_a_counts[(s,a)] >= self.s_a_threshold and self.t_s_a_counts[(s,a)] >= self.s_a_threshold
+        return self.r_s_a_counts[s][a] >= self.s_a_threshold and self.t_s_a_counts[s][a] >= self.s_a_threshold
 
     def act(self, state, reward):
         # Update given s, a, r, s' : self.prev_state, self.prev_action, reward, state
@@ -67,21 +67,14 @@ class RMaxAgent(Agent):
             Updates T and R.
         '''
         if state != None and action != None:
-            if self.r_s_a_counts[(state, action)] <= self.s_a_threshold:
+            if self.r_s_a_counts[state][action] <= self.s_a_threshold:
                 # Add new data points if we haven't seen this s-a enough.
-                self.rewards[(state, action)] += [reward]
-                self.r_s_a_counts[(state, action)] += 1
+                self.rewards[state][action] += [reward]
+                self.r_s_a_counts[state][action] += 1
 
-            if self.t_s_a_counts[(state, action)] <= self.s_a_threshold:
-                self.transitions[(state, action)][next_state] += 1
-                self.t_s_a_counts[(state, action)] += 1
-
-        # unique_states = set([])
-        # for s,a in self.r_s_a_counts.keys():
-        #     if s not in unique_states:
-        #         unique_states.add(s)
-
-        # print "Num unique states:", len(unique_states)
+            if self.t_s_a_counts[state][action] <= self.s_a_threshold:
+                self.transitions[state][action][next_state] += 1
+                self.t_s_a_counts[state][action] += 1
 
     def _compute_max_qval_action_pair(self, state, horizon=None):
         '''
@@ -94,7 +87,7 @@ class RMaxAgent(Agent):
         '''
         # If this is the first call, use the default horizon.
         if horizon is None:
-            horizon = self.horizon 
+            horizon = self.horizon
 
         # Grab random initial action in case all equal
         best_action = r.choice(self.actions)
@@ -163,7 +156,7 @@ class RMaxAgent(Agent):
 
         q_val = self._get_reward(state, action) + expected_future_return# self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
 
-        return q_val # self.q_func[(state, action)]
+        return q_val
 
     def _compute_exp_future_return(self, state, action, horizon=None):
         '''
@@ -180,7 +173,7 @@ class RMaxAgent(Agent):
         if horizon is None:
             horizon = self.horizon
 
-        next_state_dict = self.transitions[(state, action)]
+        next_state_dict = self.transitions[state][action]
 
         denominator = float(sum(next_state_dict.values()))
         state_weights = defaultdict(float)
@@ -203,15 +196,15 @@ class RMaxAgent(Agent):
             for this s,a pair, return self.rmax. Otherwise, return the MLE.
         '''
 
-        if self.r_s_a_counts[(state, action)] >= self.s_a_threshold:
+        if self.r_s_a_counts[state][action] >= self.s_a_threshold:
             # Compute MLE if we've seen this s,a pair enough.
-            rewards_s_a = self.rewards[(state, action)]
+            rewards_s_a = self.rewards[state][action]
             return float(sum(rewards_s_a)) / len(rewards_s_a)
         else:
             # Otherwise return rmax.
             return self.rmax
 
     def _reset_reward(self):
-        self.rewards = defaultdict(list) # keys are (s, a) pairs, value is int.
-        self.r_s_a_counts = defaultdict(int) # key is (s, a) pair, value is list of ints
+        self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
+        self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
 

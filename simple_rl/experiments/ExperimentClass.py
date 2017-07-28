@@ -21,14 +21,39 @@ class Experiment(object):
     # Dumps the results in a directory called "results" in the current working dir.
     RESULTS_DIR = os.getcwdu() + "/results/"
 
-    def __init__(self, agents, mdp, params=None, is_episodic=False, is_markov_game=False, is_multi_task=False, clear_old_results=True):
+    def __init__(self,
+                    agents,
+                    mdp,
+                    params=None,
+                    is_episodic=False,
+                    is_markov_game=False,
+                    is_multi_task=False,
+                    clear_old_results=True,
+                    count_r_per_n_timestep=1,
+                    cumulative_plot=True):
+        '''
+        Args:
+            agents (list)
+            mdp (MDP)
+            params (dict)
+            is_episodic (bool)
+            is_markov_game (bool)
+            is_multi_task (bool)
+            clear_old_results (bool)
+            count_r_per_n_timestep (int)
+            cumulative_plot (bool)
+        '''
         self.agents = agents
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.is_multi_task = is_multi_task
+        self.count_r_per_n_timestep = count_r_per_n_timestep
+        self.steps_since_added_r = 1
+        self.rew_since_count = 0
+        self.cumulative_plot = cumulative_plot
 
         if self.is_multi_task:
-            self.name = "multi_task"
+            self.name = "multitask-" + str(self.mdp.keys()[0])
         else:
             self.name = str(self.mdp)
             
@@ -52,12 +77,29 @@ class Experiment(object):
                     os.remove(self.exp_directory + "/" + str(agent) + ".csv")
         self.write_exp_info_to_file()
 
-    def make_plots(self, cumulative=True, open_plot=True):
+    def make_plots(self, open_plot=True):
         '''
         Summary:
             Makes plots for the current experiment.
         '''
-        chart_utils.make_plots(self.exp_directory, self.agents, episodic=self.is_episodic, cumulative=cumulative, open_plot=open_plot)
+        chart_utils.make_plots(self.exp_directory,
+                                self.agents,
+                                episodic=self.is_episodic,
+                                cumulative=self.cumulative_plot,
+                                open_plot=open_plot)
+
+    def get_agent_avg_cumulative_rew(self, agent):
+        result_file = open(self.exp_directory + "/" + str(agent) + ".csv", "r")
+        
+        total = 0
+        num_lines = 0
+        for line in result_file.readlines():
+            total += sum([float(datum) for datum in line.strip().split(",")[:-1]])
+            num_lines += 1
+
+        result_file.close()
+
+        return total / num_lines
 
     def add_experience(self, agent, state, action, reward, next_state, time_taken=0):
         '''
@@ -66,12 +108,21 @@ class Experiment(object):
         Summary:
             Record any relevant information about this experience.
         '''
-        if self.is_markov_game:
-            for a in agent:
-                self.rewards[a] += [reward[a]]
+        if self.steps_since_added_r % self.count_r_per_n_timestep == 0:
+            if self.is_markov_game:
+                for a in agent:
+                    self.rewards[a] += [reward[a]]
+            else:
+                self.rewards[agent] += [reward]
+                self.times[agent] += [time_taken]
+            self.steps_since_added_r = 1
         else:
-            self.rewards[agent] += [reward]
-            self.times[agent] += [time_taken]
+            if self.is_markov_game:
+                for a in agent:
+                    self.rew_since_count[a] += [reward[a]]
+            else:
+                self.rew_since_count += reward
+            self.steps_since_added_r += 1
 
     def end_of_episode(self, agent):
         '''

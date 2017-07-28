@@ -6,14 +6,15 @@ from AgentClass import Agent
 class FixedPolicyAgent(Agent):
     ''' Agent Class with a fixed policy. '''
 
-    def __init__(self, policy, name="fixed-policy"):
+    NAME = "fixed-policy"
+
+    def __init__(self, policy, name=NAME):
         '''
         Args:
             policy (func: S ---> A)
         '''
         Agent.__init__(self, name=name, actions=[])
         self.policy = policy
-        self.name = name
 
     def act(self, state, reward):
         '''

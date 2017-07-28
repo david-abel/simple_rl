@@ -13,7 +13,7 @@ class GridWorldMDP(MDP):
     # Static constants.
     ACTIONS = ["up", "down", "left", "right"]
 
-    def __init__(self, width=5, height=3, init_loc=(1,1), goal_locs=[(5,3)]):
+    def __init__(self, width=5, height=3, init_loc=(1,1), goal_locs=[(5,3)], is_goal_terminal=True):
         '''
         Args:
             height (int)
@@ -30,6 +30,7 @@ class GridWorldMDP(MDP):
         self.init_loc = init_loc
         self.goal_locs = goal_locs
         self.cur_state = GridWorldState(init_loc[0], init_loc[1])
+        self.is_goal_terminal = is_goal_terminal
 
     def _reward_func(self, state, action):
         '''
@@ -43,7 +44,7 @@ class GridWorldMDP(MDP):
         _error_check(state, action)
 
         if self._is_goal_state_action(state, action):
-            return 1
+            return 1.0
         else:
             return 0
 
@@ -56,6 +57,9 @@ class GridWorldMDP(MDP):
         Returns:
             (bool): True iff the state-action pair send the agent to the goal state.
         '''
+        if (state.x, state.y) in self.goal_locs and self.is_goal_terminal:
+            return False
+
         if action == "left" and (state.x - 1, state.y) in self.goal_locs:
             return True
         elif action == "right" and (state.x + 1, state.y) in self.goal_locs:
@@ -78,24 +82,28 @@ class GridWorldMDP(MDP):
         '''
         _error_check(state, action)
 
+        if state.is_terminal():
+            return state
+
         if action == "up" and state.y < self.height:
             next_state = GridWorldState(state.x, state.y + 1)
         elif action == "down" and state.y > 1:
             next_state = GridWorldState(state.x, state.y - 1)
         elif action == "right" and state.x < self.width:
-
             next_state = GridWorldState(state.x + 1, state.y)
         elif action == "left" and state.x > 1:
             next_state = GridWorldState(state.x - 1, state.y)
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if (next_state.x, next_state.y) in self.goal_locs:
+        if self.is_goal_terminal and (next_state.x, next_state.y) in self.goal_locs:
             next_state.set_terminal(True)
 
         return next_state
 
     def __str__(self):
+        if not self.is_goal_terminal:
+            return "gridworld-no-term"
         return "gridworld_h-" + str(self.height) + "_w-" + str(self.width)
 
 

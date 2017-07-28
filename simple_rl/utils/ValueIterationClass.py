@@ -8,7 +8,7 @@ from simple_rl.tasks import ChainMDP, GridWorldMDP
 
 class ValueIteration(object):
 
-    def __init__(self, mdp, delta=0.01, max_iterations=100, sample_rate=1):
+    def __init__(self, mdp, delta=0.0001, max_iterations=200, sample_rate=1):
         '''
         Args:
             mdp (MDP)
@@ -29,7 +29,9 @@ class ValueIteration(object):
         self.R = mdp.reward_func
         self.T = mdp.transition_func
         self.gamma = mdp.gamma
+        self.reachability_done = False
         self._compute_reachable_state_space()
+
 
     def get_num_states(self):
         return len(self.S)      
@@ -46,28 +48,30 @@ class ValueIteration(object):
         Returns:
             (float): The Q estimate given the current value function @self.value_func.
         '''
+        
         # Take samples and track next state counts.
         next_state_counts = defaultdict(int)
         for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
             next_state = self.T(s,a)
             next_state_counts[next_state] += 1
-            
+
         # Compute T(s' | s, a) estimate based on MLE.
         next_state_probs = defaultdict(float)
-        for key in next_state_counts:
-            next_state_probs[key] = float(next_state_counts[key]) / self.sample_rate
+        for state in next_state_counts:
+            next_state_probs[state] = float(next_state_counts[state]) / self.sample_rate
 
         # Compute expected value.
         expected_future_val = 0
-        for key in next_state_probs:
-            expected_future_val += next_state_probs[key] * self.value_func[next_state]
+        for state in next_state_probs:
+            expected_future_val += next_state_probs[state] * self.value_func[state]
 
         return self.R(s,a) + self.gamma*expected_future_val
 
     def _compute_reachable_state_space(self):
         '''
         Summary:
-            Starting with @self.start_state, determines all reachable states.
+            Starting with @self.start_state, determines all reachable states
+            and stores them in self.S.
         '''
         state_queue = Queue.Queue()
         state_queue.put(self.init_state)
@@ -79,13 +83,11 @@ class ValueIteration(object):
                 for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
                     next_state = self.T(s,a)
 
-                    # if s.objects["agent"][0]["x"] == s.objects["passenger"][0]["x"] \
-                    # and s.objects["agent"][0]["y"] == s.objects["passenger"][0]["y"]:
-                    #   print s, a, next_state
-
                     if next_state not in self.S:
                         self.S.append(next_state)
                         state_queue.put(next_state)
+
+        self.reachability_done = True
 
     def run_vi(self):
         '''
@@ -100,7 +102,6 @@ class ValueIteration(object):
         while max_diff > self.delta and iterations < self.max_iterations:
             max_diff = 0
             for s in self.S:
-                
                 if s.is_terminal():
                     continue
 
@@ -108,14 +109,15 @@ class ValueIteration(object):
                 for a in self.A:
                     q_s_a = self.get_q_value(s, a)
                     max_q = q_s_a if q_s_a > max_q else max_q
-
                 # Check terminating condition.
-                diff = abs(self.value_func[s] - max_q)
-                max_diff = diff if diff > max_diff else max_diff
+                max_diff = max(abs(self.value_func[s] - max_q), max_diff)
 
                 # Update value.
                 self.value_func[s] = max_q
             iterations += 1
+
+        value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
+        return iterations, value_of_init_state
 
     def print_value_func(self):
         for key in self.value_func.keys():
@@ -130,9 +132,11 @@ class ValueIteration(object):
         Returns:
             (list): List of actions
         '''
+        # state = self.init_state if state is None else state
         plan = []
         state_seq = [state]
         steps = 0
+
         while (not state.is_terminal()) and steps < horizon:
             next_action = self._get_max_q_action(state)
             plan.append(next_action)
@@ -151,6 +155,20 @@ class ValueIteration(object):
             (str): denoting the action with the max q value in the given @state.
         '''
         return self._compute_max_qval_action_pair(state)[1]
+
+    def policy(self, state):
+        '''
+        Args:
+            state (State)
+
+        Returns:
+            (str): Action
+
+        Summary:
+            For use in a FixedPolicyAgent.
+        '''
+        # print self._compute_max_qval_action_pair(state), state
+        return self._get_max_q_action(state)
 
     def _compute_max_qval_action_pair(self, state):
         '''
@@ -174,7 +192,6 @@ class ValueIteration(object):
                 best_action = action
 
         return max_q_val, best_action
-
 
 def main():
     # mdp = GridWorldMDP()

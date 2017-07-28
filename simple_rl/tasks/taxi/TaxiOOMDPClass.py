@@ -87,7 +87,9 @@ class TaxiOOMDP(OOMDP):
 
         next_state = self._taxi_transition_func(state, action)
 
-        if next_state.is_terminal():
+        if state.is_terminal():
+            return 0
+        elif next_state.is_terminal():
             return 1
         else:
             return 0
@@ -114,7 +116,9 @@ class TaxiOOMDP(OOMDP):
             elif action == "right":
                 action = "left"
 
+        # Instead of doing this 
         next_state = copy.deepcopy(state)
+        # next_state = copy.copy(state)
 
         if action == "up" and state.get_agent_y() < self.height:
             next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dy=1)

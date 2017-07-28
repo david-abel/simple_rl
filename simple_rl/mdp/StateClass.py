@@ -34,14 +34,13 @@ class State(object):
     def is_terminal(self):
     	return self._is_terminal
 
-    def set_terminal(self, is_term):
+    def set_terminal(self, is_term=True):
         self._is_terminal = is_term
 
     def __str__(self):
         return "s." + str(self.data)
 
     def __eq__(self, other):
-        # isinstance(other, State) and 
         return self.data == other.data
 
     def __getitem__(self, index):
