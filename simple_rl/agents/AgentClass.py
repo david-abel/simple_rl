@@ -25,6 +25,9 @@ class Agent(object):
         '''
         pass
 
+    def policy(self, state):
+        return self.act(state, 0)
+
     def reset(self):
         '''
         Summary:

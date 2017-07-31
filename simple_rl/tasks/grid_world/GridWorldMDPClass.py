@@ -1,11 +1,11 @@
 ''' GridWorldMDPClass.py: Contains the GridWorldMDP class. '''
 
-# Local imports.
-from ...mdp.MDPClass import MDP
-from GridWorldStateClass import GridWorldState
-
 # Python imports.
 import random
+
+# Other imports.
+from ...mdp.MDPClass import MDP
+from GridWorldStateClass import GridWorldState
 
 class GridWorldMDP(MDP):
     ''' Class for a Grid World MDP '''
@@ -25,6 +25,11 @@ class GridWorldMDP(MDP):
         if type(goal_locs) is not list:
             print "Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
             quit()
+        for g in goal_locs:
+            if g[0] > width or g[0] > height:
+                print "Error: goal provided is off the map."
+                print "\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")"
+                print "\tProblematic Goal:", g
         self.width = width
         self.height = height
         self.init_loc = init_loc
@@ -106,6 +111,16 @@ class GridWorldMDP(MDP):
             return "gridworld-no-term"
         return "gridworld_h-" + str(self.height) + "_w-" + str(self.width)
 
+    def get_goal_locs(self):
+        return self.goal_locs
+
+    def visualize_agent(self, agent):
+        from ...utils.mdp_visualizer import visualize_agent
+        from grid_visualizer import _draw_state
+        visualize_agent(self, agent, _draw_state)
+        raw_input("Press anything to quit ")
+        quit()
+
 
 def _error_check(state, action):
     '''
@@ -128,6 +143,8 @@ def _error_check(state, action):
 
 def main():
     grid_world = GridWorldMDP(5, 10, (1, 1), (6, 7))
+
+    grid_world.visualize()
 
 if __name__ == "__main__":
     main()

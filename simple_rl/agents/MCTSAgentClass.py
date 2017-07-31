@@ -5,7 +5,7 @@ import math as m
 import random as r
 from collections import defaultdict
 
-# Local imports.
+# Other imports.
 from AgentClass import Agent
 from simple_rl.tasks.gym.GymStateClass import GymState
 

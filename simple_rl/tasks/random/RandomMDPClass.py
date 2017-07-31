@@ -4,7 +4,7 @@
 import random
 import numpy as np
 
-# Local imports.
+# Other imports.
 from ...mdp.MDPClass import MDP
 from RandomStateClass import RandomState
 

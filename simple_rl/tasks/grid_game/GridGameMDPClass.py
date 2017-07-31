@@ -1,11 +1,11 @@
 ''' GridGameMDPClass.py: Contains an implementation of a two player grid game. '''
 
-# Local imports.
-from ...mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
-from GridGameStateClass import GridGameState
-
 # Python imports.
 import random
+
+# Other imports.
+from ...mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+from GridGameStateClass import GridGameState
 
 class GridGameMDP(MarkovGameMDP):
     ''' Class for a Two Player Grid Game '''

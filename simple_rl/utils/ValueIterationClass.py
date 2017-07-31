@@ -3,9 +3,6 @@ from collections import defaultdict
 import Queue
 import random
 
-# Other impotrs.
-from simple_rl.tasks import ChainMDP, GridWorldMDP
-
 class ValueIteration(object):
 
     def __init__(self, mdp, delta=0.0001, max_iterations=200, sample_rate=1):
@@ -37,7 +34,11 @@ class ValueIteration(object):
         return len(self.S)      
 
     def get_states(self):
-        return self.S
+        if self.reachability_done:
+            return self.S
+        else:
+            self._compute_reachable_state_space()
+            return self.S
 
     def get_q_value(self, s, a):
         '''
@@ -194,9 +195,11 @@ class ValueIteration(object):
         return max_q_val, best_action
 
 def main():
-    # mdp = GridWorldMDP()
-    mdp = ChainMDP()
-    vi = ValueIteration(mdp)
+    from simple_rl.tasks import ChainMDP, GridWorldMDP
+
+    mdp = GridWorldMDP()
+    # mdp = ChainMDP()
+    # vi = ValueIteration(mdp)
     vi.run_vi()
 
     vi.print_value_func()

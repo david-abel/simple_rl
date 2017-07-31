@@ -5,7 +5,7 @@ Basic LinUCB implementation.
 # Python imports.
 import numpy as np
 
-# Local imports.
+# Other imports.
 from ..AgentClass import Agent
 
 class LinUCBAgent(Agent):

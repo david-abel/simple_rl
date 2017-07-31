@@ -6,10 +6,9 @@ from simple_rl.tasks import ChainMDP, GridWorldMDP
 from simple_rl.run_experiments import run_agents_on_mdp 
 
 # Setup MDP, Agents.
-mdp = ChainMDP(5)
-ql_agent = QLearnerAgent(mdp.get_actions()) 
-rm_agent = RMaxAgent(mdp.get_actions()) 
+mdp = GridWorldMDP(width=10, height=10)
+ql_agent = QLearnerAgent(mdp.get_actions(), explore="uniform") 
 rand_agent = RandomAgent(mdp.get_actions())
 
 # Run experiment and make plot.
-run_agents_on_mdp([ql_agent, rm_agent], mdp, instances=20, episodes=10, steps=200, verbose=False) 
+run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=20, episodes=100, steps=10, verbose=False) 

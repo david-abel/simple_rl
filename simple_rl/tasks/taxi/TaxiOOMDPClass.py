@@ -13,7 +13,7 @@ Author: David Abel (cs.brown.edu/~dabel/)
 import random
 import copy
 
-# simple_rl imports.
+# Other imports.
 from ...mdp.oomdp.OOMDPClass import OOMDP
 from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
 from TaxiStateClass import TaxiState

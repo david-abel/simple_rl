@@ -6,7 +6,7 @@ import numpy
 import time
 from collections import defaultdict
 
-# Local imports.
+# Other imports.
 from AgentClass import Agent
 
 class QLearnerAgent(Agent):
@@ -22,7 +22,8 @@ class QLearnerAgent(Agent):
             epsilon (float): Exploration term.
             explore (str): One of {softmax, uniform}. Denotes explore policy.
         '''
-        Agent.__init__(self, name=name, actions=actions, gamma=gamma)
+        name_ext = "-" + explore if explore != "uniform" else ""
+        Agent.__init__(self, name=name + name_ext, actions=actions, gamma=gamma)
 
         # Set/initialize parameters and other relevant classwide data
         self.alpha, self.alpha_init = alpha, alpha
@@ -30,6 +31,7 @@ class QLearnerAgent(Agent):
         self.step_number = 0
         self.anneal = anneal
         self.default_q = 0.0
+        
         # Key: state
         # Val: dict
             # Key: action
@@ -43,7 +45,7 @@ class QLearnerAgent(Agent):
     # ---- CENTRAL ACTION METHODS ----
     # --------------------------------
 
-    def act(self, state, reward):
+    def act(self, state, reward, learning=True):
         '''
         Args:
             state (State)
@@ -55,7 +57,8 @@ class QLearnerAgent(Agent):
             and performs updates given (s=self.prev_state,
             a=self.prev_action, r=reward, s'=state)
         '''
-        self.update(self.prev_state, self.prev_action, reward, state)
+        if learning:
+            self.update(self.prev_state, self.prev_action, reward, state)
         
         if self.explore == "softmax":
             # Softmax exploration
@@ -69,7 +72,7 @@ class QLearnerAgent(Agent):
         self.step_number += 1
 
         # Anneal params.
-        if self.episode_number == 0 and self.anneal and self.step_number % 1000 == 0:
+        if learning and self.episode_number == 0 and self.anneal and self.step_number % 1000 == 0:
             self._anneal()
 
         return action

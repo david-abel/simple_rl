@@ -1,6 +1,6 @@
 ''' TaxiStateClass.py: Contains the TaxiState class. '''
 
-# Local imports.
+# Other imports
 from ...mdp.oomdp.OOMDPStateClass import OOMDPState
 
 class TaxiState(OOMDPState):

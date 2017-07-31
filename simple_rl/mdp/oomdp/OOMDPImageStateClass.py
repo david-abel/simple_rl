@@ -7,7 +7,7 @@ OOMDPImageStateClass.py: Contains implementation for creating an
 import itertools
 import numpy
 
-# Local imports.
+# Other imports.
 from OOMDPStateClass import OOMDPState
 from OOMDPObjectClass import OOMDPObject
 from ..ImageStateClass import ImageState

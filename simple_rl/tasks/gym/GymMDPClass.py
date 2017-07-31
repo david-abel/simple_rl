@@ -9,7 +9,7 @@ import sys
 import os
 import random
 
-# Local imports.
+# Other imports.
 import gym
 from ...mdp.MDPClass import MDP
 from GymStateClass import GymState

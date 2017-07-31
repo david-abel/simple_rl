@@ -7,9 +7,8 @@ From:
 	Proceedings of the 25th international conference on Machine learning. ACM, 2008.
 '''
 
-# Local imports.
+# Other imports.
 from ...mdp.MDPClass import MDP
-
 
 class OOMDP(MDP):
     ''' Abstract class for an Object Oriented Markov Decision Process. '''

@@ -11,7 +11,7 @@ Purpose:
 import os
 from collections import defaultdict
 
-# Local imports.
+# Other imports.
 from ..utils import chart_utils
 from ExperimentParametersClass import ExperimentParameters
 

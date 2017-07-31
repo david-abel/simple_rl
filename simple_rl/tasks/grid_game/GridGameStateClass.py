@@ -1,6 +1,6 @@
 ''' GridGameStateClass.py: Contains the GridGameState class. '''
 
-# Local imports.
+# Other imports.
 from ...mdp.StateClass import State
 
 class GridGameState(State):

@@ -1,20 +1,21 @@
 ''' FourRoomMDPClass.py: Contains the FourRoom class. '''
 
-# Local imports.
-from ...mdp.MDPClass import MDP
-from ..grid_world.GridWorldStateClass import GridWorldState
-
 # Python imports.
 import random
 import math
 
-class FourRoomMDP(MDP):
+# Other imports
+from ...mdp.MDPClass import MDP
+from ..grid_world.GridWorldMDPClass import GridWorldMDP
+from ..grid_world.GridWorldStateClass import GridWorldState
+
+class FourRoomMDP(GridWorldMDP):
     ''' Class for a FourRoom '''
 
-    # Static constants.
-    ACTIONS = ["up", "down", "left", "right"]
+    # # Static constants.
+    # ACTIONS = ["up", "down", "left", "right"]
 
-    def __init__(self, width=6, height=6, init_loc=(1,1), goal_locs=[(6,6)]):
+    def __init__(self, width=9, height=9, init_loc=(1,1), goal_locs=[(9,9)]):
         '''
         Args:
             height (int)
@@ -22,14 +23,7 @@ class FourRoomMDP(MDP):
             init_loc (tuple: (int, int))
             goal_locs (list of tuples: [(int, int)...])
         '''
-        MDP.__init__(self, FourRoomMDP.ACTIONS, self._transition_func, self._reward_func, init_state=GridWorldState(init_loc[0], init_loc[1]))
-
-        self.width = width
-        self.height = height
-        self.init_loc = init_loc
-        self.goal_locs = goal_locs
-        self.cur_state = GridWorldState(init_loc[0], init_loc[1])
-
+        GridWorldMDP.__init__(self, width, height, init_loc, goal_locs)
         self.walls = self._compute_walls()
 
     def _reward_func(self, state, action):
@@ -75,6 +69,9 @@ class FourRoomMDP(MDP):
         Returns
             (State)
         '''
+        if state.is_terminal():
+            return state
+
         if action == "up" and state.y < self.height and not self.is_wall(state.x, state.y + 1):
             next_state = GridWorldState(state.x, state.y + 1)
         elif action == "down" and state.y > 1 and not self.is_wall(state.x, state.y - 1):
@@ -92,7 +89,7 @@ class FourRoomMDP(MDP):
         return next_state
 
     def __str__(self):
-        return "four_rooms_h-" + str(self.height) + "_w-" + str(self.width)
+        return "fourrooms_h-" + str(self.height) + "_w-" + str(self.width)
 
     def is_wall(self, x, y):
         '''
@@ -112,16 +109,16 @@ class FourRoomMDP(MDP):
         '''
         walls = []
 
-        half_width = self.width / 2
-        half_height = self.height / 2
+        half_width = math.ceil(self.width / 2.0)
+        half_height = math.ceil(self.height / 2.0)
 
         for i in range(1, self.width + 1):
-            if i == self.width / 3 or i == math.ceil(2 * self.width / 3.0):
+            if i == self.width / 3 or i == math.ceil(2 * (self.width + 1) / 3.0):
                 continue
             walls.append((i, half_height))
 
         for j in range(1, self.height + 1):
-            if j == self.height / 3 or j == math.ceil(2 * self.height / 3.0):
+            if j == self.height / 3 or j == math.ceil(2 * (self.height + 1) / 3.0):
                 continue
             walls.append((half_width, j))
 

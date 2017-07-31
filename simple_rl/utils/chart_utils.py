@@ -234,7 +234,10 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
         Stores the plot in results/<experiment_name>/results.pdf
     '''
 
-    # experiment_agents.sort()
+    experiment_agents.sort()
+
+    # print experiment_dir, experiment_agents
+    # quit()
 
     # Load the data.
     data = load_data(experiment_dir, experiment_agents) # [alg][instance][episode]
