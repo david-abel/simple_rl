@@ -1,20 +1,42 @@
 #!/usr/bin/env python
 
-# Imports 
+# Python Imports.
+import argparse
+
+# Other Imports.
 from simple_rl.agents import QLearnerAgent
 from simple_rl.run_experiments import run_single_agent_on_mdp 
 from simple_rl.tasks import FourRoomMDP
+from simple_rl.utils.ValueIterationClass import ValueIteration
 
-# Setup MDP, Agents.
-dim = 9
-mdp = FourRoomMDP(dim, dim, goal_locs=[(dim,dim)])
-ql_agent = QLearnerAgent(mdp.get_actions()) 
+def parse_args():
+    # Add all arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", type = str, default="value", nargs = '?', help = "Choose the visualization type (one of {value, policy, agent}).")
+    args = parser.parse_args()
+    return args.v
 
+def main():
+	# Setup MDP, Agents.
+	mdp = FourRoomMDP(9, 9, goal_locs=[(9, 9)], gamma=0.8)
+	ql_agent = QLearnerAgent(mdp.get_actions()) 
 
-run_single_agent_on_mdp(ql_agent, mdp, episodes=500, steps=200)
+	viz = parse_args()
 
-s = mdp.get_init_state()
+	if viz == "value":
+		# Run experiment and make plot.
+		mdp.visualize_value()
+	elif viz == "policy":
+		# Viz policy
+		vi = ValueIteration(mdp)
+		vi.run_vi()
+		policy = vi.policy
+		mdp.visualize_policy(policy)
+	elif viz == "agent":
+		# Solve problem and show agent interaction.
+		print "\n", str(ql_agent), "interacting with", str(mdp)
+		run_single_agent_on_mdp(ql_agent, mdp, episodes=500, steps=200)
+		mdp.visualize_agent(ql_agent)
 
-# Run experiment and make plot.
-mdp.visualize_agent(ql_agent)
-# mdp.visualize_value(ql_agent)
+if __name__ == "__main__":
+	main()
