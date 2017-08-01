@@ -23,9 +23,9 @@ simple_rl
 	run_experiments.py
 
 Author and Maintainer: David Abel (cs.brown.edu/~dabel/)
-Last Updated: July 14th, 2016
+Last Updated: July 25th, 2017
 Contact: dabel@cs.brown.edu
 License: MIT
 '''
-import mdp, agents, tasks, utils, experiments
+import mdp, agents, tasks, utils, experiments, examples
 import run_experiments

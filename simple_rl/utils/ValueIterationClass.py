@@ -5,7 +5,7 @@ import random
 
 class ValueIteration(object):
 
-    def __init__(self, mdp, delta=0.0001, max_iterations=200, sample_rate=1):
+    def __init__(self, mdp, delta=0.0001, max_iterations=500, sample_rate=1):
         '''
         Args:
             mdp (MDP)
@@ -39,6 +39,16 @@ class ValueIteration(object):
         else:
             self._compute_reachable_state_space()
             return self.S
+
+    def get_value(self, s):
+        '''
+        Args:
+            s (State)
+
+        Returns:
+            (float)
+        '''
+        return self._compute_max_qval_action_pair(s)[0]
 
     def get_q_value(self, s, a):
         '''

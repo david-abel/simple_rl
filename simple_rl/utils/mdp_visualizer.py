@@ -1,5 +1,5 @@
+# Python imports.
 import sys
-
 try:
     import pygame
     pygame.init()
@@ -36,22 +36,47 @@ def _draw_state_text(state, screen):
     state_text = title_font.render(formatted_state_text, True, (46, 49, 49))
     screen.blit(state_text, state_text_point)
 
+def visualize_policy(mdp, policy, draw_state, action_char_dict, cur_state=None, scr_width=720, scr_height=720):
+    '''
+    Args:
+        mdp (MDP)
+        policy (lambda: S --> A)
+        draw_state (lambda)
+        action_char_dict (dict):
+            Key: action
+            Val: str
+        cur_state (State)
+
+    Summary:
+
+    '''
+    from pygame.locals import *
+    screen = pygame.display.set_mode((scr_width, scr_height))
+
+    # Setup and draw initial state.
+    cur_state = mdp.get_init_state() if cur_state is None else cur_state
+
+    agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
+    draw_state(screen, mdp, cur_state, policy=policy, action_char_dict=action_char_dict, show_value=False, draw_statics=True)
+
 def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=720):
-    pass
-    # from pygame.locals import *
-    # screen = pygame.display.set_mode((scr_width, scr_height))
+    '''
+    Args:
+        mdp (MDP)
+        draw_state (State)
 
-    # # Setup and draw initial state.
-    # cur_state = mdp.get_init_state() if cur_state is None else cur_state
-    # reward = 0
+    Summary:
+        Draws the MDP with values labeled on states.
+    '''
 
-    # agent_shape = _vis_init(screen, mdp, draw_state, agent, cur_state)
+    from pygame.locals import *
+    screen = pygame.display.set_mode((scr_width, scr_height))
 
-    # vi = ValueIteration(mdp, delta=0.001, max_iterations=1000)
-    # iters, value = vi.run_vi()
+    # Setup and draw initial state.
+    cur_state = mdp.get_init_state() if cur_state is None else cur_state
 
-    # for s in vi.get_states():
-        
+    agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
+    draw_state(screen, mdp, cur_state, show_value=True, draw_statics=True)
 
 def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
     '''
@@ -73,7 +98,7 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
     cur_state = mdp.get_init_state() if cur_state is None else cur_state
     reward = 0
 
-    agent_shape = _vis_init(screen, mdp, draw_state, agent, cur_state)
+    agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent)
 
     done = False
     while not done:
@@ -104,7 +129,7 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
         pygame.display.update()
 
 
-def _vis_init(screen, mdp, draw_state, agent, cur_state):
+def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False):
     # Pygame setup.
     pygame.init()
     screen.fill((255, 255, 255))
@@ -115,7 +140,9 @@ def _vis_init(screen, mdp, draw_state, agent, cur_state):
     _draw_title_text(mdp, screen)
     if agent is not None:
         _draw_agent_text(agent, screen)
-    _draw_state_text(cur_state, screen)
-    agent_shape = draw_state(screen, mdp, cur_state, draw_statics=True)
+    if not value:
+        # If we're not visualizing the value.
+        _draw_state_text(cur_state, screen)
+        agent_shape = draw_state(screen, mdp, cur_state, draw_statics=True)
 
-    return agent_shape
+        return agent_shape

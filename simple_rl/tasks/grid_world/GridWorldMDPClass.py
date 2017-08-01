@@ -13,7 +13,13 @@ class GridWorldMDP(MDP):
     # Static constants.
     ACTIONS = ["up", "down", "left", "right"]
 
-    def __init__(self, width=5, height=3, init_loc=(1,1), goal_locs=[(5,3)], is_goal_terminal=True):
+    def __init__(self,
+                width=5,
+                height=3,
+                init_loc=(1,1),
+                goal_locs=[(5,3)],
+                walls=[],
+                is_goal_terminal=True, gamma=0.99):
         '''
         Args:
             height (int)
@@ -21,13 +27,14 @@ class GridWorldMDP(MDP):
             init_loc (tuple: (int, int))
             goal_locs (list of tuples: [(int, int)...])
         '''
-        MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=GridWorldState(init_loc[0], init_loc[1]))
+        MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=GridWorldState(init_loc[0], init_loc[1]), gamma=gamma)
         if type(goal_locs) is not list:
             print "Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
             quit()
+        self.walls = walls
         for g in goal_locs:
-            if g[0] > width or g[0] > height:
-                print "Error: goal provided is off the map."
+            if g[0] > width or g[1] > height or self.is_wall(g[0], g[1]):
+                print "Error: goal provided is off the map or overlaps with a wall.."
                 print "\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")"
                 print "\tProblematic Goal:", g
         self.width = width
@@ -85,26 +92,35 @@ class GridWorldMDP(MDP):
         Returns
             (State)
         '''
-        _error_check(state, action)
-
         if state.is_terminal():
             return state
 
-        if action == "up" and state.y < self.height:
+        if action == "up" and state.y < self.height and not self.is_wall(state.x, state.y + 1):
             next_state = GridWorldState(state.x, state.y + 1)
-        elif action == "down" and state.y > 1:
+        elif action == "down" and state.y > 1 and not self.is_wall(state.x, state.y - 1):
             next_state = GridWorldState(state.x, state.y - 1)
-        elif action == "right" and state.x < self.width:
+        elif action == "right" and state.x < self.width and not self.is_wall(state.x + 1, state.y):
             next_state = GridWorldState(state.x + 1, state.y)
-        elif action == "left" and state.x > 1:
+        elif action == "left" and state.x > 1 and not self.is_wall(state.x - 1, state.y):
             next_state = GridWorldState(state.x - 1, state.y)
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if self.is_goal_terminal and (next_state.x, next_state.y) in self.goal_locs:
+        if (next_state.x, next_state.y) in self.goal_locs:
             next_state.set_terminal(True)
 
         return next_state
+
+    def is_wall(self, x, y):
+        '''
+        Args:
+            x (int)
+            y (int)
+
+        Returns:
+            (bool): True iff (x,y) is a wall location.
+        '''
+        return (x, y) in self.walls
 
     def __str__(self):
         if not self.is_goal_terminal:
@@ -114,10 +130,34 @@ class GridWorldMDP(MDP):
     def get_goal_locs(self):
         return self.goal_locs
 
+    def visualize_policy(self, policy):
+        from ...utils.mdp_visualizer import visualize_policy
+        from grid_visualizer import _draw_state
+        ["up", "down", "left", "right"]
+
+        action_char_dict = {
+            "up":u"\u2191",
+            "down":u"\u2193",
+            "left":u"\u2190",
+            "right":u"\u2192"
+        }
+
+        visualize_policy(self, policy, _draw_state, action_char_dict)
+        raw_input("Press anything to quit ")
+        quit()
+
+
     def visualize_agent(self, agent):
         from ...utils.mdp_visualizer import visualize_agent
         from grid_visualizer import _draw_state
         visualize_agent(self, agent, _draw_state)
+        raw_input("Press anything to quit ")
+        quit()
+
+    def visualize_value(self):
+        from ...utils.mdp_visualizer import visualize_value
+        from grid_visualizer import _draw_state
+        visualize_value(self, _draw_state)
         raw_input("Press anything to quit ")
         quit()
 
