@@ -8,6 +8,8 @@ from random.RandomMDPClass import RandomMDP
 from random.RandomStateClass import RandomState
 from taxi.TaxiOOMDPClass import TaxiOOMDP
 from taxi.TaxiStateClass import TaxiState
+from block_dude.BlockDudeOOMDPClass import BlockDudeOOMDP
+from block_dude.BlockDudeStateClass import BlockDudeState
 from prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
 from rock_paper_scissors.RockPaperScissorsMDPClass import RockPaperScissorsMDP
 from grid_game.GridGameMDPClass import GridGameMDP

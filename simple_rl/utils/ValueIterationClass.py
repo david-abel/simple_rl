@@ -29,7 +29,6 @@ class ValueIteration(object):
         self.reachability_done = False
         self._compute_reachable_state_space()
 
-
     def get_num_states(self):
         return len(self.S)      
 

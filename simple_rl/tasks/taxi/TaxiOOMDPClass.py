@@ -17,7 +17,7 @@ import copy
 from ...mdp.oomdp.OOMDPClass import OOMDP
 from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
 from TaxiStateClass import TaxiState
-import taxi_action_helpers
+import taxi_helpers
 
 class TaxiOOMDP(OOMDP):
     ''' Class for a Taxi OO-MDP '''
@@ -27,19 +27,19 @@ class TaxiOOMDP(OOMDP):
     ATTRIBUTES = ["x", "y", "has_passenger", "in_taxi", "dest_x", "dest_y"]
     CLASSES = ["agent", "wall", "passenger"]
 
-    def __init__(self, width, height, agent_loc, walls, passengers, slip_prob=0):
-        init_state = self._create_init_state(height, width, agent_loc, walls, passengers)
-        OOMDP.__init__(self, TaxiOOMDP.ACTIONS, self.objects, self._taxi_transition_func, self._taxi_reward_func, init_state=init_state)
+    def __init__(self, width, height, agent, walls, passengers, slip_prob=0, gamma=0.99):
+        init_state = self._create_init_state(height, width, agent, walls, passengers)
+        OOMDP.__init__(self, TaxiOOMDP.ACTIONS, self.objects, self._taxi_transition_func, self._taxi_reward_func, init_state=init_state, gamma=gamma)
         self.height = height
         self.width = width
         self.slip_prob = slip_prob
 
-    def _create_init_state(self, height, width, agent_loc, walls, passengers):
+    def _create_init_state(self, height, width, agent_dict, walls, passengers):
         '''
         Args:
             height (int)
             width (int)
-            agent_loc (dict): {key=attr_name : val=int}
+            agent_dict (dict): {key=attr_name : val=int}
             walls (list of dicts): [{key=attr_name : val=int, ... }, ...]
             passengers (list of dicts): [{key=attr_name : val=int, ... }, ...]
 
@@ -51,8 +51,8 @@ class TaxiOOMDP(OOMDP):
 
         # Make agent.
         agent_attributes = {}
-        for attr in agent_loc.keys():
-            agent_attributes[attr] = agent_loc[attr]
+        for attr in agent_dict.keys():
+            agent_attributes[attr] = agent_dict[attr]
         agent = OOMDPObject(attributes=agent_attributes, name="agent")
         self.objects["agent"].append(agent)
 
@@ -121,19 +121,18 @@ class TaxiOOMDP(OOMDP):
         # next_state = copy.copy(state)
 
         if action == "up" and state.get_agent_y() < self.height:
-            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dy=1)
+            taxi_helpers.move_agent(next_state, self.slip_prob, dy=1)
         elif action == "down" and state.get_agent_y() > 1:
-            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dy=-1)
+            taxi_helpers.move_agent(next_state, self.slip_prob, dy=-1)
         elif action == "right" and state.get_agent_x() < self.width:
-            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dx=1)
+            taxi_helpers.move_agent(next_state, self.slip_prob, dx=1)
         elif action == "left" and state.get_agent_x() > 1:
-            next_state = taxi_action_helpers.move_agent(next_state, self.slip_prob, dx=-1)
+            taxi_helpers.move_agent(next_state, self.slip_prob, dx=-1)
         elif action == "dropoff":
-            next_state = taxi_action_helpers.agent_dropoff(next_state)
+            taxi_helpers.agent_dropoff(next_state)
         elif action == "pickup":
-            next_state = taxi_action_helpers.agent_pickup(next_state)
-        else:
-            next_state = next_state
+            taxi_helpers.agent_pickup(next_state)
+
         
         # Make terminal.
         if is_taxi_terminal_state(next_state):
@@ -146,6 +145,13 @@ class TaxiOOMDP(OOMDP):
 
     def __str__(self):
         return "taxi_h-" + str(self.height) + "_w-" + str(self.width)
+
+    def visualize_agent(self, agent):
+        from ...utils.mdp_visualizer import visualize_agent
+        from taxi_visualizer import _draw_state
+        visualize_agent(self, agent, _draw_state)
+        raw_input("Press anything to quit ")
+        quit()
 
 def is_taxi_terminal_state(state):
     '''
@@ -182,7 +188,7 @@ def _error_check(state, action):
 def main():
     agent = {"x":1, "y":1, "has_passenger":0}
     passengers = [{"x":8, "y":4, "dest_x":2, "dest_y":2, "in_taxi":0}]
-    taxi_world = TaxiOOMDP(10, 10, agent_loc=agent, walls=[], passengers=passengers)
+    taxi_world = TaxiOOMDP(10, 10, agent=agent, walls=[], passengers=passengers)
 
 if __name__ == "__main__":
     main()

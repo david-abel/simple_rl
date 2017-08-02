@@ -19,8 +19,22 @@ class OOMDPState(State):
     def get_objects(self):
         return self.objects
 
+    def get_objects_of_class(self, obj_class):
+        try:
+            return self.objects[obj_class]
+        except KeyError:
+            print "Error: given object class (" + str(obj_class) + ") not found in state."
+            print "\t Known classes are: ", self.objects.keys()
+            quit()
+
+    def get_first_instance_of_class(self, obj_class):
+        return self.get_objects_of_class(obj_class)[0]
+
     def _update(self):
-        # Turn object attributes into a feature list.
+        '''
+        Summary:
+            Turn object attributes into a feature list.
+        '''
         state_vec = []
         for obj_class in self.objects.keys():
             for obj in self.objects[obj_class]:
@@ -35,6 +49,3 @@ class OOMDPState(State):
                 result += "\t" + str(obj)
             result += "\n"
         return result
-
-    # def __hash__(self):
-    #     return hash(tuple(self.objects))

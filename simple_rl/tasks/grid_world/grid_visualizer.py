@@ -25,7 +25,7 @@ def _draw_state(screen,
         grid_mdp (MDP)
         state (State)
         show_value (bool)
-        draw_grid
+        draw_statics (bool)
         agent_shape (pygame.rect)
 
     Returns:

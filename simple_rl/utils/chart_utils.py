@@ -136,7 +136,7 @@ def compute_single_conf_interval(datum):
     return std_error
 
 
-def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True):
+def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, is_rec_disc_reward=False):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -147,6 +147,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         open_plot (bool)
+        is_rec_disc_reward (bool): If true, plots discounted reward.
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -204,8 +205,9 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         # If it's a time plot.
         unit = "Time"
         experiment_dir = experiment_dir.replace("times", "")
+    disc_ext = "Discounted " if is_rec_disc_reward else ""
     plot_name = experiment_dir + "/all_" + plot_label.lower() + "_" + unit.lower() + ".pdf"
-    plot_title = plot_label + " " + unit + ": " + experiment_dir.split("/")[-1]
+    plot_title = plot_label + " " + disc_ext + unit + ": " + experiment_dir.split("/")[-1]
     y_axis_label = plot_label + " " + unit
     pyplot.xlabel(x_axis_unit[0].upper() + x_axis_unit[1:] + " Number")
     pyplot.ylabel(y_axis_label)
@@ -220,7 +222,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     
     pyplot.cla() # Clears.
 
-def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=False):
+def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=False, is_rec_disc_reward=False):
     '''
     Args:
         experiment_dir (str): path to results.
@@ -228,6 +230,7 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
         cumulative (bool): If true, plots show cumulative results.
         use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
+        is_rec_disc_reward (bool): If true, plots discounted reward (changes plot title, too).
 
     Summary:
         Creates plots for all agents run under the experiment.
@@ -244,7 +247,14 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
     conf_intervals = compute_conf_intervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avg_data, experiment_dir, experiment_agents, conf_intervals=conf_intervals, use_cost=use_cost, cumulative=cumulative, episodic=episodic, open_plot=open_plot)
+    plot(avg_data, experiment_dir,
+                experiment_agents,
+                conf_intervals=conf_intervals,
+                use_cost=use_cost,
+                cumulative=cumulative,
+                episodic=episodic,
+                open_plot=open_plot,
+                is_rec_disc_reward=is_rec_disc_reward)
 
 
 def main():

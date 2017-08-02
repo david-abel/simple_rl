@@ -31,6 +31,9 @@ def _draw_state_text(state, screen):
     scr_width, scr_height = screen.get_width(), screen.get_height()
     # Clear.
     formatted_state_text = str(state)
+    if len(formatted_state_text) > 20:
+        # State text is too long, ignore.
+        return
     state_text_point = (scr_width / 4.0 - len(formatted_state_text)*6, 18*scr_height / 20.0)
     pygame.draw.rect(screen, (255,255,255), (state_text_point[0] - 20, state_text_point[1]) + (200,40))
     state_text = title_font.render(formatted_state_text, True, (46, 49, 49))
@@ -118,7 +121,7 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
                 # Update state text.
                 _draw_state_text(cur_state, screen)
 
-        if (cur_state.x, cur_state.y) in mdp.get_goal_locs():
+        if cur_state.is_terminal():
             # Done! Agent found goal.
             goal_text = "Victory!"
             goal_text_rendered = title_font.render(goal_text, True, (246, 207, 106))

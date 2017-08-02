@@ -1,7 +1,5 @@
 ''' Helper functions for executing actions in the Taxi Problem '''
 
-import random
-
 def move_agent(state, slip_prob=0, dx=0, dy=0):
     '''
     Args:
@@ -14,13 +12,11 @@ def move_agent(state, slip_prob=0, dx=0, dy=0):
     '''
     if _is_wall_in_the_way(state, dx=dx, dy=dy):
         # There's a wall in the way.
-        return state
+        return
 
-    new_state = _move_passenger_in_taxi(state, x=dx, y=dy)
-    new_state.objects["agent"][0]["x"] += dx
-    new_state.objects["agent"][0]["y"] += dy
-
-    return new_state
+    _move_passenger_in_taxi(state, x=dx, y=dy)
+    state.objects["agent"][0]["x"] += dx
+    state.objects["agent"][0]["y"] += dy
 
 def _is_wall_in_the_way(state, dx=0, dy=0):
     '''
@@ -53,8 +49,6 @@ def _move_passenger_in_taxi(state, x=0, y=0):
             state.objects["passenger"][i]["x"] += x
             state.objects["passenger"][i]["y"] += y
     
-    return state
-
 def agent_pickup(state):
     '''
     Args:
@@ -73,7 +67,6 @@ def agent_pickup(state):
                 # If they're at the same location, pickup.
                 state.objects["agent"][0]["has_passenger"] = 1
                 state.objects["passenger"][i]["in_taxi"] = 1
-    return state
 
 def agent_dropoff(state):
     '''
@@ -91,4 +84,3 @@ def agent_dropoff(state):
                 # Drop off the passenger.
                 state.objects["passenger"][i]["in_taxi"] = 0
                 state.objects["agent"][0]["has_passenger"] = 0
-    return state

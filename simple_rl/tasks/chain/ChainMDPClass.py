@@ -9,12 +9,12 @@ class ChainMDP(MDP):
 
     ACTIONS = ["forward", "reset"]
 
-    def __init__(self, num_states=5, reset_val=0.01):
+    def __init__(self, num_states=5, reset_val=0.01, gamma=0.99):
         '''
         Args:
             num_states (int) [optional]: Number of states in the chain.
         '''
-        MDP.__init__(self, ChainMDP.ACTIONS, self._transition_func, self._reward_func, init_state=ChainState(1))
+        MDP.__init__(self, ChainMDP.ACTIONS, self._transition_func, self._reward_func, init_state=ChainState(1), gamma=gamma)
         self.num_states = num_states
         self.reset_val = reset_val
 

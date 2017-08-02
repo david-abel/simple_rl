@@ -28,6 +28,7 @@ class Experiment(object):
                     is_episodic=False,
                     is_markov_game=False,
                     is_multi_task=False,
+                    is_rec_disc_reward=False,
                     clear_old_results=True,
                     count_r_per_n_timestep=1,
                     cumulative_plot=True):
@@ -47,6 +48,7 @@ class Experiment(object):
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.is_multi_task = is_multi_task
+        self.is_rec_disc_reward = is_rec_disc_reward
         self.count_r_per_n_timestep = count_r_per_n_timestep
         self.steps_since_added_r = 1
         self.rew_since_count = 0
@@ -86,6 +88,7 @@ class Experiment(object):
                                 self.agents,
                                 episodic=self.is_episodic,
                                 cumulative=self.cumulative_plot,
+                                is_rec_disc_reward=self.is_rec_disc_reward,
                                 open_plot=open_plot)
 
     def get_agent_avg_cumulative_rew(self, agent):

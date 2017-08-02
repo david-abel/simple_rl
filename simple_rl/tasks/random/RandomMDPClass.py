@@ -13,7 +13,7 @@ class RandomMDP(MDP):
 
     ACTIONS = [str(i) for i in range(3)]
 
-    def __init__(self, num_states=5, num_rand_trans=5):
+    def __init__(self, num_states=5, num_rand_trans=5, gamma=0.99):
         '''
         Args:
             num_states (int) [optional]: Number of states in the Random MDP.
@@ -23,7 +23,7 @@ class RandomMDP(MDP):
             Each state-action pair picks @num_rand_trans possible states and has a uniform distribution
             over them for transitions. Rewards are also chosen randomly.
         '''
-        MDP.__init__(self, RandomMDP.ACTIONS, self._transition_func, self._reward_func, init_state=RandomState(1))
+        MDP.__init__(self, RandomMDP.ACTIONS, self._transition_func, self._reward_func, init_state=RandomState(1), gamma=gamma)
         assert(num_rand_trans <= num_states)
         self.num_rand_trans = num_rand_trans
         self.num_states = num_states

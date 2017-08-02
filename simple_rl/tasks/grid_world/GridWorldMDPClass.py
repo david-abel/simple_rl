@@ -19,7 +19,9 @@ class GridWorldMDP(MDP):
                 init_loc=(1,1),
                 goal_locs=[(5,3)],
                 walls=[],
-                is_goal_terminal=True, gamma=0.99):
+                is_goal_terminal=True,
+                gamma=0.99,
+                init_state=None):
         '''
         Args:
             height (int)
@@ -27,16 +29,24 @@ class GridWorldMDP(MDP):
             init_loc (tuple: (int, int))
             goal_locs (list of tuples: [(int, int)...])
         '''
-        MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=GridWorldState(init_loc[0], init_loc[1]), gamma=gamma)
+        init_state = GridWorldState(init_loc[0], init_loc[1]) if init_state is None else init_state
+        MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state, gamma=gamma)
         if type(goal_locs) is not list:
             print "Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
             quit()
         self.walls = walls
         for g in goal_locs:
-            if g[0] > width or g[1] > height or self.is_wall(g[0], g[1]):
+            if g[0] > width or g[1] > height:
                 print "Error: goal provided is off the map or overlaps with a wall.."
                 print "\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")"
                 print "\tProblematic Goal:", g
+                quit()
+            if self.is_wall(g[0], g[1]):
+                print "Error: goal provided is off the map or overlaps with a wall.."
+                print "\tWalls:", walls
+                print "\tProblematic Goal:", g
+                quit()
+
         self.width = width
         self.height = height
         self.init_loc = init_loc
@@ -106,7 +116,7 @@ class GridWorldMDP(MDP):
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if (next_state.x, next_state.y) in self.goal_locs:
+        if (next_state.x, next_state.y) in self.goal_locs and self.is_goal_terminal:
             next_state.set_terminal(True)
 
         return next_state
