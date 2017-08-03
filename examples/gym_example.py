@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# Imports
+# Other imports.
+import srl_example_setup
 from simple_rl.agents import LinearApproxQLearnerAgent, RandomAgent
 from simple_rl.tasks import GymMDP
 from simple_rl.run_experiments import run_agents_on_mdp
