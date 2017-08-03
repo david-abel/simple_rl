@@ -12,14 +12,14 @@ import os
 from collections import defaultdict
 
 # Other imports.
-from ..utils import chart_utils
-from ExperimentParametersClass import ExperimentParameters
+from simple_rl.utils import chart_utils
+from simple_rl.experiments.ExperimentParametersClass import ExperimentParameters
 
 class Experiment(object):
     ''' Experiment Class for RL Experiments '''
 
     # Dumps the results in a directory called "results" in the current working dir.
-    RESULTS_DIR = os.getcwdu() + "/results/"
+    RESULTS_DIR = os.path.join(os.getcwdu(), "results")
 
     def __init__(self,
                     agents,
@@ -71,12 +71,12 @@ class Experiment(object):
         Summary:
             Creates and removes relevant directories/files.
         '''
-        if not os.path.exists(self.exp_directory + "/"):
-            os.makedirs(self.exp_directory + "/")
+        if not os.path.exists(os.path.join(self.exp_directory, "")):
+            os.makedirs(self.exp_directory)
         elif clear_old_results:
             for agent in self.agents:
-                if os.path.exists(self.exp_directory + "/" + str(agent) + ".csv"):
-                    os.remove(self.exp_directory + "/" + str(agent) + ".csv")
+                if os.path.exists(os.path.join(self.exp_directory, str(agent)) + ".csv"):
+                    os.remove(os.path.join(self.exp_directory, str(agent)) + ".csv")
         self.write_exp_info_to_file()
 
     def make_plots(self, open_plot=True):
@@ -92,7 +92,7 @@ class Experiment(object):
                                 open_plot=open_plot)
 
     def get_agent_avg_cumulative_rew(self, agent):
-        result_file = open(self.exp_directory + "/" + str(agent) + ".csv", "r")
+        result_file = open(os.path.join(self.exp_directory, str(agent)) + ".csv", "r")
         
         total = 0
         num_lines = 0
@@ -149,12 +149,12 @@ class Experiment(object):
             Adds a new line to indicate we're onto a new instance.
         '''
         #
-        out_file = open(self.exp_directory + "/" + str(agent) + ".csv", "a+")
+        out_file = open(os.path.join(self.exp_directory, str(agent)) + ".csv", "a+")
         out_file.write("\n")
         out_file.close()
 
-        if os.path.isdir(self.exp_directory + "/times/"):
-            out_file = open(self.exp_directory + "/times/" + str(agent) + ".csv", "a+")
+        if os.path.isdir(os.path.join(self.exp_directory, "times", "")):
+            out_file = open(os.path.join(self.exp_directory, "times", str(agent)) + ".csv", "a+")
             out_file.write("\n")
             out_file.close()
 
@@ -164,8 +164,8 @@ class Experiment(object):
             Writes datum to file.
         '''
         if extra_dir != "" and not os.path.isdir(self.exp_directory + "/" + extra_dir):
-            os.makedirs(self.exp_directory + "/" + extra_dir)
-        out_file = open(self.exp_directory + "/" + extra_dir + str(agent) + ".csv", "a+")
+            os.makedirs(os.path.join(self.exp_directory, extra_dir))
+        out_file = open(os.path.join(self.exp_directory, extra_dir, str(agent)) + ".csv", "a+")
         out_file.write(str(datum) + ",")
         out_file.close()
 

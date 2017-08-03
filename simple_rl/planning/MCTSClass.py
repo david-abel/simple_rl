@@ -19,6 +19,27 @@ class MCTS(Planner):
         self.explore_param = explore_param
         self.visitation_counts = defaultdict(lambda : defaultdict(lambda : 1))
 
+    def plan(self, cur_state, horizon=100):
+        '''
+        Args:
+            cur_state (State)
+            horizon (int)
+
+        Returns:
+            (list): List of actions
+        '''
+        action_seq = []
+        state_seq = [cur_state]
+        steps = 0
+        while not cur_state.is_terminal() and steps < horizon:
+            action = self.policy(cur_state)
+            cur_state = self.transition_func(cur_state, action)
+            action_seq.append(action)
+            state_seq.append(cur_state)
+            steps += 1
+
+        return action_seq, state_seq
+
     def policy(self, state):
         for i in xrange(self.num_rollouts_per_step):
             a = self._next_action(state)
@@ -60,23 +81,22 @@ class MCTS(Planner):
 
         return best_action
 
-    def _rollout(self, state, action):
-        next_state = state
+    def _rollout(self, cur_state, action):
         trajectory = []
         total_discounted_reward = []
         for i in range(self.rollout_depth):
 
 
             # Simulate next.
-            next_action = self._next_action(next_state)
-            next_state = self.transition_func(next_state, next_action)
-            next_reward = self.transition_func(next_state, next_action)
+            next_action = self._next_action(cur_state)
+            cur_state = self.transition_func(cur_state, next_action)
+            next_reward = self.transition_func(cur_state, next_action)
 
             # Track rewards and states.
             total_discounted_reward.append(self.gamma**i * next_reward)
-            trajectory.append((next_state, next_action))
+            trajectory.append((cur_state, next_action))
 
-            if next_state.is_terminal():
+            if cur_state.is_terminal():
                 # Break terminal.
                 break
 

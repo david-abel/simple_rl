@@ -77,11 +77,11 @@ class ValueIteration(Planner):
         '''
         Summary:
             Starting with @self.start_state, determines all reachable states
-            and stores them in self.S.
+            and stores them in self.states.
         '''
         state_queue = Queue.Queue()
         state_queue.put(self.init_state)
-        self.S.append(self.init_state)
+        self.states.append(self.init_state)
 
         while not state_queue.empty():
             s = state_queue.get()
@@ -90,7 +90,7 @@ class ValueIteration(Planner):
                     next_state = self.transition_func(s,a)
 
                     if next_state not in self.states:
-                        self.S.append(next_state)
+                        self.states.append(next_state)
                         state_queue.put(next_state)
 
         self.reachability_done = True
@@ -107,7 +107,7 @@ class ValueIteration(Planner):
         # Main loop.
         while max_diff > self.delta and iterations < self.max_iterations:
             max_diff = 0
-            for s in self.S:
+            for s in self.states:
                 if s.is_terminal():
                     continue
 
@@ -138,19 +138,18 @@ class ValueIteration(Planner):
         Returns:
             (list): List of actions
         '''
-        # state = self.init_state if state is None else state
-        plan = []
+        action_seq = []
         state_seq = [state]
         steps = 0
 
         while (not state.is_terminal()) and steps < horizon:
             next_action = self._get_max_q_action(state)
-            plan.append(next_action)
+            action_seq.append(next_action)
             state = self.transition_func(state, next_action)
             state_seq.append(state)
             steps += 1
 
-        return plan, state_seq
+        return action_seq, state_seq
     
     def _get_max_q_action(self, state):
         '''

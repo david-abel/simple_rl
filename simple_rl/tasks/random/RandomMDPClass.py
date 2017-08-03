@@ -5,8 +5,8 @@ import random
 import numpy as np
 
 # Other imports.
-from ...mdp.MDPClass import MDP
-from RandomStateClass import RandomState
+from simple_rl.mdp.MDPClass import MDP
+from simple_rl.tasks.random.RandomStateClass import RandomState
 
 class RandomMDP(MDP):
     ''' Imeplementation for a standard Random MDP '''

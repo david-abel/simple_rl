@@ -1,7 +1,7 @@
 ''' BlockDudeStateClass.py: Contains the BlockDudeState class. '''
 
 # Other imports
-from ...mdp.oomdp.OOMDPStateClass import OOMDPState
+from simple_rl.mdp.oomdp.OOMDPStateClass import OOMDPState
 
 class BlockDudeState(OOMDPState):
     ''' Class for Block Dude State '''

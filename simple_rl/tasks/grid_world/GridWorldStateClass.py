@@ -1,7 +1,7 @@
 ''' GridWorldStateClass.py: Contains the GridWorldState class. '''
 
 # Other imports.
-from ...mdp.StateClass import State
+from simple_rl.mdp.StateClass import State
 
 class GridWorldState(State):
     ''' Class for Grid World States '''

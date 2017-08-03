@@ -1,11 +1,11 @@
 ''' RockPaperScissorsMDP.py: Contains an implementation of a two player Rock Paper Scissors game. '''
 
-# Other imports
-from ...mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
-from ...mdp.StateClass import State
-
 # Python imports.
 import random
+
+# Other imports
+from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+from simple_rl.mdp.StateClass import State
 
 class RockPaperScissorsMDP(MarkovGameMDP):
     ''' Class for a Rock Paper Scissors Game '''

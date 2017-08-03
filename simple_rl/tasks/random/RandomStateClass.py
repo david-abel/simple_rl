@@ -1,7 +1,7 @@
 ''' RandomStateClass.py: Contains the RandomStateClass class. '''
 
 # Other imports
-from ...mdp.StateClass import State
+from simple_rl.mdp.StateClass import State
 
 class RandomState(State):
     ''' Class for Random MDP States '''

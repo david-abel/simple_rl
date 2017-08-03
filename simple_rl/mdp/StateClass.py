@@ -1,5 +1,5 @@
 # Python imports
-import numpy
+import numpy as np
 
 ''' StateClass.py: Contains the State Class. '''
 
@@ -20,10 +20,10 @@ class State(object):
         Returns:
             (iterable)
     	'''
-        return numpy.array(self.data).flatten()
+        return np.array(self.data).flatten()
 
     def __hash__(self):
-        if type(self.data).__module__ == numpy.__name__:
+        if type(self.data).__module__ == np.__name__:
             # Numpy arrays
             return hash(str(self.data))
         elif self.data.__hash__ is None:

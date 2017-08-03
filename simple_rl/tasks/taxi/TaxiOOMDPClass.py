@@ -14,9 +14,9 @@ import random
 import copy
 
 # Other imports.
-from ...mdp.oomdp.OOMDPClass import OOMDP
-from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
-from TaxiStateClass import TaxiState
+from simple_rl.mdp.oomdp.OOMDPClass import OOMDP
+from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
+from simple_rl.tasks.taxi.TaxiStateClass import TaxiState
 import taxi_helpers
 
 class TaxiOOMDP(OOMDP):

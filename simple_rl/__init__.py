@@ -27,5 +27,5 @@ Last Updated: July 25th, 2017
 Contact: dabel@cs.brown.edu
 License: MIT
 '''
-import mdp, agents, tasks, utils, experiments, examples
+import agents, experiments, mdp, planning, tasks, utils
 import run_experiments

@@ -1,6 +1,7 @@
 ''' MarkovGameMDP.py: Contains implementation for simple Markov Games. '''
 
-from ...mdp.MDPClass import MDP
+# Other imports.
+from simple_rl.mdp.MDPClass import MDP
 
 class MarkovGameMDP(MDP):
     ''' Abstract class for a Markov Decision Process. '''

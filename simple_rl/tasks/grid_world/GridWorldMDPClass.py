@@ -4,8 +4,8 @@
 import random
 
 # Other imports.
-from ...mdp.MDPClass import MDP
-from GridWorldStateClass import GridWorldState
+from simple_rl.mdp.MDPClass import MDP
+from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class GridWorldMDP(MDP):
     ''' Class for a Grid World MDP '''

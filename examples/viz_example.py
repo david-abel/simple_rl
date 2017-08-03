@@ -8,7 +8,7 @@ import srl_example_setup
 from simple_rl.agents import QLearnerAgent
 from simple_rl.run_experiments import run_single_agent_on_mdp 
 from simple_rl.tasks import FourRoomMDP
-from simple_rl.utils.ValueIterationClass import ValueIteration
+from simple_rl.planning import ValueIteration
 
 def parse_args():
     # Add all arguments

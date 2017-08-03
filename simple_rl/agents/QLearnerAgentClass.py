@@ -7,7 +7,7 @@ import time
 from collections import defaultdict
 
 # Other imports.
-from AgentClass import Agent
+from simple_rl.agents.AgentClass import Agent
 
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''

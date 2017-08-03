@@ -8,8 +8,8 @@ import random
 import sys
 
 # Other imports.
-from ...utils.ValueIterationClass import ValueIteration
-from ..four_room.FourRoomMDPClass import FourRoomMDP
+from simple_rl.planning import ValueIteration
+from simple_rl.tasks import FourRoomMDP
 
 def _draw_state(screen,
                 grid_mdp,

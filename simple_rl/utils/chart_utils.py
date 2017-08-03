@@ -16,7 +16,7 @@ import math
 import sys
 import os
 import matplotlib.pyplot as pyplot
-import numpy
+import numpy as np
 
 color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
                 [113, 198, 113],[85, 85, 85], [198, 113, 113],\
@@ -37,7 +37,7 @@ def load_data(experiment_dir, experiment_agents):
     for alg in experiment_agents:
 
         # Load the reward for all instances of each agent
-        all_reward = open(experiment_dir + "/" + str(alg) + ".csv", "r")
+        all_reward = open(os.path.join(experiment_dir, str(alg)) + ".csv", "r")
         all_instances = []
 
         # Put the reward instances into a list of floats.
@@ -68,7 +68,7 @@ def average_data(data, cumulative=False):
 
         # Take the average.
         num_instances = len(data[i])
-        all_instances = numpy.array(all_instances)
+        all_instances = np.array(all_instances)
         avged = None
         try:
             avged = all_instances.sum(axis=0)/float(num_instances)
@@ -105,17 +105,17 @@ def compute_conf_intervals(data, cumulative=False):
         num_instances = len(data[i])
         num_episodes = len(data[i][0])
 
-        all_instances = numpy.array(all_instances)
+        all_instances = np.array(all_instances)
         alg_i_ci = []
-        total_so_far = numpy.zeros(num_instances)
+        total_so_far = np.zeros(num_instances)
         for j in xrange(num_episodes):
             # Compute datum for confidence interval.
             episode_j_all_instances = all_instances[:, j]
 
             if cumulative:
                 # Cumulative.
-                summed_vector = numpy.add(episode_j_all_instances, total_so_far)
-                total_so_far = numpy.add(episode_j_all_instances, total_so_far)
+                summed_vector = np.add(episode_j_all_instances, total_so_far)
+                total_so_far = np.add(episode_j_all_instances, total_so_far)
                 episode_j_all_instances = summed_vector
 
             # Compute the interval and add it to list.
@@ -135,7 +135,7 @@ def compute_single_conf_interval(datum):
     Returns:
         (float): Margin of error.
     '''
-    std_deviation = numpy.std(datum)
+    std_deviation = np.std(datum)
     std_error = 1.96*(std_deviation / math.sqrt(len(datum)))
 
     return std_error
@@ -157,9 +157,6 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
     '''
-
-    if experiment_dir[-1] == "/":
-        experiment_dir = experiment_dir[:-1]
 
     # Some nice markers and colors for plotting.
     markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
@@ -189,8 +186,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         # Plot Confidence Intervals.
         if conf_intervals != []:
             alg_conf_interv = conf_intervals[i]
-            top = numpy.add(y_axis, alg_conf_interv)
-            bot = numpy.subtract(y_axis, alg_conf_interv)
+            top = np.add(y_axis, alg_conf_interv)
+            bot = np.subtract(y_axis, alg_conf_interv)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
 
         # print "Mean last " + x_axis_unit + ": (" + str(agents[i]) + ") :", y_axis[-1], "(conf_interv:", alg_conf_interv[-1], ")"
@@ -207,7 +204,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         unit = "Time"
         experiment_dir = experiment_dir.replace("times", "")
     disc_ext = "Discounted " if is_rec_disc_reward else ""
-    plot_name = experiment_dir + "/all_" + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    plot_name = os.path.join(experiment_dir, "all_") + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    print experiment_dir
     plot_title = plot_label + " " + disc_ext + unit + ": " + experiment_dir.split("/")[-1]
     y_axis_label = plot_label + " " + unit
     pyplot.xlabel(x_axis_unit[0].upper() + x_axis_unit[1:] + " Number")

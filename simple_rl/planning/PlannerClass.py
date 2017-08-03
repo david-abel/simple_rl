@@ -1,9 +1,9 @@
-class PlannerClass(object):
-	''' Abstract class for a Planner. '''
+class Planner(object):
+    ''' Abstract class for a Planner. '''
 
-	def __init__(self, mdp, name="planner"):
+    def __init__(self, mdp, name="planner"):
 
-		self.name = name
+        self.name = name
 
         # MDP components.
         self.mdp = mdp
@@ -14,8 +14,11 @@ class PlannerClass(object):
         self.transition_func = mdp.transition_func
         self.gamma = mdp.gamma
 
-	def policy(self, state):
-		pass
+        def plan(self, state):
+            pass
 
-	def __str__(self):
-		return self.name
+        def policy(self, state):
+            pass
+
+        def __str__(self):
+            return self.name

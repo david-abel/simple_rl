@@ -5,9 +5,9 @@ import random
 import math
 
 # Other imports
-from ...mdp.MDPClass import MDP
-from ..grid_world.GridWorldMDPClass import GridWorldMDP
-from ..grid_world.GridWorldStateClass import GridWorldState
+from simple_rl.mdp.MDPClass import MDP
+from simple_rl.tasks.grid_world.GridWorldMDPClass import GridWorldMDP
+from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class FourRoomMDP(GridWorldMDP):
     ''' Class for a FourRoom '''

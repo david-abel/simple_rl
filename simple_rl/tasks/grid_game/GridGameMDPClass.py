@@ -4,7 +4,7 @@
 import random
 
 # Other imports.
-from ...mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
 from GridGameStateClass import GridGameState
 
 class GridGameMDP(MarkovGameMDP):

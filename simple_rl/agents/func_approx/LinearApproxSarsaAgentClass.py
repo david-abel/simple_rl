@@ -4,12 +4,12 @@ LinearApproxSarsaAgentClass.py
 Contains implementation for a Q Learner with a Linear Function Approximator.
 '''
 
-# Local classes
-from LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
-
 # Python imports.
 import numpy as np
 import math
+
+# Other imports.
+from simple_rl.agents.func_approx.LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
 
 class LinearApproxSarsaAgent(LinearApproxQLearnerAgent):
     '''

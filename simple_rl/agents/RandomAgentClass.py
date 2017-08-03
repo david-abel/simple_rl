@@ -4,7 +4,7 @@
 import random as r
 
 # Other imports
-from AgentClass import Agent
+from simple_rl.agents.AgentClass import Agent
 
 class RandomAgent(Agent):
     ''' Class for a random decision maker. '''

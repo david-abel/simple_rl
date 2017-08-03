@@ -4,8 +4,8 @@
 import random
 
 # Other imports.
-from ...mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
-from ...mdp.StateClass import State
+from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+from simple_rl.mdp.StateClass import State
 
 class PrisonersDilemmaMDP(MarkovGameMDP):
     ''' Class for a Grid World MDP '''

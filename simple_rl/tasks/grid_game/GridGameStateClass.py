@@ -1,7 +1,7 @@
 ''' GridGameStateClass.py: Contains the GridGameState class. '''
 
 # Other imports.
-from ...mdp.StateClass import State
+from simple_rl.mdp.StateClass import State
 
 class GridGameState(State):
     ''' Class for two player Grid Game States '''

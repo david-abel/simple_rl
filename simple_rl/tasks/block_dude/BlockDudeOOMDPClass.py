@@ -9,9 +9,9 @@ import random
 import copy
 
 # Other imports.
-from ...mdp.oomdp.OOMDPClass import OOMDP
-from ...mdp.oomdp.OOMDPObjectClass import OOMDPObject
-from BlockDudeStateClass import BlockDudeState
+from simple_rl.mdp.oomdp.OOMDPClass import OOMDP
+from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
+from simple_rl.tasks.block_dude.BlockDudeStateClass import BlockDudeState
 import block_dude_helpers as bd_helpers
 
 class BlockDudeOOMDP(OOMDP):

@@ -12,7 +12,6 @@ passengers = [{"x":4, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}, {"x":2, "y":5
 walls = []
 mdp = TaxiOOMDP(width=5, height=5, agent=agent, walls=walls, passengers=passengers)
 
-
 ql_agent = QLearnerAgent(actions=mdp.get_actions()) 
 rand_agent = RandomAgent(actions=mdp.get_actions())
 
