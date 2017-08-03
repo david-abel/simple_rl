@@ -14,7 +14,6 @@ from FixedPolicyAgentClass import FixedPolicyAgent
 from QLearnerAgentClass import QLearnerAgent
 from RandomAgentClass import RandomAgent
 from RMaxAgentClass import RMaxAgent
-from MCTSAgentClass import MCTSAgent
 
 from func_approx.LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
 from func_approx.LinearApproxSarsaAgentClass import LinearApproxSarsaAgent
