@@ -106,7 +106,7 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
             a.reset()
 
     # Time stuff.
-    print "Experiment took " + str(time.clock() - start) + " seconds."
+    print "Experiment took " + str(round(time.clock() - start, 2)) + " seconds."
 
     experiment.make_plots()
 
@@ -171,7 +171,7 @@ def run_agents_multi_task(agents,
     # Time stuff.
     print "\n--- TIMES ---"
     for agent in times.keys():
-        print str(agent) + " agent took " + str(times[agent]) + " seconds."
+        print str(agent) + " agent took " + str(round(times[agent], 2)) + " seconds."
     print "-------------\n"
 
     last_reward_each_agent = defaultdict(float)
@@ -248,7 +248,7 @@ def run_agents_on_mdp(agents,
     # Time stuff.
     print "\n--- TIMES ---"
     for agent in time_dict.keys():
-        print str(agent) + " agent took " + str(time_dict[agent]) + " seconds."
+        print str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds."
     print "-------------\n"
 
     # if not isinstance(mdp, GymMDP):

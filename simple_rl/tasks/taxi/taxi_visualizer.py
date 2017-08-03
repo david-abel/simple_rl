@@ -5,7 +5,7 @@ except ImportError:
     print "Warning: pygame not installed (needed for visuals)."
 
 # Other imports.
-from colors import color_ls
+from simple_rl.utils.chart_utils import color_ls
 
 def _draw_state(screen,
                 taxi_oomdp,
@@ -53,7 +53,7 @@ def _draw_state(screen,
 
         top_left_point = width_buffer + cell_width*(pass_x - 1) + in_taxi_size, height_buffer + cell_height*(taxi_oomdp.height - pass_y) + in_taxi_size
 
-        pygame.draw.rect(screen, color_ls[i], top_left_point + (cell_width - 2*in_taxi_size, cell_height - 2*in_taxi_size), 0)
+        pygame.draw.rect(screen, color_ls[-i-1], top_left_point + (cell_width - 2*in_taxi_size, cell_height - 2*in_taxi_size), 0)
 
 
     
@@ -79,7 +79,7 @@ def _draw_state(screen,
         dest_x, dest_y = p["dest_x"], p["dest_y"]
         top_left_point = int(width_buffer + cell_width*(dest_x - 1) + 25), int(height_buffer + cell_height*(taxi_oomdp.height - dest_y) + 25)
         # circle_center = int(top_left_point[0] + cell_width/2.0), int(top_left_point[1] + cell_height/2.0)
-        dest_col = (max(color_ls[i][0]-30, 0), max(color_ls[i][1]-30, 0), max(color_ls[i][2]-30, 0))
+        dest_col = (max(color_ls[-i-1][0]-30, 0), max(color_ls[-i-1][1]-30, 0), max(color_ls[-i-1][2]-30, 0))
         pygame.draw.circle(screen, dest_col, top_left_point, int(min(cell_width, cell_height) / 8.0))
 
     pygame.display.flip()

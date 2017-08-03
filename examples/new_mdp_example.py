@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-# Python Imports.
+# Python imports.
 from collections import defaultdict
 
-# Other Imports.
+# Other imports.
+import srl_example_setup
 from simple_rl.agents import QLearnerAgent, RandomAgent
 from simple_rl.tasks import GridWorldMDP, GridWorldState
 from simple_rl.run_experiments import run_agents_on_mdp 
@@ -73,15 +74,17 @@ class ColoredGridWorldState(GridWorldState):
     def __str__(self):
         return "s: (" + str(self.x) + "," + str(self.y) + "," + str(self.color) + ")"
 
+def main():
+    state_colors = defaultdict(lambda : defaultdict(lambda : "white"))
+    state_colors[3][2] = "red"
 
-state_colors = defaultdict(lambda : defaultdict(lambda : "white"))
-state_colors[3][2] = "red"
+    # Setup MDP, Agents.
+    mdp = ColoredGridWorldMDP(state_colors)
+    ql_agent = QLearnerAgent(actions=mdp.get_actions()) 
+    rand_agent = RandomAgent(actions=mdp.get_actions())
 
-# Setup MDP, Agents.
-mdp = ColoredGridWorldMDP(state_colors)
-ql_agent = QLearnerAgent(actions=mdp.get_actions()) 
-rand_agent = RandomAgent(actions=mdp.get_actions())
+    # Run experiment and make plot.
+    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=15, episodes=500, steps=40) 
 
-# Run experiment and make plot.
-run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=15, episodes=200, steps=40) 
-
+if __name__ == "__main__":
+    main()

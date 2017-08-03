@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# Imports 
+# Other imports.
+import srl_example_setup
 from simple_rl.agents import QLearnerAgent, RandomAgent
 from simple_rl.tasks import TaxiOOMDP, BlockDudeOOMDP
 from simple_rl.run_experiments import run_agents_on_mdp, run_single_agent_on_mdp
@@ -15,7 +16,7 @@ mdp = TaxiOOMDP(width=5, height=5, agent=agent, walls=walls, passengers=passenge
 ql_agent = QLearnerAgent(actions=mdp.get_actions()) 
 rand_agent = RandomAgent(actions=mdp.get_actions())
 
-viz = False
+viz = True
 if viz == True:
 	# Visualize Taxi.
 	run_single_agent_on_mdp(ql_agent, mdp, episodes=50, steps=1000)

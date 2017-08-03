@@ -18,6 +18,11 @@ import os
 import matplotlib.pyplot as pyplot
 import numpy
 
+color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
+                [113, 198, 113],[85, 85, 85], [198, 113, 113],\
+                [142, 56, 142], [125, 158, 192],[184, 221, 255],\
+                [153, 63, 0], [142, 142, 56], [56, 142, 142]]
+
 def load_data(experiment_dir, experiment_agents):
     '''
     Args:
@@ -158,15 +163,11 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Some nice markers and colors for plotting.
     markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
-    colors = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
-                [113, 198, 113],[85, 85, 85], [198, 113, 113],\
-                [142, 56, 142], [125, 158, 192],[184, 221, 255],\
-                [153, 63, 0], [142, 142, 56], [56, 142, 142]]
 
     x_axis_unit = "episode" if episodic else "step"
 
     # Map them to floats in [0:1].
-    colors = [[shade / 255.0 for shade in rgb] for rgb in colors]
+    colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
 
     # Puts the legend into the best location in the plot and use a tight layout.
     pyplot.rcParams['legend.loc'] = 'best'

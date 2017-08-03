@@ -2,11 +2,15 @@
 import sys
 try:
     import pygame
+    from pygame.locals import *
     pygame.init()
     title_font = pygame.font.SysFont("CMU Serif", 32)
 except ImportError:
     print "Error: pygame not installed (needed for visuals)."
     quit()
+
+# Other imports.
+from simple_rl.utils.chart_utils import color_ls
 
 def _draw_title_text(mdp, screen):
     scr_width, scr_height = screen.get_width(), screen.get_height()
@@ -53,7 +57,6 @@ def visualize_policy(mdp, policy, draw_state, action_char_dict, cur_state=None, 
     Summary:
 
     '''
-    from pygame.locals import *
     screen = pygame.display.set_mode((scr_width, scr_height))
 
     # Setup and draw initial state.
@@ -72,7 +75,6 @@ def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=7
         Draws the MDP with values labeled on states.
     '''
 
-    from pygame.locals import *
     screen = pygame.display.set_mode((scr_width, scr_height))
 
     # Setup and draw initial state.
@@ -94,7 +96,6 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
     Summary:
         Creates a 2d visual of the agent's interactions with the MDP.
     '''
-    from pygame.locals import *
     screen = pygame.display.set_mode((scr_width, scr_height))
 
     # Setup and draw initial state.
