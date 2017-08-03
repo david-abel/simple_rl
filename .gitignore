@@ -1,2 +1,6 @@
 *.pyc
 results/
+build/
+dist/
+todo.txt
+update.py
