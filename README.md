@@ -6,11 +6,11 @@ There are loads of other great libraries out there for RL. The aim of this one i
 1. Simplicity.
 2. Reproducibility of results.
 
-A brief tutorial is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).
+A brief tutorial for a slightly earlier version is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).
 
-Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/).
+Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDP's have visuals, too, which requires [pygame](http://www.pygame.org/news).
 
-Now includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs).
+Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs).
 
 
 ## Installation
@@ -42,6 +42,8 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 * (_experiments_): Code for an Experiment class to reproduce results.
 
 * (_mdp_): Code for a basic MDP and MDPState class. Also contains OO-MDP implementation [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf).
+
+* (_planning_): Implementations for planning algorithms, includes ValueIteration and MCTS [[Couloum 2006]](https://hal.archives-ouvertes.fr/file/index/docid/116992/filename/CG2006.pdf).
 
 * (_tasks_): Implementations for a few standard MDPs (grid world, n-chain, and Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf)). Recently added support for the [OpenAI Gym](https://gym.openai.com/envs).
 
