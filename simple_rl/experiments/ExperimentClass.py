@@ -19,7 +19,7 @@ class Experiment(object):
     ''' Experiment Class for RL Experiments '''
 
     # Dumps the results in a directory called "results" in the current working dir.
-    RESULTS_DIR = os.path.join(os.getcwdu(), "results")
+    RESULTS_DIR = os.path.join(os.getcwdu(), "results", "")
 
     def __init__(self,
                     agents,

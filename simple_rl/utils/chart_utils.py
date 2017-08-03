@@ -205,8 +205,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         experiment_dir = experiment_dir.replace("times", "")
     disc_ext = "Discounted " if is_rec_disc_reward else ""
     plot_name = os.path.join(experiment_dir, "all_") + plot_label.lower() + "_" + unit.lower() + ".pdf"
-    print experiment_dir
-    plot_title = plot_label + " " + disc_ext + unit + ": " + experiment_dir.split("/")[-1]
+
+    plot_title = plot_label + " " + disc_ext + unit + ": " + os.path.basename(experiment_dir)
     y_axis_label = plot_label + " " + unit
     pyplot.xlabel(x_axis_unit[0].upper() + x_axis_unit[1:] + " Number")
     pyplot.ylabel(y_axis_label)
