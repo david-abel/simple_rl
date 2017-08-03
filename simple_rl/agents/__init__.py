@@ -5,7 +5,8 @@ Implementations of standard RL agents:
 	QLearnerAgentClass: QLearner.
 	LinearApproxQLearnerAgentClass: Q Learner with a Linear Approximator.
 	RandomAgentClass: Random actor.
-	RMaxAgentClass: RMax (assumes deterministic MDP for now).
+	RMaxAgentClass: RMax.
+	LinUCBAgentClass: Conextual Bandit Algorithm.
 '''
 
 # Grab classes.
@@ -17,4 +18,5 @@ from RMaxAgentClass import RMaxAgent
 
 from func_approx.LinearApproxQLearnerAgentClass import LinearApproxQLearnerAgent
 from func_approx.LinearApproxSarsaAgentClass import LinearApproxSarsaAgent
+
 from bandits.LinUCBAgentClass import LinUCBAgent
