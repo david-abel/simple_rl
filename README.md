@@ -23,6 +23,8 @@ Alternatively, you can download simple_rl [here](https://github.com/david-abel/s
 
 ## Example
 
+Several examples showcasing basic functionality are included in the _examples_ directory.
+
 To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ method from _simple_rl.run_experiments_ and call it with some agents for a given MDP. For example:
 
 	# Imports
