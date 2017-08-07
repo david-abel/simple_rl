@@ -3,7 +3,6 @@ from chain.ChainMDPClass import ChainMDP
 from chain.ChainStateClass import ChainState
 from grid_world.GridWorldMDPClass import GridWorldMDP
 from grid_world.GridWorldStateClass import GridWorldState
-from contin_grid_world.ContinuousGridWorldMDPClass import ContinuousGridWorldMDP
 from four_room.FourRoomMDPClass import FourRoomMDP
 from random.RandomMDPClass import RandomMDP
 from random.RandomStateClass import RandomState
