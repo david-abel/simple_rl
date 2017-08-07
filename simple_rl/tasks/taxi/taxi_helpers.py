@@ -1,22 +1,7 @@
 ''' Helper functions for executing actions in the Taxi Problem '''
 
-def move_agent(state, slip_prob=0, dx=0, dy=0):
-    '''
-    Args:
-        state (TaxiState)
-        dx (int) [optional]
-        dy (int) [optional]
-
-    Returns:
-        (TaxiState)
-    '''
-    if _is_wall_in_the_way(state, dx=dx, dy=dy):
-        # There's a wall in the way.
-        return
-
-    _move_passenger_in_taxi(state, x=dx, y=dy)
-    state.objects["agent"][0]["x"] += dx
-    state.objects["agent"][0]["y"] += dy
+# Other imports.
+from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
 
 def _is_wall_in_the_way(state, dx=0, dy=0):
     '''
@@ -34,53 +19,33 @@ def _is_wall_in_the_way(state, dx=0, dy=0):
             return True
     return False
 
-def _move_passenger_in_taxi(state, x=0, y=0):
+def _move_pass_in_taxi(state, dx=0, dy=0):
     '''
     Args:
         state (TaxiState)
         x (int) [optional]
         y (int) [optional]
 
-    Returns
-        (TaxiState)
+    Returns:
+        (list of dict): List of new passenger attributes.
+
     '''
-    for i, passenger in enumerate(state.objects["passenger"]):
+    passenger_attr_dict_ls = state.get_objects_of_class("passenger")
+    for i, passenger in enumerate(passenger_attr_dict_ls):
         if passenger["in_taxi"] == 1:
-            state.objects["passenger"][i]["x"] += x
-            state.objects["passenger"][i]["y"] += y
-    
-def agent_pickup(state):
+            passenger_attr_dict_ls[i]["x"] += dx
+            passenger_attr_dict_ls[i]["y"] += dy
+
+def is_taxi_terminal_state(state):
     '''
     Args:
-        state (TaxiState)
+        state (OOMDPState)
 
-    Returns
-        (TaxiState)
+    Returns:
+        (bool): True iff all passengers at at their destinations, not in the taxi.
     '''
-    if state.objects["agent"][0]["has_passenger"] == 0:
-        # If the agent doesn't already have a passenger.
-        
-        for i, passenger in enumerate(state.objects["passenger"]):
-            if state.objects["agent"][0]["x"] == passenger["x"] and \
-                state.objects["agent"][0]["y"] == passenger["y"]:
-
-                # If they're at the same location, pickup.
-                state.objects["agent"][0]["has_passenger"] = 1
-                state.objects["passenger"][i]["in_taxi"] = 1
-
-def agent_dropoff(state):
-    '''
-    Args:
-        state (TaxiState)
-
-    Returns
-        (TaxiState)
-    '''
-    if state.objects["agent"][0]["has_passenger"] == 1:
-        # If the agent has a passenger.
-        for i, passenger in enumerate(state.objects["passenger"]):
-
-            if passenger["in_taxi"] == 1:
-                # Drop off the passenger.
-                state.objects["passenger"][i]["in_taxi"] = 0
-                state.objects["agent"][0]["has_passenger"] = 0
+    for p in state.get_objects_of_class("passenger"):
+        if p.get_attribute("in_taxi") == 1 or p.get_attribute("x") != p.get_attribute("dest_x") or \
+            p.get_attribute("y") != p.get_attribute("dest_y"):
+            return False
+    return True

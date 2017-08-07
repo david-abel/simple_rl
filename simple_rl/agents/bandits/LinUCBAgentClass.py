@@ -60,7 +60,7 @@ class LinUCBAgent(Agent):
 
         return score
 
-    def _update(self, reward):
+    def update(self, reward):
         '''
         Args:
             reward (float)
@@ -98,7 +98,7 @@ class LinUCBAgent(Agent):
 
         # Update
         if self.prev_action is not None:
-            self._update(reward)
+            self.update(reward)
         self.prev_action = best_action
         self.prev_context = context
         

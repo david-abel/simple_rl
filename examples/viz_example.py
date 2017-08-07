@@ -18,26 +18,26 @@ def parse_args():
     return args.v
 
 def main():
-	# Setup MDP, Agents.
-	mdp = FourRoomMDP(9, 9, goal_locs=[(9, 9)], gamma=0.8)
-	ql_agent = QLearnerAgent(mdp.get_actions()) 
+    # Setup MDP, Agents.
+    mdp = FourRoomMDP(9, 9, goal_locs=[(9, 9)], gamma=0.95)
+    ql_agent = QLearnerAgent(mdp.get_actions()) 
 
-	viz = parse_args()
+    viz = parse_args()
 
-	if viz == "value":
-		# Run experiment and make plot.
-		mdp.visualize_value()
-	elif viz == "policy":
-		# Viz policy
-		vi = ValueIteration(mdp)
-		vi.run_vi()
-		policy = vi.policy
-		mdp.visualize_policy(policy)
-	elif viz == "agent":
-		# Solve problem and show agent interaction.
-		print "\n", str(ql_agent), "interacting with", str(mdp)
-		run_single_agent_on_mdp(ql_agent, mdp, episodes=500, steps=200)
-		mdp.visualize_agent(ql_agent)
+    if viz == "value":
+        # Run experiment and make plot.
+        mdp.visualize_value()
+    elif viz == "policy":
+        # Viz policy
+        vi = ValueIteration(mdp)
+        vi.run_vi()
+        policy = vi.policy
+        mdp.visualize_policy(policy)
+    elif viz == "agent":
+        # Solve problem and show agent interaction.
+        print "\n", str(ql_agent), "interacting with", str(mdp)
+        run_single_agent_on_mdp(ql_agent, mdp, episodes=500, steps=200)
+        mdp.visualize_agent(ql_agent)
 
 if __name__ == "__main__":
-	main()
+    main()

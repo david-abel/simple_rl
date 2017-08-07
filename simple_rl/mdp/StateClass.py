@@ -22,6 +22,15 @@ class State(object):
     	'''
         return np.array(self.data).flatten()
 
+    def get_num_feats(self):
+        return len(self.features())
+
+    def is_terminal(self):
+    	return self._is_terminal
+
+    def set_terminal(self, is_term=True):
+        self._is_terminal = is_term
+
     def __hash__(self):
         if type(self.data).__module__ == np.__name__:
             # Numpy arrays
@@ -30,12 +39,6 @@ class State(object):
             return hash(tuple(self.data))
         else:
             return hash(self.data)
-
-    def is_terminal(self):
-    	return self._is_terminal
-
-    def set_terminal(self, is_term=True):
-        self._is_terminal = is_term
 
     def __str__(self):
         return "s." + str(self.data)

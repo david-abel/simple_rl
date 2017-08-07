@@ -49,12 +49,9 @@ def _draw_state(screen,
     for i, p in enumerate(objects["passenger"]):
         # Passenger
         pass_x, pass_y = p["x"], p["y"]
-        in_taxi_size = min(cell_width, cell_height) / 3.0 if p["in_taxi"] else 25
-
-        top_left_point = width_buffer + cell_width*(pass_x - 1) + in_taxi_size, height_buffer + cell_height*(taxi_oomdp.height - pass_y) + in_taxi_size
-
+        in_taxi_size = min(cell_width, cell_height) / 2.5 if p["in_taxi"] else min(cell_width, cell_height) / 5.0
+        top_left_point = width_buffer + cell_width*(pass_x - 1) + in_taxi_size , height_buffer + cell_height*(taxi_oomdp.height - pass_y) + in_taxi_size
         pygame.draw.rect(screen, color_ls[-i-1], top_left_point + (cell_width - 2*in_taxi_size, cell_height - 2*in_taxi_size), 0)
-
 
     
     # Statics
@@ -63,7 +60,6 @@ def _draw_state(screen,
         for i in range(taxi_oomdp.width):
             # For each column:
             for j in range(taxi_oomdp.height):
-
                 top_left_point = width_buffer + cell_width*i, height_buffer + cell_height*j
                 r = pygame.draw.rect(screen, (46, 49, 49), top_left_point + (cell_width, cell_height), 3)
 

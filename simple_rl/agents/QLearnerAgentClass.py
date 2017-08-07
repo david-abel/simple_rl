@@ -32,13 +32,14 @@ class QLearnerAgent(Agent):
         self.anneal = anneal
         self.default_q = 0.0
         
+        # Q Function:
         # Key: state
         # Val: dict
-            # Key: action
-            # Val: q-value
+        #   Key: action
+        #   Val: q-value
         self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
 
-        # Choose explore type. Can also be "uniform" for \epsilon-greedy.
+        # Choose explore type.
         self.explore = explore
 
     # --------------------------------
@@ -132,8 +133,8 @@ class QLearnerAgent(Agent):
 
     def _anneal(self):
         # Taken from "Note on learning rate schedules for stochastic optimization, by Darken and Moody (Yale)":
-        self.alpha = self.alpha_init / (1.0 +  self.step_number*(self.episode_number + 1) / 2000.0 )
-        self.epsilon = self.epsilon_init / (1.0 + self.step_number*(self.episode_number + 1) / 2000.0 )
+        self.alpha = self.alpha_init / (1.0 +  (self.step_number / 200.0)*(self.episode_number + 1) / 2000.0 )
+        self.epsilon = self.epsilon_init / (1.0 + (self.step_number / 200.0)*(self.episode_number + 1) / 2000.0 )
 
     def _compute_max_qval_action_pair(self, state):
         '''

@@ -16,7 +16,7 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.99, horizon=4, s_a_threshold=4):
+    def __init__(self, actions, gamma=0.99, horizon=4, s_a_threshold=1):
         Agent.__init__(self, name="rmax-h" + str(horizon), actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
@@ -28,7 +28,6 @@ class RMaxAgent(Agent):
         Summary:
             Resets the agent back to its tabula rasa config.
         '''
-
         self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
         self.transitions = defaultdict(lambda : defaultdict(lambda : defaultdict(int))) # S --> A --> S' --> counts
         self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs

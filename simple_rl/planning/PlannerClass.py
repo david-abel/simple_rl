@@ -9,9 +9,9 @@ class Planner(object):
         self.mdp = mdp
         self.init_state = self.mdp.get_init_state()
         self.states = []
-        self.actions = mdp.actions
-        self.reward_func = mdp.reward_func
-        self.transition_func = mdp.transition_func
+        self.actions = mdp.get_actions()
+        self.reward_func = mdp.get_reward_func()
+        self.transition_func = mdp.get_transition_func()
         self.gamma = mdp.gamma
 
         def plan(self, state):

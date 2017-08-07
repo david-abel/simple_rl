@@ -16,12 +16,10 @@ class TaxiState(OOMDPState):
         return self.objects["agent"][0]["y"]
 
     def __hash__(self):
-    	ax = self.get_agent_x()
-    	ay = self.get_agent_y()
 
-    	state_hash = str(ax) + str(ay) + "0"
+    	state_hash = str(self.get_agent_x()) + str(self.get_agent_y()) + "0"
 
     	for p in self.objects["passenger"]:
-    		state_hash += str(p["x"]) + str(p["y"]) + "0" + str(p["in_taxi"]) + "0" + str(p["dest_x"]) + str(p["dest_y"])
+    		state_hash += str(p["x"]) + str(p["y"]) + str(p["in_taxi"])
 
     	return int(state_hash)

@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 
+# Python imports.
+import random
+
 # Other imports.
 import srl_example_setup
-from simple_rl.agents import QLearnerAgent, RandomAgent
-from simple_rl.tasks import GridGameMDP, RockPaperScissorsMDP
+from simple_rl.agents import QLearnerAgent, FixedPolicyAgent
+from simple_rl.tasks import RockPaperScissorsMDP
 from simple_rl.run_experiments import play_markov_game 
 
 # Setup MDP, Agents.
-mdp = GridGameMDP()
-ql_agent = QLearnerAgent(actions=mdp.get_actions()) 
-rand_agent = RandomAgent(actions=mdp.get_actions())
+markov_game = RockPaperScissorsMDP()
+ql_agent = QLearnerAgent(actions=markov_game.get_actions())
+fixed_action = random.choice(markov_game.get_actions())
+fixed_agent = FixedPolicyAgent(policy=lambda s:fixed_action)
 
 # Run experiment and make plot.
-play_markov_game([ql_agent, rand_agent], mdp, instances=15, episodes=200, steps=40) 
+play_markov_game([ql_agent, fixed_agent], markov_game, instances=15, episodes=1, steps=40) 

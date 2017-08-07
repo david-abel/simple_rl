@@ -1,25 +1,27 @@
 '''
-LinearApproxQLearnerAgentClass.py
+LinearQLearnerAgentClass.py
 
 Contains implementation for a Q Learner with a Linear Function Approximator.
 '''
 
-# Local classes
-from simple_rl.agents import QLearnerAgent
-
 # Python imports.
-import numpy
+import numpy as np
 import math
 
-class LinearApproxQLearnerAgent(QLearnerAgent):
+# Other imports.
+from simple_rl.agents import Agent, QLearnerAgent
+
+class LinearQLearnerAgent(QLearnerAgent):
     '''
     QLearnerAgent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, name="ql-linear", alpha=0.05, gamma=0.99, epsilon=0.01, explore="uniform", rbf=False, anneal=True):
-        name = name + "-rbf" if (name == "ql-linear" and rbf) else name
+    def __init__(self, actions, num_features, name="ql-linear", alpha=0.2, gamma=0.99, epsilon=0.2, explore="uniform", rbf=False, anneal=True):
+        name = name + "-rbf" if rbf else name
         QLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
-        self.num_features = 0
+        self.num_features = num_features
+        # Add a basis feature.
+        self.weights = np.zeros(self.num_features*len(self.actions))
         self.rbf = rbf
 
     def update(self, state, action, reward, next_state):
@@ -33,12 +35,9 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
         Summary:
             Updates the internal Q Function according to the Bellman Equation. (Classic Q Learning update)
         '''
-        # If this is the first state, initialize state-relevant data and return.
         if state is None:
-            if self.num_features == 0:
-                self.num_features = len(next_state.features())
-                self.weights = numpy.zeros(self.num_features*len(self.actions))
-            self.prev_state = next_state
+            # If this is the first state, initialize state-relevant data and return.
+            self.prev_state = state
             return
         self._update_weights(reward, next_state)
 
@@ -53,7 +52,7 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
 
         Notes:
             The resulting feature vector multiplies the state vector by |A| (size of action space), and only the action passed in retains
-            the original vector, all other values are set to namespaceAIX.EMPTYFEATURE
+            the original vector, all other values are set to 0.
         '''
         result = [0 for i in xrange(self.num_features * len(self.actions))]
         act_index = self.actions.index(action)
@@ -65,13 +64,20 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
 
         result[act_index*self.num_features:(act_index + 1)*self.num_features] = basis_feats
 
-        return numpy.array(result)
+        return np.array(self._normalize(result))
 
-    def _update_weights(self, reward, curr_state):
+    def _normalize(self, vec):
+        # return vec
+        tot = sum(vec)
+        if tot <= 0:
+            return vec
+        return [float(i) / tot for i in vec]
+
+    def _update_weights(self, reward, cur_state):
         '''
         Args:
             reward (float)
-            curr_state (State)
+            cur_state (State)
 
         Summary:
             Updates according to:
@@ -85,9 +91,9 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
         '''
 
         # Compute temporal difference [Eq. 1]
-        max_q_curr_state = self.get_max_q_value(curr_state)
+        max_q_cur_state = self.get_max_q_value(cur_state)
         prev_q_val = self.get_q_value(self.prev_state, self.prev_action)
-        self.most_recent_loss = reward + self.gamma * max_q_curr_state - prev_q_val
+        self.most_recent_loss = reward + self.gamma * max_q_cur_state - prev_q_val
 
         # Update each weight
         phi = self._phi(self.prev_state, self.prev_action)
@@ -109,7 +115,14 @@ class LinearApproxQLearnerAgent(QLearnerAgent):
 
         # Return linear approximation of Q value
         sa_feats = self._phi(state, action)
-        return numpy.dot(self.weights, sa_feats)
+        # print "q s a ", round(np.dot(self.weights, sa_feats), 2), state, action
+        return np.dot(self.weights, sa_feats)
+
+    def reset(self):
+        self.step_number = 0
+        self.weights = np.zeros(self.num_features*len(self.actions))
+        Agent.reset(self)
+
 
 def _rbf(x):
     return math.exp(-(x)**2)

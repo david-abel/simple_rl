@@ -10,6 +10,7 @@ import sys
 # Other imports.
 from simple_rl.planning import ValueIteration
 from simple_rl.tasks import FourRoomMDP
+from simple_rl.utils import mdp_visualizer as mdpv
 
 def _draw_state(screen,
                 grid_mdp,
@@ -78,7 +79,7 @@ def _draw_state(screen,
                 top_left_point = width_buffer + cell_width*i, height_buffer + cell_height*j
                 r = pygame.draw.rect(screen, (46, 49, 49), top_left_point + (cell_width, cell_height), 3)
 
-                if policy:
+                if policy and not grid_mdp.is_wall(i+1, grid_mdp.height - j):
                     a = policy_dict[i+1][grid_mdp.height - j]
                     if a not in action_char_dict:
                         text_a = a
@@ -88,10 +89,10 @@ def _draw_state(screen,
                     text_rendered_a = cc_font.render(text_a, True, (46, 49, 49))
                     screen.blit(text_rendered_a, text_center_point)
 
-                if show_value:
+                if show_value and not grid_mdp.is_wall(i+1, grid_mdp.height - j):
                     # Draw the value.
                     val = val_text_dict[i+1][grid_mdp.height - j]
-                    color = (255-100*val, 255-70*val, 255-30*val)
+                    color = mdpv.val_to_color(val)#(255-100*val, 255-70*val, 255-30*val)
                     pygame.draw.rect(screen, color, top_left_point + (cell_width, cell_height), 0)
                     text_center_point = int(top_left_point[0] + cell_width/2.0 - 10), int(top_left_point[1] + cell_height/2.0)
                     text = str(round(val,2))

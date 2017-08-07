@@ -2,6 +2,7 @@
 
 # Python imports.
 import random
+import sys
 
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
@@ -80,6 +81,7 @@ class GridWorldMDP(MDP):
             (bool): True iff the state-action pair send the agent to the goal state.
         '''
         if (state.x, state.y) in self.goal_locs and self.is_goal_terminal:
+            # Already at terminal.
             return False
 
         if action == "left" and (state.x - 1, state.y) in self.goal_locs:
@@ -133,15 +135,14 @@ class GridWorldMDP(MDP):
         return (x, y) in self.walls
 
     def __str__(self):
-        if not self.is_goal_terminal:
-            return "gridworld-no-term"
-        return "gridworld_h-" + str(self.height) + "_w-" + str(self.width)
+        prefix = "gridworld" if self.is_goal_terminal else "gridworld-no-term"
+        return prefix + "_h-" + str(self.height) + "_w-" + str(self.width)
 
     def get_goal_locs(self):
         return self.goal_locs
 
     def visualize_policy(self, policy):
-        from ...utils.mdp_visualizer import visualize_policy
+        from simple_rl.utils import mdp_visualizer as mdpv
         from grid_visualizer import _draw_state
         ["up", "down", "left", "right"]
 
@@ -152,24 +153,22 @@ class GridWorldMDP(MDP):
             "right":u"\u2192"
         }
 
-        visualize_policy(self, policy, _draw_state, action_char_dict)
+        mdpv.visualize_policy(self, policy, _draw_state, action_char_dict)
         raw_input("Press anything to quit ")
         quit()
 
 
     def visualize_agent(self, agent):
-        from ...utils.mdp_visualizer import visualize_agent
+        from simple_rl.utils import mdp_visualizer as mdpv
         from grid_visualizer import _draw_state
-        visualize_agent(self, agent, _draw_state)
+        mdpv.visualize_agent(self, agent, _draw_state)
         raw_input("Press anything to quit ")
-        quit()
 
     def visualize_value(self):
-        from ...utils.mdp_visualizer import visualize_value
+        from simple_rl.utils import mdp_visualizer as mdpv
         from grid_visualizer import _draw_state
-        visualize_value(self, _draw_state)
+        mdpv.visualize_value(self, _draw_state)
         raw_input("Press anything to quit ")
-        quit()
 
 
 def _error_check(state, action):
@@ -189,6 +188,55 @@ def _error_check(state, action):
     if not isinstance(state, GridWorldState):
         print "Error: the given state (" + str(state) + ") was not of the correct class."
         quit()
+
+
+def make_grid_world_from_file(file_name, randomize=False):
+    '''
+    Args:
+        file_name (str)
+        randomize (bool): If true, chooses a random agent location and goal location.
+
+
+    Returns:
+        (GridWorldMDP)
+
+    Summary:
+        Builds a GridWorldMDP from a file:
+            'w' --> wall
+            'a' --> agent
+            'g' --> goal
+            '-' --> empty
+    '''
+    wall_file = open(file_name)
+    wall_lines = wall_file.readlines()
+
+    # Get walls, agent, goal loc.
+    num_rows = len(wall_lines)
+    num_cols = len(wall_lines[0].strip())
+    empty_cells = []
+    agent_x, agent_y = 1, 1
+    walls = []
+    goal_locs = []
+    for i, line in enumerate(wall_lines):
+        line = line.strip()
+        for j, ch in enumerate(line):
+            if ch == "w":
+                walls.append((j+1, num_rows - i))
+            elif ch == "g":
+                goal_locs.append((j+1, num_rows - i))
+            elif ch == "a":
+                agent_x, agent_y = j + 1, num_rows - i
+            elif ch == "-":
+                empty_cells.append((j + 1, num_rows - i))
+
+    if randomize:
+        agent_x, agent_y = random.choice(empty_cells)
+        goal_locs = [random.choice(empty_cells)]
+
+    if len(goal_locs) == 0:
+        goal_locs = [(num_cols, num_rows)]
+
+    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls)
 
 
 def main():

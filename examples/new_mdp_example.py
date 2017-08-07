@@ -75,7 +75,7 @@ class ColoredGridWorldState(GridWorldState):
         return "s: (" + str(self.x) + "," + str(self.y) + "," + str(self.color) + ")"
 
 def main():
-    state_colors = defaultdict(lambda : defaultdict(lambda : "white"))
+    state_colors = defaultdict(lambda:defaultdict(lambda:"white"))
     state_colors[3][2] = "red"
 
     # Setup MDP, Agents.

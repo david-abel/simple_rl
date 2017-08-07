@@ -1,7 +1,7 @@
 ''' OOMDPStateClass.py: Contains the OOMDP State Class. '''
 
 # Other imports.
-from ...mdp.StateClass import State
+from simple_rl.mdp.StateClass import State
 
 class OOMDPState(State):
     ''' OOMDP State class '''
@@ -12,7 +12,7 @@ class OOMDPState(State):
             objects (dict of OOMDPObject instances): {key=object class (str):val = object instances}
         '''
         self.objects = objects
-        self._update()
+        self.update()
 
         State.__init__(self, data=self.data)
 
@@ -27,10 +27,10 @@ class OOMDPState(State):
             print "\t Known classes are: ", self.objects.keys()
             quit()
 
-    def get_first_instance_of_class(self, obj_class):
+    def get_first_obj_of_class(self, obj_class):
         return self.get_objects_of_class(obj_class)[0]
 
-    def _update(self):
+    def update(self):
         '''
         Summary:
             Turn object attributes into a feature list.

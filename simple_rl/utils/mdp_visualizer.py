@@ -7,12 +7,39 @@ try:
     title_font = pygame.font.SysFont("CMU Serif", 32)
 except ImportError:
     print "Error: pygame not installed (needed for visuals)."
-    quit()
+    exit()
 
 # Other imports.
 from simple_rl.utils.chart_utils import color_ls
 
+def val_to_color(val, good_col=(169, 193, 249), bad_col=(255, 255, 255)):
+    '''
+    Args:
+        val (float)
+        good_col (tuple)
+        bad_col (tuple)
+
+    Returns:
+        (tuple)
+
+    Summary:
+        Smoothly interpolates between @good_col and @bad_col. That is,
+        if @val is 1, we get good_col, if it's 0.5, we get a color
+        halfway between the two, and so on.
+    '''
+    diff_list = [bad_col[i] - good_col[i] for i in range(3)]
+    result = tuple([max(min(int(bad_col[i] - (val**4)*diff_list[i]), 255), 0) for i in range(3)])
+    return result
+
 def _draw_title_text(mdp, screen):
+    '''
+    Args:
+        mdp (simple_rl.MDP)
+        screen (pygame.Surface)
+
+    Summary:
+        Draws the name of the MDP to the top of the screen.
+    '''
     scr_width, scr_height = screen.get_width(), screen.get_height()
     title_split = str(mdp).split("_")
     title = title_split[0]
@@ -25,6 +52,14 @@ def _draw_title_text(mdp, screen):
     screen.blit(title_text, (scr_width / 2.0 - len(formatted_title_text)*6, scr_width / 20.0))
 
 def _draw_agent_text(agent, screen):
+    '''
+    Args:
+        agent (simple_rl.Agent)
+        screen (pygame.Surface)
+
+    Summary:
+        Draws the name of the agent to the bottom right of the screen.
+    '''
     scr_width, scr_height = screen.get_width(), screen.get_height()
     formatted_agent_text = "agent: " + str(agent)
     agent_text_point = (3*scr_width / 4.0 - len(formatted_agent_text)*6, 18*scr_height / 20.0)
@@ -32,6 +67,14 @@ def _draw_agent_text(agent, screen):
     screen.blit(agent_text, agent_text_point)
 
 def _draw_state_text(state, screen):
+    '''
+    Args:
+        state (simple_rl.State)
+        screen (pygame.Surface)
+
+    Summary:
+        Draws the name of the current state to the bottom left of the screen.
+    '''
     scr_width, scr_height = screen.get_width(), screen.get_height()
     # Clear.
     formatted_state_text = str(state)

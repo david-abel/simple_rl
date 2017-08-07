@@ -31,6 +31,9 @@ class MDP(object):
     def get_transition_func(self):
         return self.transition_func
 
+    def get_num_state_feats(self):
+        return self.init_state.get_num_feats()
+
     def execute_agent_action(self, action):
         '''
         Args:
@@ -38,6 +41,10 @@ class MDP(object):
 
         Returns:
             (tuple: <float,State>): reward, State
+
+        Summary:
+            Core method of all of simple_rl. Facilitates interaction
+            between the MDP and an agent.
         '''
         reward = self.reward_func(self.cur_state, action)
         next_state = self.transition_func(self.cur_state, action)

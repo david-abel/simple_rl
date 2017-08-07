@@ -73,9 +73,10 @@ def average_data(data, cumulative=False):
         try:
             avged = all_instances.sum(axis=0)/float(num_instances)
         except TypeError:
-            print "Error: something went wrong. I couldn't find an algorithm or some algorithm was run under inconsinsent parameters (perhaps experiments are still running)."
+            print 
+            print "(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters."
             quit()
-
+        
         if cumulative:
             # If we're summing over episodes.
             temp = []
@@ -215,13 +216,13 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Save the plot.
     pyplot.savefig(plot_name, format="pdf")
-
-    if open_plot:
-        cmd = "gnome-open " if sys.platform == "linux" or sys.platform == "linux2" else "open "
-        cmd += plot_name
-        os.system(cmd)
     
-    pyplot.cla() # Clears.
+    if open_plot:
+        pyplot.show()
+
+    # Clear and close.
+    pyplot.cla()
+    pyplot.close()
 
 def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=False, is_rec_disc_reward=False):
     '''
@@ -275,6 +276,8 @@ def main():
     if len(agents) == 0:
         print "Error: no csv files found."
         quit()
+
+    print agents
 
     # Plot.
     make_plots(data_dir, agents)

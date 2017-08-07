@@ -129,7 +129,7 @@ class ValueIteration(Planner):
         for key in self.value_func.keys():
             print key, ":", self.value_func[key]
 
-    def plan(self, state, horizon=100):
+    def plan(self, state=None, horizon=100):
         '''
         Args:
             state (State)
@@ -138,6 +138,9 @@ class ValueIteration(Planner):
         Returns:
             (list): List of actions
         '''
+        if state is None:
+            state = self.mdp.get_init_state()
+
         action_seq = []
         state_seq = [state]
         steps = 0

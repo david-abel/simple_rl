@@ -44,6 +44,7 @@ class Experiment(object):
             count_r_per_n_timestep (int)
             cumulative_plot (bool)
         '''
+        # Store all relevant bools.
         self.agents = agents
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
@@ -53,12 +54,7 @@ class Experiment(object):
         self.steps_since_added_r = 1
         self.rew_since_count = 0
         self.cumulative_plot = cumulative_plot
-
-        if self.is_multi_task:
-            self.name = "multitask-" + str(self.mdp.keys()[0])
-        else:
-            self.name = str(self.mdp)
-            
+        self.name = str(self.mdp)
         self.rewards = defaultdict(list)
         self.times = defaultdict(list)
         self.exp_directory = Experiment.RESULTS_DIR + self.name
