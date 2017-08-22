@@ -4,7 +4,7 @@ import random
 from collections import defaultdict
 
 # Other imports.
-from simple_rl.tasks import BanditMDP, ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP, FourRoomMDP
+from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP, FourRoomMDP
 from simple_rl.tasks.grid_world.GridWorldMDPClass import make_grid_world_from_file
 from simple_rl.mdp import MDPDistribution
 
@@ -66,7 +66,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0):
     hall_goal_locs = [(i, width) for i in range(1, height + 1)]
 
         # Four room.
-    four_room_goal_locs = [(width, height), (width, 1), (1, height)]
+    four_room_goal_locs = [(2,2), (width, height), (width, 1), (1, height)]
 
         # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}
