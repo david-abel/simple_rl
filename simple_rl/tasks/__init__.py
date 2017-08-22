@@ -1,5 +1,4 @@
 # Grab classes.
-from bandit.BanditMDPClass import BanditMDP
 from chain.ChainMDPClass import ChainMDP
 from chain.ChainStateClass import ChainState
 from grid_world.GridWorldMDPClass import GridWorldMDP
