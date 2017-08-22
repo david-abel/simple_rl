@@ -24,9 +24,10 @@ import numpy as np
 from collections import defaultdict
 
 # Non-standard imports.
+from simple_rl.planning import ValueIteration
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
-from simple_rl.agents import QLearnerAgent
+from simple_rl.agents import QLearnerAgent, FixedPolicyAgent
 
 
 def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False):
@@ -115,22 +116,34 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
     experiment.make_plots()
 
 def run_agents_multi_task(agents,
-                        mdp_distr,
-                        task_samples=5,
-                        episodes=1,
-                        steps=100,
-                        clear_old_results=True,
-                        open_plot=True,
-                        verbose=False,
-                        is_rec_disc_reward=False,
-                        reset_at_terminal=False):
+                            mdp_distr,
+                            task_samples=5,
+                            episodes=1,
+                            steps=100,
+                            clear_old_results=True,
+                            open_plot=True,
+                            verbose=False,
+                            is_rec_disc_reward=False,
+                            reset_at_terminal=False,
+                            include_optimal=False):
     '''
     Args:
+        agents (list)
         mdp_distr (MDPDistribution)
         task_samples
         episodes
         steps
+
+    Summary:
+        Runs each agent on the MDP distribution according to the given parameters.
+        If @mdp_distr has a non-zero horizon, then gamma is set to 1 and #steps is ignored.
     '''
+
+    # Set number of steps if the horizon is given.
+    if mdp_distr.get_horizon() > 0:
+        mdp_distr.set_gamma(1.0)
+        steps = mdp_distr.get_horizon()
+
     # Experiment (for reproducibility, plotting).
     exp_params = {"task_samples":task_samples, "episodes":episodes, "steps":steps}
     experiment = Experiment(agents=agents,
@@ -147,6 +160,10 @@ def run_agents_multi_task(agents,
 
     times = defaultdict(float)
 
+    if include_optimal:
+        fixed_policy_agent = FixedPolicyAgent(policy=lambda s: "", name="optimal")
+        agents += [fixed_policy_agent]
+
     # Learn.
     for agent in agents:
         print str(agent) + " is learning."
@@ -158,6 +175,11 @@ def run_agents_multi_task(agents,
 
             # Sample the MDP.
             mdp = mdp_distr.sample()
+
+            if include_optimal and agent.name == "optimal":
+                vi = ValueIteration(mdp)
+                vi.run_vi()
+                agent.set_policy(vi.policy)
 
             # Run the agent.
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal)
@@ -181,16 +203,17 @@ def run_agents_multi_task(agents,
     experiment.make_plots(open_plot=open_plot)
 
 def run_agents_on_mdp(agents,
-                    mdp,
-                    instances=5,
-                    episodes=100,
-                    steps=200,
-                    clear_old_results=True,
-                    rew_step_count=1,
-                    is_rec_disc_reward=False,
-                    open_plot=True,
-                    verbose=False,
-                    reset_at_terminal=False):
+                        mdp,
+                        instances=5,
+                        episodes=100,
+                        steps=200,
+                        clear_old_results=True,
+                        rew_step_count=1,
+                        is_rec_disc_reward=False,
+                        open_plot=True,
+                        verbose=False,
+                        reset_at_terminal=False,
+                        include_optimal=False):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -203,6 +226,8 @@ def run_agents_on_mdp(agents,
         is_rec_disc_reward (bool): If true, track (and plot) discounted reward.
         open_plot (bool): If true opens the plot at the end.
         verbose (bool): If true, prints status bars per episode/instance.
+        reset_at_terminal (bool): If true sends the agent to the start state after terminal.
+        include_optimal (bool): If true also plots optimal behavior.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
@@ -224,6 +249,12 @@ def run_agents_on_mdp(agents,
     print "Running experiment: \n" + str(experiment)
     time_dict = defaultdict(float)
 
+    if include_optimal:
+        vi = ValueIteration(mdp)
+        vi.run_vi()
+        fixed_policy_agent = FixedPolicyAgent(vi.policy, name="optimal")
+        agents += [fixed_policy_agent]
+
     # Learn.
     for agent in agents:
         print str(agent) + " is learning."
@@ -232,8 +263,8 @@ def run_agents_on_mdp(agents,
 
         # For each instance.
         for instance in xrange(1, instances + 1):
-            sys.stdout.flush()
             print "  Instance " + str(instance) + " of " + str(instances) + "."
+            sys.stdout.flush()
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal=reset_at_terminal)
             
             # Reset the agent.
@@ -296,7 +327,6 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
             # Terminal check.
             if state.is_terminal():
-                
                 if episodes == 1 and not reset_at_terminal and experiment is not None:
                     # Self loop if we're not episodic or resetting and in a terminal state.
                     experiment.add_experience(agent, state, action, 0, state, time_taken=time.clock()-step_start)
@@ -307,10 +337,12 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             # Execute in MDP.
             reward, next_state = mdp.execute_agent_action(action)
 
+            # print state, action, reward, next_state
+
             # Record the experience.
             if experiment is not None:
-                reward = mdp.get_gamma()**(step + 1) * reward if is_rec_disc_reward else reward
-                experiment.add_experience(agent, state, action, reward, next_state, time_taken=time.clock()-step_start)
+                reward_to_track = mdp.get_gamma()**(step + 1) * reward if is_rec_disc_reward else reward
+                experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock()-step_start)
 
             if next_state.is_terminal() and reset_at_terminal:
                 # Reset the MDP.

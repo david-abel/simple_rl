@@ -27,5 +27,8 @@ class FixedPolicyAgent(Agent):
         '''
         return self.policy(state)
 
+    def set_policy(self, new_policy):
+        self.policy = new_policy
+
     def __str__(self):
         return str(self.name)

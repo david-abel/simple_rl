@@ -218,7 +218,11 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     pyplot.savefig(plot_name, format="pdf")
     
     if open_plot:
-        pyplot.show()
+        # Open it.
+        open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
+        os.system(open_prefix + "open " + plot_name)
+
+        # pyplot.show()
 
     # Clear and close.
     pyplot.cla()

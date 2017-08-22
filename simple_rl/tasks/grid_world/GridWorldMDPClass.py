@@ -3,6 +3,7 @@
 # Python imports.
 import random
 import sys
+import os
 
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
@@ -207,7 +208,8 @@ def make_grid_world_from_file(file_name, randomize=False):
             'g' --> goal
             '-' --> empty
     '''
-    wall_file = open(file_name)
+    grid_path = os.path.dirname(os.path.realpath(__file__))
+    wall_file = open(os.path.join(grid_path, "txt_grids", file_name))
     wall_lines = wall_file.readlines()
 
     # Get walls, agent, goal loc.

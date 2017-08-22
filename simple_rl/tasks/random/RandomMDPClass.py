@@ -3,6 +3,7 @@
 # Python imports.
 import random
 import numpy as np
+from collections import defaultdict
 
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
@@ -24,11 +25,11 @@ class RandomMDP(MDP):
             over them for transitions. Rewards are also chosen randomly.
         '''
         MDP.__init__(self, RandomMDP.ACTIONS, self._transition_func, self._reward_func, init_state=RandomState(1), gamma=gamma)
-        assert(num_rand_trans <= num_states)
+        # assert(num_rand_trans <= num_states)
         self.num_rand_trans = num_rand_trans
         self.num_states = num_states
         self._reward_s_a = (random.choice(range(self.num_states)), random.choice(RandomMDP.ACTIONS))
-        self._transitions = {}
+        self._transitions = defaultdict(lambda: defaultdict(str))
 
     def _reward_func(self, state, action):
         '''
@@ -40,7 +41,6 @@ class RandomMDP(MDP):
         Returns
             (float)
         '''
-
         if (state.data, action) == self._reward_s_a:
             return 1.0
         else:
@@ -55,11 +55,14 @@ class RandomMDP(MDP):
         Returns
             (State)
         '''
+        if self.num_states == 1:
+            return state
+
         if (state, action) not in self._transitions:
             # Chooses @self.num_rand_trans from range(self.num_states)
-            self._transitions[(state, action)] = np.random.choice(self.num_states, self.num_rand_trans, replace=False)
+            self._transitions[state][action] = np.random.choice(self.num_states, self.num_rand_trans, replace=False)
 
-        state_id = np.random.choice(self._transitions[(state, action)])
+        state_id = np.random.choice(self._transitions[state][action])
         return RandomState(state_id)
 
     def __str__(self):

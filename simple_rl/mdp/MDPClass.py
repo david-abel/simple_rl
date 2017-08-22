@@ -34,6 +34,9 @@ class MDP(object):
     def get_num_state_feats(self):
         return self.init_state.get_num_feats()
 
+    def set_gamma(self, new_gamma):
+        self.gamma = new_gamma
+
     def execute_agent_action(self, action):
         '''
         Args:

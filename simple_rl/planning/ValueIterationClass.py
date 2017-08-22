@@ -23,9 +23,12 @@ class ValueIteration(Planner):
         self.sample_rate = sample_rate
         self.value_func = defaultdict(float)
         self.reachability_done = False
+        self.has_run_vi = False
         self._compute_reachable_state_space()
 
     def get_num_states(self):
+        if not self.reachability_done:
+            self._compute_reachable_state_space()
         return len(self.states)      
 
     def get_states(self):
@@ -107,7 +110,7 @@ class ValueIteration(Planner):
         # Main loop.
         while max_diff > self.delta and iterations < self.max_iterations:
             max_diff = 0
-            for s in self.states:
+            for s in self.get_states():
                 if s.is_terminal():
                     continue
 
@@ -123,6 +126,9 @@ class ValueIteration(Planner):
             iterations += 1
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
+        
+        self.has_run_vi = True
+
         return iterations, value_of_init_state
 
     def print_value_func(self):
@@ -138,8 +144,11 @@ class ValueIteration(Planner):
         Returns:
             (list): List of actions
         '''
-        if state is None:
-            state = self.mdp.get_init_state()
+
+        state = self.mdp.get_init_state() if state is None else state
+
+        if self.has_run_vi is False:
+            print "Warning: VI has not been run. Plan will be random."
 
         action_seq = []
         state_seq = [state]
@@ -160,9 +169,28 @@ class ValueIteration(Planner):
             state (State)
 
         Returns:
-            (str): denoting the action with the max q value in the given @state.
+            (str): The action with the max q value in the given @state.
         '''
         return self._compute_max_qval_action_pair(state)[1]
+
+    def get_max_q_actions(self, state):
+        '''
+        Args:
+            state (State)
+
+        Returns:
+            (list): List of actions with the max q value in the given @state.
+        '''
+        max_q_val = self.get_value(state)
+        best_action_list = []
+
+        # Find best action (action w/ current max predicted Q value)
+        for action in self.actions:
+            q_s_a = self.get_q_value(state, action)
+            if q_s_a == max_q_val:
+                best_action_list.append(action)
+
+        return best_action_list
 
     def policy(self, state):
         '''
@@ -186,13 +214,13 @@ class ValueIteration(Planner):
             (tuple) --> (float, str): where the float is the Qval, str is the action.
         '''
         # Grab random initial action in case all equal
-        best_action = random.choice(self.actions)
         max_q_val = float("-inf")
-        shuffled_action_list = self.actions[:]
-        random.shuffle(shuffled_action_list)
+        action_list = self.actions[:]
+        # random.shuffle(shuffled_action_list)
+        best_action = action_list[0]
 
         # Find best action (action w/ current max predicted Q value)
-        for action in shuffled_action_list:
+        for action in action_list:
             q_s_a = self.get_q_value(state, action)
             if q_s_a > max_q_val:
                 max_q_val = q_s_a

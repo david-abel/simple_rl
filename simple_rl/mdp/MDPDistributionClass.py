@@ -8,7 +8,7 @@ from collections import defaultdict
 class MDPDistribution(object):
     ''' Class for distributions over MDPs. '''
 
-    def __init__(self, mdp_prob_dict):
+    def __init__(self, mdp_prob_dict, horizon=0):
         '''
         Args:
             mdp_prob_dict (dict):
@@ -26,7 +26,46 @@ class MDPDistribution(object):
                 new_dict[mdp] = mdp_prob
             mdp_prob_dict = new_dict
 
+        self.horizon = horizon
         self.mdp_prob_dict = mdp_prob_dict
+
+    def remove_mdps(self, mdp_list):
+        '''
+        Args:
+            (list): Contains MDP instances.
+
+        Summary:
+            Removes each mdp in @mdp_list from self.mdp_prob_dict and recomputes the distribution.
+        '''
+        for mdp in mdp_list:
+            try:
+                self.mdp_prob_dict.pop(mdp)
+            except KeyError:
+                print "simple-rl (Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it."
+                quit()
+
+        self._normalize()
+
+    def remove_mdp(self, mdp):
+        '''
+        Args:
+            (MDP)
+
+        Summary:
+            Removes @mdp from self.mdp_prob_dict and recomputes the distribution.
+        '''
+        try:
+            self.mdp_prob_dict.pop(mdp)
+        except KeyError:
+            print "simple-rl (Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it."
+            quit()
+
+        self._normalize()
+
+    def _normalize(self):
+        total = sum(self.mdp_prob_dict.values())
+        for mdp in self.mdp_prob_dict.keys():
+            self.mdp_prob_dict[mdp] = self.mdp_prob_dict[mdp] / total
 
     def get_all_mdps(self, prob_threshold=0):
         '''
@@ -38,6 +77,9 @@ class MDPDistribution(object):
         '''
         return [mdp for mdp in self.mdp_prob_dict.keys() if self.mdp_prob_dict[mdp] > prob_threshold]
 
+    def get_horizon(self):
+        return self.horizon
+
     def get_actions(self):
         return self.mdp_prob_dict.keys()[0].get_actions()
 
@@ -47,6 +89,20 @@ class MDPDistribution(object):
             Not all MDPs in the distribution are guaranteed to share gamma.
         '''
         return self.mdp_prob_dict.keys()[0].get_gamma()
+
+    def get_reward_func(self, avg=True):
+        if avg:
+            self.get_average_reward_func()
+        else:
+            self.get_all_mdps()[0].get_reward_func()
+
+    def get_average_reward_func(self):
+        def _avg_r_func(s, a):
+            r = 0.0
+            for m in self.mdp_prob_dict.keys():
+                r += m.reward_func(s, a) * self.mdp_prob_dict[m]
+            return r
+        return _avg_r_func
 
     def get_init_state(self):
         '''
@@ -60,6 +116,16 @@ class MDPDistribution(object):
 
     def get_mdps(self):
         return self.mdp_prob_dict.keys()
+
+    def get_prob_of_mdp(self, mdp):
+        if mdp in self.mdp_prob_dict.keys():
+            return self.mdp_prob_dict[mdp]
+        else:
+            return 0.0
+
+    def set_gamma(self, new_gamma):
+        for mdp in self.mdp_prob_dict.keys():
+            mdp.set_gamma(new_gamma)
 
     def sample(self, k=1):
         '''
