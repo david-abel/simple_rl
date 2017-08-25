@@ -54,19 +54,24 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0):
         
         # Corridor.
     corr_width = 20
-    corr_goal_magnitude = random.randint(1, 5)
-    corr_goal_cols = [i for i in xrange(1, corr_goal_magnitude)] + [j for j in xrange(corr_width-corr_goal_magnitude, corr_width + 1)]
+    corr_goal_magnitude = 1 #random.randint(1, 5)
+    corr_goal_cols = [i for i in xrange(1, corr_goal_magnitude + 1)] + [j for j in xrange(corr_width-corr_goal_magnitude + 1, corr_width + 1)]
     corr_goal_locs  = list(itertools.product(corr_goal_cols, [1]))
 
         # Grid World
-    grid_world_rows, grid_world_cols = [i for i in xrange(width - 4, width)], [j for j in xrange(height - 4, height)]
-    grid_goal_locs = list(itertools.product(grid_world_rows, grid_world_cols))
+    tl_grid_world_rows, tl_grid_world_cols = [i for i in xrange(width - 4, width)], [j for j in xrange(height - 4, height)]
+    tl_grid_goal_locs = list(itertools.product(tl_grid_world_rows, tl_grid_world_cols))
+
+    tr_grid_world_rows, tr_grid_world_cols = [i for i in xrange(1, 4)], [j for j in xrange(height - 4, height)]
+    tr_grid_goal_locs = list(itertools.product(tr_grid_world_rows, tr_grid_world_cols))
+
+    grid_goal_locs = tl_grid_goal_locs + tr_grid_goal_locs
 
         # Hallway.
     hall_goal_locs = [(i, width) for i in range(1, height + 1)]
 
         # Four room.
-    four_room_goal_locs = [(2,2), (width, height), (width, 1), (1, height)]
+    four_room_goal_locs = [(width, height), (width, 1), (1, height)]
 
         # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}
@@ -75,17 +80,20 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0):
     goal_loc_dict = {"four_room":four_room_goal_locs,
                     "hall":hall_goal_locs,
                     "grid":grid_goal_locs,
-                    "corridor":corr_goal_locs
+                    "corridor":corr_goal_locs,
+                    "icerink":four_room_goal_locs
                     }
     
     # MDP Probability.
-    num_mdps = 10 if mdp_class not in goal_loc_dict.keys() else len(goal_loc_dict[mdp_class])
+    num_mdps = 12 if mdp_class not in goal_loc_dict.keys() else len(goal_loc_dict[mdp_class])
     mdp_prob = 1.0 / num_mdps
 
     for i in range(num_mdps):
 
-        new_mdp = {"hall":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=[goal_loc_dict["hall"][i % len(goal_loc_dict["hall"])]]),
-                    "corridor":GridWorldMDP(width=20, height=1, init_loc=(10, 1), goal_locs=[goal_loc_dict["corridor"][i % len(goal_loc_dict["corridor"])]], is_goal_terminal=True),
+        new_mdp = {"octo":make_grid_world_from_file("octogrid.txt", num_goals=4, randomize=False, goal_num=i),
+                    "icerink":FourRoomMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]], slip_prob=0.05, name="icerink"),
+                    "hall":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=[goal_loc_dict["hall"][i % len(goal_loc_dict["hall"])]], name="hallway"),
+                    "corridor":GridWorldMDP(width=20, height=1, init_loc=(10, 1), goal_locs=[goal_loc_dict["corridor"][i % len(goal_loc_dict["corridor"])]], is_goal_terminal=True, name="corridor"),
                     "grid":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=[goal_loc_dict["grid"][i % len(goal_loc_dict["grid"])]], is_goal_terminal=True),
                     "four_room":FourRoomMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]]),
                     # THESE GOALS ARE SPECIFIED IMPLICITLY:

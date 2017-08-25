@@ -23,7 +23,9 @@ class GridWorldMDP(MDP):
                 walls=[],
                 is_goal_terminal=True,
                 gamma=0.99,
-                init_state=None):
+                init_state=None,
+                slip_prob=0.0,
+                name="gridworld"):
         '''
         Args:
             height (int)
@@ -55,6 +57,8 @@ class GridWorldMDP(MDP):
         self.goal_locs = goal_locs
         self.cur_state = GridWorldState(init_loc[0], init_loc[1])
         self.is_goal_terminal = is_goal_terminal
+        self.slip_prob = slip_prob
+        self.name = name
 
     def _reward_func(self, state, action):
         '''
@@ -108,6 +112,18 @@ class GridWorldMDP(MDP):
         if state.is_terminal():
             return state
 
+        r = random.random()
+        if self.slip_prob > r:
+            # Flip dir.
+            if action == "up":
+                action = random.choice(["left", "right"])
+            elif action == "down":
+                action = random.choice(["left", "right"])
+            elif action == "left":
+                action = random.choice(["up", "down"])
+            elif action == "right":
+                action = random.choice(["up", "down"])
+
         if action == "up" and state.y < self.height and not self.is_wall(state.x, state.y + 1):
             next_state = GridWorldState(state.x, state.y + 1)
         elif action == "down" and state.y > 1 and not self.is_wall(state.x, state.y - 1):
@@ -136,7 +152,7 @@ class GridWorldMDP(MDP):
         return (x, y) in self.walls
 
     def __str__(self):
-        prefix = "gridworld" if self.is_goal_terminal else "gridworld-no-term"
+        prefix = self.name if self.is_goal_terminal else self.name + "-no-term"
         return prefix + "_h-" + str(self.height) + "_w-" + str(self.width)
 
     def get_goal_locs(self):
@@ -191,12 +207,13 @@ def _error_check(state, action):
         quit()
 
 
-def make_grid_world_from_file(file_name, randomize=False):
+def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None, goal_num=None):
     '''
     Args:
         file_name (str)
         randomize (bool): If true, chooses a random agent location and goal location.
-
+        num_goals (int)
+        name (str)
 
     Returns:
         (GridWorldMDP)
@@ -208,6 +225,10 @@ def make_grid_world_from_file(file_name, randomize=False):
             'g' --> goal
             '-' --> empty
     '''
+
+    if name is None:
+        name = file_name.split(".")[0]
+
     grid_path = os.path.dirname(os.path.realpath(__file__))
     wall_file = open(os.path.join(grid_path, "txt_grids", file_name))
     wall_lines = wall_file.readlines()
@@ -223,22 +244,29 @@ def make_grid_world_from_file(file_name, randomize=False):
         line = line.strip()
         for j, ch in enumerate(line):
             if ch == "w":
-                walls.append((j+1, num_rows - i))
+                walls.append((j + 1, num_rows - i))
             elif ch == "g":
-                goal_locs.append((j+1, num_rows - i))
+                goal_locs.append((j + 1, num_rows - i))
             elif ch == "a":
                 agent_x, agent_y = j + 1, num_rows - i
             elif ch == "-":
                 empty_cells.append((j + 1, num_rows - i))
 
+    if goal_num is not None:
+        goal_locs = [goal_locs[goal_num % len(goal_locs)]]
+
     if randomize:
         agent_x, agent_y = random.choice(empty_cells)
-        goal_locs = [random.choice(empty_cells)]
+        if len(goal_locs) == 0:
+            goal_locs = random.sample(empty_cells, num_goals)
+        else:
+            goal_locs = random.sample(goal_locs, num_goals)
 
     if len(goal_locs) == 0:
         goal_locs = [(num_cols, num_rows)]
 
-    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls)
+
+    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls, name=name)
 
 
 def main():

@@ -144,7 +144,6 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
     # Setup and draw initial state.
     cur_state = mdp.get_init_state() if cur_state is None else cur_state
     reward = 0
-
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent)
 
     done = False

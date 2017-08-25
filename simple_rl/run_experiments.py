@@ -326,8 +326,8 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             action = agent.act(state, reward)
 
             # Terminal check.
-            if state.is_terminal():
-                if episodes == 1 and not reset_at_terminal and experiment is not None:
+            if state.is_terminal() or action == "terminate":
+                if episodes == 1 and not reset_at_terminal and experiment is not None and action != "terminate":
                     # Self loop if we're not episodic or resetting and in a terminal state.
                     experiment.add_experience(agent, state, action, 0, state, time_taken=time.clock()-step_start)
                     continue

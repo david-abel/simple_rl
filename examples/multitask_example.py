@@ -43,7 +43,7 @@ def main():
     rand_agent = RandomAgent(actions=mdp_distr.get_actions())
 
     # Run experiment and make plot.
-    run_agents_multi_task([ql_agent, rand_agent], mdp_distr, task_samples=30, episodes=100, steps=50, reset_at_terminal=True, include_optimal=True)
+    run_agents_multi_task([ql_agent, rand_agent], mdp_distr, task_samples=30, episodes=1, steps=400, reset_at_terminal=True, include_optimal=False)
 
 if __name__ == "__main__":
     main()
