@@ -125,7 +125,7 @@ class BlockDudeOOMDP(OOMDP):
             next_state.set_terminal(True)
         
         # All OOMDP states must be updated.
-        next_state._update()
+        next_state.update()
         
         return next_state
 
@@ -141,7 +141,7 @@ def is_block_dude_terminal_state(state):
         (bool): True iff all passengers at at their destinations, not in the BlockDude.
     '''
     ax, ay = state.get_agent_x(), state.get_agent_y()
-    exit = state.get_first_instance_of_class("exit")
+    exit = state.get_first_obj_of_class("exit")
     goal_x, goal_y = exit["x"], exit["y"]
 
     return ax == goal_x and ay == goal_y
