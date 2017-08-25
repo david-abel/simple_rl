@@ -71,7 +71,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0):
     hall_goal_locs = [(i, width) for i in range(1, height + 1)]
 
         # Four room.
-    four_room_goal_locs = [(width, height), (width, 1), (1, height)]
+    four_room_goal_locs = [(width, height), (width, 1), (1, height), (width - 2, 2), (1, height - 2), (width - 2, height - 2)]
 
         # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}

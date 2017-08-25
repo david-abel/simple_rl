@@ -17,6 +17,7 @@ import sys
 import os
 import matplotlib.pyplot as pyplot
 import numpy as np
+import subprocess
 
 color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
                 [113, 198, 113],[85, 85, 85], [198, 113, 113],\
@@ -221,8 +222,6 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         # Open it.
         open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
         os.system(open_prefix + "open " + plot_name)
-
-        # pyplot.show()
 
     # Clear and close.
     pyplot.cla()
