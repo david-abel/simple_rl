@@ -8,7 +8,7 @@ from PlannerClass import Planner
 
 class ValueIteration(Planner):
 
-    def __init__(self, mdp, name="value_iter", delta=0.0001, max_iterations=500, sample_rate=1):
+    def __init__(self, mdp, name="value_iter", delta=0.0001, max_iterations=500, sample_rate=10):
         '''
         Args:
             mdp (MDP)
@@ -25,6 +25,19 @@ class ValueIteration(Planner):
         self.reachability_done = False
         self.has_run_vi = False
         self._compute_reachable_state_space()
+
+    def _compute_matrix_from_trans_func(self):
+        self.trans_dict = defaultdict(lambda:defaultdict(lambda:defaultdict(float)))
+            # K: state
+                # K: a
+                    # K: s_prime
+                    # V: prob
+
+        for s in self.get_states():
+            for a in self.actions:
+                for sample in xrange(self.sample_rate):
+                    s_prime = self.transition_func(s, a)
+                    self.trans_dict[s][a][s_prime] += 1.0 / self.sample_rate
 
     def get_num_states(self):
         if not self.reachability_done:
@@ -58,21 +71,21 @@ class ValueIteration(Planner):
             (float): The Q estimate given the current value function @self.value_func.
         '''
         
-        # Take samples and track next state counts.
-        next_state_counts = defaultdict(int)
-        for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
-            next_state = self.transition_func(s,a)
-            next_state_counts[next_state] += 1
+        # # Take samples and track next state counts.
+        # next_state_counts = defaultdict(int)
+        # for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
+        #     next_state = self.transition_func(s,a)
+        #     next_state_counts[next_state] += 1
 
-        # Compute T(s' | s, a) estimate based on MLE.
-        next_state_probs = defaultdict(float)
-        for state in next_state_counts:
-            next_state_probs[state] = float(next_state_counts[state]) / self.sample_rate
+        # # Compute T(s' | s, a) estimate based on MLE.
+        # next_state_probs = defaultdict(float)
+        # for state in next_state_counts:
+        #     next_state_probs[state] = float(next_state_counts[state]) / self.sample_rate
 
         # Compute expected value.
         expected_future_val = 0
-        for state in next_state_probs:
-            expected_future_val += next_state_probs[state] * self.value_func[state]
+        for s_prime in self.trans_dict[s][a].keys():
+            expected_future_val += self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
 
         return self.reward_func(s,a) + self.gamma*expected_future_val
 
@@ -106,6 +119,8 @@ class ValueIteration(Planner):
         # Algorithm bookkeeping params.
         iterations = 0
         max_diff = float("inf")
+
+        self._compute_matrix_from_trans_func()
 
         # Main loop.
         while max_diff > self.delta and iterations < self.max_iterations:
