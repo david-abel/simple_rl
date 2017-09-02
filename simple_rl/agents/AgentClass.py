@@ -35,6 +35,7 @@ class Agent(object):
         '''
         self.prev_state = None
         self.prev_action = None
+        self.step_number = 0
 
     def end_of_episode(self):
         '''
