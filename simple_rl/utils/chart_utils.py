@@ -8,16 +8,24 @@ Functions:
     compute_single_conf_interval: Helper function for above.
     plot: Creates (and opens) a single plot using matplotlib.pyplot
     make_plots: Puts everything in order to create the plot.
+    _get_agent_names: Grabs the agent names from parameters.txt.
+    _get_aget_colors: Determines the relevant colors/markers for the plot.
+    _is_epidosic: Determines if the experiment was episodic from parameters.txt.
+    parse_args: Parse command line arguments.
     main: Loads data from a given path and creates plot.
+
+Author: David Abel (cs.brown.edu/~dabel)
 '''
 
 # Python imports.
 import math
 import sys
 import os
+import matplotlib
 import matplotlib.pyplot as pyplot
 import numpy as np
 import subprocess
+import argparse
 
 color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
                 [113, 198, 113],[85, 85, 85], [198, 113, 113],\
@@ -43,8 +51,10 @@ def load_data(experiment_dir, experiment_agents):
 
         # Put the reward instances into a list of floats.
         for instance in all_reward.readlines():
-            all_episodes_for_instance = [float(r) for r in instance.split(",")[:-1]]
-            all_instances.append(all_episodes_for_instance)
+            all_episodes_for_instance = [float(r) for r in instance.split(",")[:-1] if len(r) > 0 and "e" not in r]
+            all_episodes_for_instance = all_episodes_for_instance[:7050]
+            if len(all_episodes_for_instance) > 0:
+                all_instances.append(all_episodes_for_instance)
 
         result.append(all_instances)
 
@@ -176,12 +186,18 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     if use_cost:
         results = [[-x for x in alg] for alg in results]
 
+    agent_colors = _get_agent_colors(experiment_dir, agents)
+
     # Make the plot.
-    for i, alg in enumerate(agents):
+    print_prefix = "\nAvg. cumulative reward" if cumulative else "Avg. reward"
+    print print_prefix + " last " + x_axis_unit + ":"
+
+    for i, agent_name in enumerate(agents):
 
         # Add figure for this algorithm.
-        series_color = colors[i % len(colors)]
-        series_marker = markers[i % len(markers)]
+        agent_color_index = agent_colors[agent_name]
+        series_color = colors[agent_color_index]
+        series_marker = markers[agent_color_index]
         y_axis = results[i]
         x_axis = range(len(y_axis))
 
@@ -191,12 +207,12 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
             top = np.add(y_axis, alg_conf_interv)
             bot = np.subtract(y_axis, alg_conf_interv)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
-
-        # print "Mean last " + x_axis_unit + ": (" + str(agents[i]) + ") :", y_axis[-1], "(conf_interv:", alg_conf_interv[-1], ")"
+        print "\t" + str(agents[i]) + ":", y_axis[-1], "(conf_interv:", round(alg_conf_interv[-1], 2), ")"
 
         marker_every = max(len(y_axis) / 30,1)
-        pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=alg)
+        pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
         pyplot.legend()
+    print
 
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
@@ -208,7 +224,9 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     disc_ext = "Discounted " if is_rec_disc_reward else ""
     plot_name = os.path.join(experiment_dir, "all_") + plot_label.lower() + "_" + unit.lower() + ".pdf"
 
-    plot_title = plot_label + " " + disc_ext + unit + ": " + os.path.basename(experiment_dir)
+    exp_dir_split_list = experiment_dir.split("/")
+    exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
+    plot_title = plot_label + " " + disc_ext + unit + ": " + exp_name
     y_axis_label = plot_label + " " + unit
     pyplot.xlabel(x_axis_unit[0].upper() + x_axis_unit[1:] + " Number")
     pyplot.ylabel(y_axis_label)
@@ -227,7 +245,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     pyplot.cla()
     pyplot.close()
 
-def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=False, is_rec_disc_reward=False):
+def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=True, is_rec_disc_reward=False):
     '''
     Args:
         experiment_dir (str): path to results.
@@ -241,6 +259,8 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
         Creates plots for all agents run under the experiment.
         Stores the plot in results/<experiment_name>/results.pdf
     '''
+
+    # experiment_agents.sort()
 
     # Load the data.
     data = load_data(experiment_dir, experiment_agents) # [alg][instance][episode]
@@ -261,29 +281,111 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
                 open_plot=open_plot,
                 is_rec_disc_reward=is_rec_disc_reward)
 
+def _get_agent_names(data_dir):
+    '''
+    Args:
+        data_dir (str)
+
+    Returns:
+        (list)
+    '''
+    params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+
+    agent_names = []
+    agent_flag = False
+
+    for line in params_file.readlines():
+        if "Agents" in line:
+            agent_flag = True
+            continue
+        if "Params" in line:
+            agent_flag = False
+        if agent_flag:
+            agent_names.append(line.split(",")[0].strip())
+
+    return agent_names
+
+def _get_agent_colors(data_dir, agents):
+    '''
+    Args:
+        data_dir (str)
+        agents (list)
+
+    Returns:
+        (list)
+    '''
+    params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+
+    colors = {}
+
+    # Check if episodes > 1.
+    for line in params_file.readlines():
+        for agent_name in agents:
+            if agent_name in line.strip():
+                colors[agent_name] = int(line[-2])
+
+    return colors
+
+def _is_episodic(data_dir):
+    '''
+    Returns:
+        (bool) True iff the experiment was episodic.
+    '''
+
+    # Open param file for the experiment.
+    if not os.path.exists(data_dir + "parameters.txt"):
+        print data_dir.split("/")
+        if data_dir.split("/")[-2] == "times":
+            data_dir = data_dir.replace("times/","")
+        else:
+            print "Warning: no parameters file found for experiment. Assuming non-episodic."
+            return False
+
+    params_file = open(data_dir + "parameters.txt", "r")
+
+    # Check if episodes > 1.
+    for line in params_file.readlines():
+        if "episodes" in line:
+            vals = line.strip().split(":")
+            return int(vals[1]) > 1
+
+def parse_args():
+    '''
+    Summary:
+        Parses two arguments, 'dir' (directory pointer) and 'a' (bool to indicate avg. plot).
+    '''
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-dir", type = str, help = "Path to relevant csv files of data.")
+    parser.add_argument("-a", type = bool, default=False, help = "If true, plots average reward (default is cumulative).")
+    return parser.parse_args()
+
 
 def main():
     '''
     Summary:
         For manual plotting.
     '''
-    # Make sure we've been given a legitimate batch of results.
-    if len(sys.argv) < 2:
-        print "Error: you must specify a directory containing the relevant csv files of data."
-        print "Usage: python chart_utils.py <path-to-data>"
-        quit()
+    
+    # Parse args.
+    args = parse_args()
+
+    font = {'family':'sans serif', 'size':14}
+
+    matplotlib.rc('font', **font)
 
     # Grab agents.
-    data_dir = sys.argv[1]
-    agents = [agent.replace(".csv","") for agent in os.listdir(data_dir) if ".csv" in agent]
-    if len(agents) == 0:
+
+    data_dir = args.dir
+    agent_names = _get_agent_names(data_dir)
+    if len(agent_names) == 0:
         print "Error: no csv files found."
         quit()
 
-    print agents
+    cumulative = not(args.a)
+    episodic = _is_episodic(data_dir)
 
     # Plot.
-    make_plots(data_dir, agents)
+    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic)
 
 if __name__ == "__main__":
     main()

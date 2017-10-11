@@ -174,7 +174,6 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
 
         pygame.display.update()
 
-
 def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False):
     # Pygame setup.
     pygame.init()

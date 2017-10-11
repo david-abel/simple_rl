@@ -8,13 +8,14 @@ from PlannerClass import Planner
 
 class ValueIteration(Planner):
 
-    def __init__(self, mdp, name="value_iter", delta=0.0001, max_iterations=500, sample_rate=10):
+    def __init__(self, mdp, name="value_iter", delta=0.001, max_iterations=200, sample_rate=3):
         '''
         Args:
             mdp (MDP)
             delta (float): After an iteration if VI, if no change more than @\delta has occurred, terminates.
             max_iterations (int): Hard limit for number of iterations.
             sample_rate (int): Determines how many samples from @mdp to take to estimate T(s' | s, a).
+            horizon (int): Number of steps before terminating.
         '''
         Planner.__init__(self, mdp, name=name)
 
@@ -23,10 +24,16 @@ class ValueIteration(Planner):
         self.sample_rate = sample_rate
         self.value_func = defaultdict(float)
         self.reachability_done = False
-        self.has_run_vi = False
+        self.has_computed_matrix = False
+        print "Computing reachable states...",
         self._compute_reachable_state_space()
+        print "done."
 
     def _compute_matrix_from_trans_func(self):
+        if self.has_computed_matrix:
+            # We've already run this, just return.
+            return
+
         self.trans_dict = defaultdict(lambda:defaultdict(lambda:defaultdict(float)))
             # K: state
                 # K: a
@@ -39,6 +46,8 @@ class ValueIteration(Planner):
                     s_prime = self.transition_func(s, a)
                     self.trans_dict[s][a][s_prime] += 1.0 / self.sample_rate
 
+        self.has_computed_matrix = True
+
     def get_num_states(self):
         if not self.reachability_done:
             self._compute_reachable_state_space()
@@ -46,10 +55,10 @@ class ValueIteration(Planner):
 
     def get_states(self):
         if self.reachability_done:
-            return self.states
+            return list(self.states)
         else:
             self._compute_reachable_state_space()
-            return self.states
+            return list(self.states)
 
     def get_value(self, s):
         '''
@@ -70,18 +79,6 @@ class ValueIteration(Planner):
         Returns:
             (float): The Q estimate given the current value function @self.value_func.
         '''
-        
-        # # Take samples and track next state counts.
-        # next_state_counts = defaultdict(int)
-        # for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
-        #     next_state = self.transition_func(s,a)
-        #     next_state_counts[next_state] += 1
-
-        # # Compute T(s' | s, a) estimate based on MLE.
-        # next_state_probs = defaultdict(float)
-        # for state in next_state_counts:
-        #     next_state_probs[state] = float(next_state_counts[state]) / self.sample_rate
-
         # Compute expected value.
         expected_future_val = 0
         for s_prime in self.trans_dict[s][a].keys():
@@ -97,7 +94,7 @@ class ValueIteration(Planner):
         '''
         state_queue = Queue.Queue()
         state_queue.put(self.init_state)
-        self.states.append(self.init_state)
+        self.states.add(self.init_state)
 
         while not state_queue.empty():
             s = state_queue.get()
@@ -106,7 +103,7 @@ class ValueIteration(Planner):
                     next_state = self.transition_func(s,a)
 
                     if next_state not in self.states:
-                        self.states.append(next_state)
+                        self.states.add(next_state)
                         state_queue.put(next_state)
 
         self.reachability_done = True
@@ -119,13 +116,14 @@ class ValueIteration(Planner):
         # Algorithm bookkeeping params.
         iterations = 0
         max_diff = float("inf")
-
+        print "Making T...",
         self._compute_matrix_from_trans_func()
-
+        print "done."
+        state_space = self.get_states()
         # Main loop.
         while max_diff > self.delta and iterations < self.max_iterations:
             max_diff = 0
-            for s in self.get_states():
+            for s in state_space:
                 if s.is_terminal():
                     continue
 
@@ -139,10 +137,11 @@ class ValueIteration(Planner):
                 # Update value.
                 self.value_func[s] = max_q
             iterations += 1
+            print "iters, val:", iterations, max_diff, len(self.get_states())
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
         
-        self.has_run_vi = True
+        self.has_planned = True
 
         return iterations, value_of_init_state
 
@@ -162,17 +161,21 @@ class ValueIteration(Planner):
 
         state = self.mdp.get_init_state() if state is None else state
 
-        if self.has_run_vi is False:
+        if self.has_planned is False:
             print "Warning: VI has not been run. Plan will be random."
 
         action_seq = []
         state_seq = [state]
         steps = 0
 
+
         while (not state.is_terminal()) and steps < horizon:
+            # print "(vi.plan) state:", state,
             next_action = self._get_max_q_action(state)
             action_seq.append(next_action)
             state = self.transition_func(state, next_action)
+            # print state
+            # print
             state_seq.append(state)
             steps += 1
 
@@ -230,12 +233,10 @@ class ValueIteration(Planner):
         '''
         # Grab random initial action in case all equal
         max_q_val = float("-inf")
-        action_list = self.actions[:]
-        # random.shuffle(shuffled_action_list)
-        best_action = action_list[0]
+        best_action = self.actions[0]
 
         # Find best action (action w/ current max predicted Q value)
-        for action in action_list:
+        for action in self.actions:
             q_s_a = self.get_q_value(state, action)
             if q_s_a > max_q_val:
                 max_q_val = q_s_a
