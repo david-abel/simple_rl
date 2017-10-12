@@ -24,6 +24,7 @@ class Experiment(object):
     def __init__(self,
                     agents,
                     mdp,
+                    agent_colors=[],
                     params=None,
                     is_episodic=False,
                     is_markov_game=False,
@@ -36,6 +37,7 @@ class Experiment(object):
         Args:
             agents (list)
             mdp (MDP)
+            agent_colors (list)
             params (dict)
             is_episodic (bool)
             is_markov_game (bool)
@@ -46,6 +48,7 @@ class Experiment(object):
         '''
         # Store all relevant bools.
         self.agents = agents
+        self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.is_multi_task = is_multi_task
@@ -73,6 +76,8 @@ class Experiment(object):
             for agent in self.agents:
                 if os.path.exists(os.path.join(self.exp_directory, str(agent)) + ".csv"):
                     os.remove(os.path.join(self.exp_directory, str(agent)) + ".csv")
+            if os.path.exists(os.path.join(self.exp_directory, "optimal") + ".csv"):
+                os.remove(os.path.join(self.exp_directory, "optimal") + ".csv")
         self.write_exp_info_to_file()
 
     def make_plots(self, open_plot=True):
@@ -80,12 +85,18 @@ class Experiment(object):
         Summary:
             Makes plots for the current experiment.
         '''
+        agent_name_ls = [a.get_name() for a in self.agents]
         chart_utils.make_plots(self.exp_directory,
-                                self.agents,
+                                agent_name_ls,
                                 episodic=self.is_episodic,
                                 cumulative=self.cumulative_plot,
                                 is_rec_disc_reward=self.is_rec_disc_reward,
                                 open_plot=open_plot)
+
+    def _write_extra_datum_to_file(self, mdp_name, agent, datum, datum_name):
+        out_file = open(os.path.join(self.exp_directory, str(agent)) + "-" + datum_name + ".csv", "a+")
+        out_file.write(str(datum) + ",")
+        out_file.close()
 
     def get_agent_avg_cumulative_rew(self, agent):
         result_file = open(os.path.join(self.exp_directory, str(agent)) + ".csv", "r")
@@ -104,16 +115,18 @@ class Experiment(object):
         '''
         Args:
             agent (agent OR dict): if self.is_markov_game, contains a dict of agents
+
         Summary:
             Record any relevant information about this experience.
         '''
         if self.steps_since_added_r % self.count_r_per_n_timestep == 0:
-            if self.is_markov_game:
-                for a in agent:
-                    self.rewards[a] += [reward[a]]
+            if self.is_markov_game and self.count_r_per_n_timestep > 1:
+                print "(simple_rl) Experiment Error: can't track markov games per step. (set rew_step_count to 1)."
+                quit()
             else:
-                self.rewards[agent] += [reward]
+                self.rewards[agent] += [self.rew_since_count + reward]
                 self.times[agent] += [time_taken]
+                self.rew_since_count = 0
             self.steps_since_added_r = 1
         else:
             if self.is_markov_game:
@@ -123,7 +136,7 @@ class Experiment(object):
                 self.rew_since_count += reward
             self.steps_since_added_r += 1
 
-    def end_of_episode(self, agent):
+    def end_of_episode(self, agent, num_times_to_write=1):
         '''
         Args:
             agent (str)
@@ -132,11 +145,13 @@ class Experiment(object):
             Writes reward data from this episode to file and resets the reward.
         '''
         if self.is_episodic:
-            self.write_datum_to_file(agent, sum(self.rewards[agent]))
-            self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
+            for x in xrange(num_times_to_write):
+                self.write_datum_to_file(agent, sum(self.rewards[agent]))
+                self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
         else:
-            for step_reward in self.rewards[agent]:
-                self.write_datum_to_file(agent, step_reward)
+            for x in xrange(num_times_to_write):
+                for step_reward in self.rewards[agent]:
+                    self.write_datum_to_file(agent, step_reward)
         self.rewards[agent] = []
 
     def end_of_instance(self, agent):
@@ -183,8 +198,8 @@ class Experiment(object):
         mdp_text = "(Markov Game MDP)" if self.is_markov_game else "(MDP)"
         mdp_string = mdp_text + "\n\t" + self.name + "\n"
         agent_string = "(Agents)\n"
-        for agent in self.agents:
-            agent_string += "\t" + str(agent) + "\n"
+        for i, agent in enumerate(self.agents):
+            agent_string += "\t" + str(agent) + "," + str(self.agent_colors[i]) + "\n"
         param_string = "(Params)" + str(self.parameters) + "\n"
 
         return  mdp_string + agent_string + param_string
