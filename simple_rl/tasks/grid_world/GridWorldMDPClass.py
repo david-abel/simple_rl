@@ -4,6 +4,7 @@
 import random
 import sys
 import os
+import numpy as np
 
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
@@ -19,12 +20,14 @@ class GridWorldMDP(MDP):
                 width=5,
                 height=3,
                 init_loc=(1,1),
+                rand_init=False,
                 goal_locs=[(5,3)],
                 walls=[],
                 is_goal_terminal=True,
                 gamma=0.99,
                 init_state=None,
                 slip_prob=0.0,
+                gaussian=False,
                 name="gridworld"):
         '''
         Args:
@@ -33,32 +36,63 @@ class GridWorldMDP(MDP):
             init_loc (tuple: (int, int))
             goal_locs (list of tuples: [(int, int)...])
         '''
-        init_state = GridWorldState(init_loc[0], init_loc[1]) if init_state is None else init_state
+        self.rand_init = rand_init
+        if rand_init:
+            init_loc = random.randint(1, width), random.randint(1, height)
+            while init_loc in walls:
+                init_loc = random.randint(1, width), random.randint(1, height)
+        self.init_loc = init_loc
+        init_state = GridWorldState(init_loc[0], init_loc[1]) if init_state is None or rand_init else init_state
         MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state, gamma=gamma)
         if type(goal_locs) is not list:
-            print "Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
+            print "(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
             quit()
         self.walls = walls
         for g in goal_locs:
             if g[0] > width or g[1] > height:
-                print "Error: goal provided is off the map or overlaps with a wall.."
+                print "(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall.."
                 print "\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")"
                 print "\tProblematic Goal:", g
                 quit()
             if self.is_wall(g[0], g[1]):
-                print "Error: goal provided is off the map or overlaps with a wall.."
+                print "(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall.."
                 print "\tWalls:", walls
                 print "\tProblematic Goal:", g
                 quit()
 
         self.width = width
         self.height = height
-        self.init_loc = init_loc
+        
         self.goal_locs = goal_locs
+        self.gaussian = gaussian 
+        
+        if gaussian:
+            self.gaussian_locs = self._setup_gauss_goal_locs(gaussian, goal_locs)
+
         self.cur_state = GridWorldState(init_loc[0], init_loc[1])
         self.is_goal_terminal = is_goal_terminal
         self.slip_prob = slip_prob
         self.name = name
+
+    def _setup_gauss_goal_locs(self, gaussian, goal_locs):
+        '''
+        Args:
+            gaussian (bool): If true, each goal location is chosen
+            according to a gaussian centered around the points in
+            @goal_locs.
+
+        Returns:
+            (list)
+        '''
+        result = []
+        if self.gaussian:
+            for g in goal_locs:
+                covariance = np.array([[2,0],[0,2]])
+                a = np.random.multivariate_normal(mean=g, cov=covariance, size=1)
+                goal_x, goal_y = min(max(int(a[0][0]), 1), self.width), min(max(int(a[0][1]), 1), self.height)
+                result.append((goal_x, goal_y))
+
+        return result
 
     def _reward_func(self, state, action):
         '''
@@ -69,12 +103,10 @@ class GridWorldMDP(MDP):
         Returns
             (float)
         '''
-        _error_check(state, action)
-
         if self._is_goal_state_action(state, action):
-            return 1.0
+            return 1.0 - self.step_cost
         else:
-            return 0
+            return 0 - self.step_cost
 
     def _is_goal_state_action(self, state, action):
         '''
@@ -89,13 +121,17 @@ class GridWorldMDP(MDP):
             # Already at terminal.
             return False
 
-        if action == "left" and (state.x - 1, state.y) in self.goal_locs:
+        goals = self.goal_locs
+        if self.gaussian:
+            goals = self.gaussian_locs
+
+        if action == "left" and (state.x - 1, state.y) in goals:
             return True
-        elif action == "right" and (state.x + 1, state.y) in self.goal_locs:
+        elif action == "right" and (state.x + 1, state.y) in goals:
             return True
-        elif action == "down" and (state.x, state.y - 1) in self.goal_locs:
+        elif action == "down" and (state.x, state.y - 1) in goals:
             return True
-        elif action == "up" and (state.x, state.y + 1) in self.goal_locs:
+        elif action == "up" and (state.x, state.y + 1) in goals:
             return True
         else:
             return False
@@ -199,15 +235,15 @@ def _error_check(state, action):
     '''
 
     if action not in GridWorldMDP.ACTIONS:
-        print "Error: the action provided (" + str(action) + ") was invalid."
+        print "(simple_rl) GridWorldError: the action provided (" + str(action) + ") was invalid in state: " + str(state) + "."
         quit()
 
     if not isinstance(state, GridWorldState):
-        print "Error: the given state (" + str(state) + ") was not of the correct class."
+        print "(simple_rl) GridWorldError: the given state (" + str(state) + ") was not of the correct class."
         quit()
 
 
-def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None, goal_num=None):
+def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None, goal_num=None, slip_prob=0.0):
     '''
     Args:
         file_name (str)
@@ -258,6 +294,7 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     if randomize:
         agent_x, agent_y = random.choice(empty_cells)
         if len(goal_locs) == 0:
+            # Sample @num_goals random goal locations.
             goal_locs = random.sample(empty_cells, num_goals)
         else:
             goal_locs = random.sample(goal_locs, num_goals)
@@ -266,7 +303,14 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
         goal_locs = [(num_cols, num_rows)]
 
 
-    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls, name=name)
+    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls, name=name, slip_prob=slip_prob)
+
+    def reset(self):
+        if self.rand_init:
+            init_loc = random.randint(1, width), random.randint(1, height)
+            self.cur_state = GridWorldState(init_loc[0], init_loc[1])
+        else:
+            self.cur_state = copy.deepcopy(self.init_state)
 
 
 def main():

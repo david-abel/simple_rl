@@ -25,7 +25,6 @@ class ValueIteration(Planner):
         self.value_func = defaultdict(float)
         self.reachability_done = False
         self.has_computed_matrix = False
-        print "Computing reachable states...",
         self._compute_reachable_state_space()
         print "done."
 
@@ -92,6 +91,12 @@ class ValueIteration(Planner):
             Starting with @self.start_state, determines all reachable states
             and stores them in self.states.
         '''
+
+        if self.reachability_done:
+            return
+
+        print "Computing reachable states...",
+
         state_queue = Queue.Queue()
         state_queue.put(self.init_state)
         self.states.add(self.init_state)

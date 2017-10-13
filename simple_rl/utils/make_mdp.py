@@ -44,11 +44,12 @@ def make_mdp(mdp_class="grid", state_size=7):
 
     return mdp
 
-def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0):
+def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0):
     '''
     Args:
         mdp_class (str): one of {"grid", "random"}
         horizon (int)
+        step_cost (float)
 
     Returns:
         (MDPDistribution)
@@ -123,6 +124,8 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0):
                                     passengers=[{"x":2, "y":1, "dest_x":random.choice([2,3]), "dest_y":random.choice([2,3]), "in_taxi":0},
                                                 {"x":1, "y":2, "dest_x":random.choice([1,2]), "dest_y":random.choice([1,4]), "in_taxi":0}])}[mdp_class]
 
+        new_mdp.set_step_cost(step_cost)
+        
         mdp_dist_dict[new_mdp] = mdp_prob
 
     return MDPDistribution(mdp_dist_dict, horizon=horizon)
