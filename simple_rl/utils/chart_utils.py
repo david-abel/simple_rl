@@ -46,13 +46,14 @@ def load_data(experiment_dir, experiment_agents):
     for alg in experiment_agents:
 
         # Load the reward for all instances of each agent
+
+
         all_reward = open(os.path.join(experiment_dir, str(alg)) + ".csv", "r")
         all_instances = []
 
         # Put the reward instances into a list of floats.
         for instance in all_reward.readlines():
             all_episodes_for_instance = [float(r) for r in instance.split(",")[:-1] if len(r) > 0 and "e" not in r]
-            all_episodes_for_instance = all_episodes_for_instance[:7050]
             if len(all_episodes_for_instance) > 0:
                 all_instances.append(all_episodes_for_instance)
 
@@ -207,7 +208,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
             top = np.add(y_axis, alg_conf_interv)
             bot = np.subtract(y_axis, alg_conf_interv)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
-        print "\t" + str(agents[i]) + ":", y_axis[-1], "(conf_interv:", round(alg_conf_interv[-1], 2), ")"
+        print "\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")"
 
         marker_every = max(len(y_axis) / 30,1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)

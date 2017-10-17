@@ -85,7 +85,11 @@ class Experiment(object):
         Summary:
             Makes plots for the current experiment.
         '''
-        agent_name_ls = [a.get_name() for a in self.agents]
+        if self.is_markov_game:
+            agent_name_ls = [agent_name for agent_name in self.agents.keys()]
+        else:
+            agent_name_ls = [a.get_name() for a in self.agents]
+            
         chart_utils.make_plots(self.exp_directory,
                                 agent_name_ls,
                                 episodic=self.is_episodic,
@@ -119,6 +123,14 @@ class Experiment(object):
         Summary:
             Record any relevant information about this experience.
         '''
+
+        # Markov Game.
+        if self.is_markov_game:
+            for a in agent:
+                self.rewards[a] += [reward[a]]
+            return
+
+        # Regular MDP.
         if self.steps_since_added_r % self.count_r_per_n_timestep == 0:
             if self.is_markov_game and self.count_r_per_n_timestep > 1:
                 print "(simple_rl) Experiment Error: can't track markov games per step. (set rew_step_count to 1)."
@@ -129,11 +141,7 @@ class Experiment(object):
                 self.rew_since_count = 0
             self.steps_since_added_r = 1
         else:
-            if self.is_markov_game:
-                for a in agent:
-                    self.rew_since_count[a] += [reward[a]]
-            else:
-                self.rew_since_count += reward
+            self.rew_since_count += reward
             self.steps_since_added_r += 1
 
     def end_of_episode(self, agent, num_times_to_write=1):
