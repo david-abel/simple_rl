@@ -19,7 +19,7 @@ def parse_args():
 
 def main():
     # Setup MDP, Agents.
-    mdp = FourRoomMDP(9, 9, goal_locs=[(9, 9)], gamma=0.95)
+    mdp = FourRoomMDP(11, 11, goal_locs=[(11, 11)], gamma=0.9)
     ql_agent = QLearnerAgent(mdp.get_actions()) 
 
     viz = parse_args()

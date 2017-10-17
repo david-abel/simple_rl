@@ -11,7 +11,6 @@ from simple_rl.agents import QLearnerAgent, RandomAgent, RMaxAgent
 from simple_rl.run_experiments import run_agents_multi_task
 from simple_rl.utils import make_mdp
 
-
 def main():
     # Make MDP distribution, agents.
     mdp_distr = make_mdp.make_mdp_distr(mdp_class="four_room")

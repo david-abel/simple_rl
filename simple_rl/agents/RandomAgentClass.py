@@ -1,7 +1,7 @@
 ''' RandomAgentClass.py: Class for a randomly acting RL Agent '''
 
 # Python imports.
-import random as r
+import random
 
 # Other imports
 from simple_rl.agents.AgentClass import Agent
@@ -14,4 +14,4 @@ class RandomAgent(Agent):
         Agent.__init__(self, name=name, actions=actions)
 
     def act(self, state, reward):
-        return r.choice(self.actions)
+        return random.choice(self.actions)

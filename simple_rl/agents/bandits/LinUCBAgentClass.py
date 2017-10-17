@@ -16,15 +16,23 @@ class LinUCBAgent(Agent):
         International Conference on World Wide Web (WWW), 2010.
     '''
 
-    def __init__(self, actions, name="lin-ucb", recommendation_cls=None, context_size=None, alpha=0.5):
+    def __init__(self, actions, name="lin-ucb", rand_init=True, context_size=None, alpha=1.5):
+        '''
+        Args:
+            actions (list): Contains a string for each action.
+            name (str)
+            context_size (int)
+            alpha (float): Uncertainty parameter.
+        '''
         Agent.__init__(self, name, actions)
         self.alpha = alpha
         self.context_size = context_size
         self.prev_context = None
+        self.step_number = 0
         if context_size is not None:
-            self._init_action_model()
+            self._init_action_model(rand_init)
 
-    def _init_action_model(self):
+    def _init_action_model(self, rand_init=True):
         '''
         Summary:
             Initializes model parameters
@@ -33,7 +41,10 @@ class LinUCBAgent(Agent):
         for action_id in xrange(len(self.actions)):
             self.model['act'][action_id] = np.identity(self.context_size)
             self.model['act_inv'][action_id] = np.identity(self.context_size)
-            self.model['theta'][action_id] = np.zeros((self.context_size, 1))
+            if rand_init:
+                self.model['theta'][action_id] = np.random.random((self.context_size, 1))
+            else:
+                self.model['theta'][action_id] = np.zeros((self.context_size, 1))
             self.model['b'][action_id] = np.zeros((self.context_size,1))
 
     def _compute_score(self, context):
@@ -42,7 +53,9 @@ class LinUCBAgent(Agent):
             context (list)
 
         Returns:
-            (float)
+            (dict):
+                K (str): action
+                V (float): score
         '''
 
         a_inv = self.model['act_inv']
@@ -50,15 +63,16 @@ class LinUCBAgent(Agent):
 
         estimated_reward = {}
         uncertainty = {}
-        score = {}
+        score_dict = {}
         max_score = 0
         for action_id in xrange(len(self.actions)):
             action_context = np.reshape(context[action_id], (-1, 1))
             estimated_reward[action_id] = float(theta[action_id].T.dot(action_context))
             uncertainty[action_id] = float(self.alpha * np.sqrt(action_context.T.dot(a_inv[action_id]).dot(action_context)))
-            score[action_id] = estimated_reward[action_id] + uncertainty[action_id]
+            # print "u", uncertainty[action_id],
+            score_dict[action_id] = estimated_reward[action_id] + uncertainty[action_id]
 
-        return score
+        return score_dict
 
     def update(self, reward):
         '''
@@ -84,23 +98,30 @@ class LinUCBAgent(Agent):
         Returns:
             (str): action.
         '''
+
+        # Update previous context-action pair.
+        if self.prev_action is not None:
+            self.update(reward)
+
         # Compute score.
         context = self._pre_process_context(context)
         score = self._compute_score(context)
 
         # Compute best action.
         best_action = np.random.choice(self.actions)
-        max_score = 0.0
+        max_score = float("-inf")
+        # print "context", score
         for action_id in xrange(len(self.actions)):
+            # print "\t", score[action_id], self.actions[action_id]
             if score[action_id] > max_score:
                 max_score = score[action_id]
                 best_action = self.actions[action_id]
 
-        # Update
-        if self.prev_action is not None:
-            self.update(reward)
+
+        # Update prev pointers.
         self.prev_action = best_action
         self.prev_context = context
+        self.step_number += 1
         
         return best_action
 

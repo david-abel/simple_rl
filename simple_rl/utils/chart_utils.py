@@ -32,6 +32,10 @@ color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
 
+# Set font.
+font = {'family':'sans serif', 'size':15}
+matplotlib.rc('font', **font)
+
 def load_data(experiment_dir, experiment_agents):
     '''
     Args:
@@ -369,10 +373,6 @@ def main():
     
     # Parse args.
     args = parse_args()
-
-    font = {'family':'sans serif', 'size':14}
-
-    matplotlib.rc('font', **font)
 
     # Grab agents.
 

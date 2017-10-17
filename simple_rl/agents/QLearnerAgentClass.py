@@ -73,7 +73,7 @@ class QLearnerAgent(Agent):
         self.step_number += 1
 
         # Anneal params.
-        if learning and self.episode_number == 0 and self.anneal and self.step_number % 1000 == 0:
+        if learning and self.anneal:
             self._anneal()
 
         return action
@@ -212,6 +212,7 @@ class QLearnerAgent(Agent):
 
     def reset(self):
         self.step_number = 0
+        self.episode_number = 0
         self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
         Agent.reset(self)
 
