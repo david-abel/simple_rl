@@ -86,9 +86,9 @@ class TaxiOOMDP(OOMDP):
             if agent.get_attribute("has_passenger"):
                 for p in state.get_objects_of_class("passenger"):
                     if p.get_attribute("x") != p.get_attribute("dest_x") or p.get_attribute("y") != p.get_attribute("dest_y"):
-                        return 0
-                return 1
-        return 0
+                        return 0 - self.step_cost
+                return 1 - self.step_cost
+        return 0 - self.step_cost
 
     def _taxi_transition_func(self, state, action):
         '''

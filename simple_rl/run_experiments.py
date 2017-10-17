@@ -124,19 +124,23 @@ def run_agents_multi_task(agents,
                             open_plot=True,
                             verbose=False,
                             is_rec_disc_reward=False,
-                            reset_at_terminal=False,
-                            include_optimal=False):
+                            reset_at_terminal=False):
     '''
     Args:
         agents (list)
         mdp_distr (MDPDistribution)
-        task_samples
-        episodes
-        steps
+        task_samples (int)
+        episodes (int)
+        steps (int)
+        clear_old_results (bool)
+        open_plot (bool)
+        verbose (bool)
+        is_rew_disc_reward (bool): If true records and plots discounted reward
+        reset_at_terminal (bool)
 
     Summary:
         Runs each agent on the MDP distribution according to the given parameters.
-        If @mdp_distr has a non-zero horizon, then gamma is set to 1 and #steps is ignored.
+        If @mdp_distr has a non-zero horizon, then gamma is set to 1 and @steps is ignored.
     '''
 
     # Set number of steps if the horizon is given.
@@ -145,7 +149,7 @@ def run_agents_multi_task(agents,
         steps = mdp_distr.get_horizon()
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"task_samples":task_samples, "episodes":episodes, "steps":steps}
+    exp_params = {"task_samples":task_samples, "episodes":episodes, "steps":steps, "gamma":mdp_distr.get_gamma()}
     experiment = Experiment(agents=agents,
                 mdp=mdp_distr,
                 params=exp_params,
@@ -160,10 +164,6 @@ def run_agents_multi_task(agents,
 
     times = defaultdict(float)
 
-    if include_optimal:
-        fixed_policy_agent = FixedPolicyAgent(policy=lambda s: "", name="optimal")
-        agents += [fixed_policy_agent]
-
     # Learn.
     for agent in agents:
         print str(agent) + " is learning."
@@ -175,11 +175,6 @@ def run_agents_multi_task(agents,
 
             # Sample the MDP.
             mdp = mdp_distr.sample()
-
-            if include_optimal and agent.name == "optimal":
-                vi = ValueIteration(mdp)
-                vi.run_vi()
-                agent.set_policy(vi.policy)
 
             # Run the agent.
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal)
@@ -212,8 +207,7 @@ def run_agents_on_mdp(agents,
                         is_rec_disc_reward=False,
                         open_plot=True,
                         verbose=False,
-                        reset_at_terminal=False,
-                        include_optimal=False):
+                        reset_at_terminal=False):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -227,7 +221,6 @@ def run_agents_on_mdp(agents,
         open_plot (bool): If true opens the plot at the end.
         verbose (bool): If true, prints status bars per episode/instance.
         reset_at_terminal (bool): If true sends the agent to the start state after terminal.
-        include_optimal (bool): If true also plots optimal behavior.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
@@ -236,7 +229,7 @@ def run_agents_on_mdp(agents,
     '''
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"instances":instances, "episodes":episodes, "steps":steps}
+    exp_params = {"instances":instances, "episodes":episodes, "steps":steps, "gamma":mdp.get_gamma()}
     experiment = Experiment(agents=agents,
                             mdp=mdp,
                             params=exp_params,
@@ -248,12 +241,6 @@ def run_agents_on_mdp(agents,
     # Record how long each agent spends learning.
     print "Running experiment: \n" + str(experiment)
     time_dict = defaultdict(float)
-
-    if include_optimal:
-        vi = ValueIteration(mdp)
-        vi.run_vi()
-        fixed_policy_agent = FixedPolicyAgent(vi.policy, name="optimal")
-        agents += [fixed_policy_agent]
 
     # Learn.
     for agent in agents:
@@ -292,6 +279,10 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     Returns:
         (dict): {key=agent, val=time}
     '''
+    
+    # if "grena" in agent.name or "fixed-panel" in agent.name or "optimal" in agent.name:
+    #     original_eps = episodes
+    #     episodes = 1
 
     # For each episode.
     for episode in xrange(1, episodes + 1):
@@ -304,7 +295,6 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
         # Compute initial state/reward.
         state = mdp.get_init_state()
-
         reward = 0
         episode_start_time = time.clock()
 
@@ -326,18 +316,15 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             action = agent.act(state, reward)
 
             # Terminal check.
-            if state.is_terminal() or action == "terminate":
+            if state.is_terminal():
                 if episodes == 1 and not reset_at_terminal and experiment is not None and action != "terminate":
                     # Self loop if we're not episodic or resetting and in a terminal state.
                     experiment.add_experience(agent, state, action, 0, state, time_taken=time.clock()-step_start)
                     continue
-                    
                 break
 
             # Execute in MDP.
             reward, next_state = mdp.execute_agent_action(action)
-
-            # print state, action, reward, next_state
 
             # Record the experience.
             if experiment is not None:
@@ -406,12 +393,13 @@ def choose_mdp(mdp_name, env_name="Asteroids-v0"):
     passengers = [{"x":4, "y":3, "dest_x":2, "dest_y":2, "in_taxi":0}]
     walls = []
     if mdp_name == "gym":
-            try:
-                from simple_rl.tasks.gym.GymMDPClass import GymMDP
-            except:
-                print "Error: OpenAI gym not installed."
-                quit()
-            return GymMDP(env_name, render=True)
+        # OpenAI Gym MDP.
+        try:
+            from simple_rl.tasks.gym.GymMDPClass import GymMDP
+        except:
+            print "Error: OpenAI gym not installed."
+            quit()
+        return GymMDP(env_name, render=True)
     else:
         return {"grid":GridWorldMDP(5, 5, (1, 1), goal_locs=[(5, 3), (4,1)]),
                 "four_room":FourRoomMDP(),
@@ -445,7 +433,6 @@ def main():
     mdp = choose_mdp(task, rom)
     actions = mdp.get_actions()
     gamma = mdp.get_gamma()
-
 
     # Setup agents.
     from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearQLearnerAgent

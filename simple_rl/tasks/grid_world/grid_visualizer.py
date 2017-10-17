@@ -9,7 +9,7 @@ import sys
 
 # Other imports.
 from simple_rl.planning import ValueIteration
-from simple_rl.tasks import FourRoomMDP
+from simple_rl.tasks import FourRoomMDP, WhirlpoolMDP
 from simple_rl.utils import mdp_visualizer as mdpv
 
 def _draw_state(screen,
@@ -115,6 +115,12 @@ def _draw_state(screen,
                     offset = int(min(cell_width, cell_height) / 3.0)
                     goal_text_point = circle_center[0] - font_size, circle_center[1] - font_size/1.5
                     screen.blit(text, goal_text_point)
+
+                if isinstance(grid_mdp, WhirlpoolMDP):
+                    if (i+1,grid_mdp.height - j) in grid_mdp.teleporter_states:
+                        top_left_point = width_buffer + cell_width*i + 5, height_buffer + cell_height*j + 5
+                        r = pygame.draw.rect(screen, (4, 159, 99), top_left_point + (cell_width-10, cell_height-10), 0)
+
 
                 # Current state.
                 if not show_value and (i+1,grid_mdp.height - j) == (state.x, state.y) and agent_shape is None:

@@ -20,10 +20,7 @@ class FourRoomMDP(GridWorldMDP):
             init_loc (tuple: (int, int))
             goal_locs (list of tuples: [(int, int)...])
         '''
-        GridWorldMDP.__init__(self, width, height, init_loc, goal_locs, walls=self._compute_walls(width, height), gamma=gamma, slip_prob=slip_prob, name=name)
-
-    def __str__(self):
-        return "fourrooms_h-" + str(self.height) + "_w-" + str(self.width)
+        GridWorldMDP.__init__(self, width, height, init_loc, goal_locs=goal_locs, walls=self._compute_walls(width, height), gamma=gamma, slip_prob=slip_prob, name=name)
 
     def _compute_walls(self, width, height):
         '''

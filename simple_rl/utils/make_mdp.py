@@ -44,12 +44,13 @@ def make_mdp(mdp_class="grid", state_size=7):
 
     return mdp
 
-def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0):
+def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0, gamma=0.99):
     '''
     Args:
         mdp_class (str): one of {"grid", "random"}
         horizon (int)
         step_cost (float)
+        gamma (float)
 
     Returns:
         (MDPDistribution)
@@ -59,39 +60,33 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0):
 
     # Define goal locations.
         
-        # Corridor.
+    # Corridor.
     corr_width = 20
     corr_goal_magnitude = 1 #random.randint(1, 5)
     corr_goal_cols = [i for i in xrange(1, corr_goal_magnitude + 1)] + [j for j in xrange(corr_width-corr_goal_magnitude + 1, corr_width + 1)]
     corr_goal_locs  = list(itertools.product(corr_goal_cols, [1]))
 
-        # Grid World
+    # Grid World
     tl_grid_world_rows, tl_grid_world_cols = [i for i in xrange(width - 4, width)], [j for j in xrange(height - 4, height)]
     tl_grid_goal_locs = list(itertools.product(tl_grid_world_rows, tl_grid_world_cols))
-
     tr_grid_world_rows, tr_grid_world_cols = [i for i in xrange(1, 4)], [j for j in xrange(height - 4, height)]
     tr_grid_goal_locs = list(itertools.product(tr_grid_world_rows, tr_grid_world_cols))
-
     grid_goal_locs = tl_grid_goal_locs + tr_grid_goal_locs
 
-        # Hallway.
+    # Hallway.
     hall_goal_locs = [(i, width) for i in xrange(1, height + 1)]
 
-        # Four room.
+    # Four room.
     four_room_goal_locs = [(width, height), (width, 1), (1, height)] #, (1, height - 2), (width - 2, height - 2)]
 
-        # Taxi.
+    # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}
     walls = []
-
-        # Rock Climb.
-    rock_slip_states = [(random.randint(1, width), random.randint(1, height - 2)) for x in xrange(5)]
 
     goal_loc_dict = {"four_room":four_room_goal_locs,
                     "hall":hall_goal_locs,
                     "grid":grid_goal_locs,
                     "corridor":corr_goal_locs,
-                    "icerink":four_room_goal_locs
                     }
 
     # MDP Probability.
@@ -104,17 +99,13 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0):
 
     for i in range(num_mdps):
 
-        new_mdp = {"hrooms":make_grid_world_from_file("hierarch_rooms.txt", num_goals=1, randomize=True),
-                    "gauss":GridWorldMDP(width=width, height=height, gaussian=True, goal_locs=[goal_loc_dict["grid"][i % len(goal_loc_dict["grid"])]], is_goal_terminal=True),
+        new_mdp = {"hrooms":make_grid_world_from_file("hierarch_rooms.txt", num_goals=7, randomize=False),
                     "color":ColorMDP(width=width, height=height, rand_init=True, goal_locs=[goal_loc_dict["grid"][i % len(goal_loc_dict["grid"])]], num_colors=2),
                     "octo":make_grid_world_from_file("octogrid.txt", num_goals=12, randomize=False, goal_num=i),
-                    "icerink":FourRoomMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]], slip_prob=0.1, name="icerink"),
                     "hall":GridWorldMDP(width=25, height=height, rand_init=True, goal_locs=goal_loc_dict["hall"], name="hallway"),
                     "corridor":GridWorldMDP(width=20, height=1, init_loc=(10, 1), goal_locs=[goal_loc_dict["corridor"][i % len(goal_loc_dict["corridor"])]], is_goal_terminal=True, name="corridor"),
                     "grid":GridWorldMDP(width=width, height=height, rand_init=True, goal_locs=[goal_loc_dict["grid"][i % len(goal_loc_dict["grid"])]], is_goal_terminal=True),
                     "four_room":FourRoomMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]]),
-                    "rock_climb":RockClimbMDP(width=width, height=height, goal_locs=[goal_loc_dict["hall"][i % len(goal_loc_dict["hall"])]], slip_param=0.3, slip_states=rock_slip_states, is_goal_terminal=True),
-                    "whirlpool":WhirlpoolMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]], slip_prob=0, rand_init=True),
                     "rock_sample":RockSampleMDP(rocks=rocks),
                     # THESE GOALS ARE SPECIFIED IMPLICITLY:
                     "pblocks_grid":make_grid_world_from_file("pblocks_grid.txt", randomize=True, slip_prob=0.1),
@@ -125,6 +116,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0):
                                                 {"x":1, "y":2, "dest_x":random.choice([1,2]), "dest_y":random.choice([1,4]), "in_taxi":0}])}[mdp_class]
 
         new_mdp.set_step_cost(step_cost)
+        new_mdp.set_gamma(gamma)
         
         mdp_dist_dict[new_mdp] = mdp_prob
 

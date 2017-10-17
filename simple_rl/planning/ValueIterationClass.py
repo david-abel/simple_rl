@@ -26,7 +26,6 @@ class ValueIteration(Planner):
         self.reachability_done = False
         self.has_computed_matrix = False
         self._compute_reachable_state_space()
-        print "done."
 
     def _compute_matrix_from_trans_func(self):
         if self.has_computed_matrix:
@@ -95,8 +94,6 @@ class ValueIteration(Planner):
         if self.reachability_done:
             return
 
-        print "Computing reachable states...",
-
         state_queue = Queue.Queue()
         state_queue.put(self.init_state)
         self.states.add(self.init_state)
@@ -121,9 +118,7 @@ class ValueIteration(Planner):
         # Algorithm bookkeeping params.
         iterations = 0
         max_diff = float("inf")
-        print "Making T...",
         self._compute_matrix_from_trans_func()
-        print "done."
         state_space = self.get_states()
         # Main loop.
         while max_diff > self.delta and iterations < self.max_iterations:
@@ -142,7 +137,7 @@ class ValueIteration(Planner):
                 # Update value.
                 self.value_func[s] = max_q
             iterations += 1
-            print "iters, val:", iterations, max_diff, len(self.get_states())
+            # print "iters, val:", iterations, max_diff, len(self.get_states())
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
         
@@ -175,12 +170,9 @@ class ValueIteration(Planner):
 
 
         while (not state.is_terminal()) and steps < horizon:
-            # print "(vi.plan) state:", state,
             next_action = self._get_max_q_action(state)
             action_seq.append(next_action)
             state = self.transition_func(state, next_action)
-            # print state
-            # print
             state_seq.append(state)
             steps += 1
 
