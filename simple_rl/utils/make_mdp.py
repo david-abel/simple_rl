@@ -10,7 +10,7 @@ import random
 from collections import defaultdict
 
 # Other imports.
-from simple_rl.tasks import ChainMDP, GridWorldMDP, ColorMDP, TaxiOOMDP, RandomMDP, FourRoomMDP, RockClimbMDP, WhirlpoolMDP, RockSampleMDP
+from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP, FourRoomMDP, RockSampleMDP
 from simple_rl.tasks.grid_world.GridWorldMDPClass import make_grid_world_from_file
 from simple_rl.mdp import MDPDistribution
 
@@ -100,7 +100,6 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0, gamma=0
     for i in range(num_mdps):
 
         new_mdp = {"hrooms":make_grid_world_from_file("hierarch_rooms.txt", num_goals=7, randomize=False),
-                    "color":ColorMDP(width=width, height=height, rand_init=True, goal_locs=[goal_loc_dict["grid"][i % len(goal_loc_dict["grid"])]], num_colors=2),
                     "octo":make_grid_world_from_file("octogrid.txt", num_goals=12, randomize=False, goal_num=i),
                     "hall":GridWorldMDP(width=25, height=height, rand_init=True, goal_locs=goal_loc_dict["hall"], name="hallway"),
                     "corridor":GridWorldMDP(width=20, height=1, init_loc=(10, 1), goal_locs=[goal_loc_dict["corridor"][i % len(goal_loc_dict["corridor"])]], is_goal_terminal=True, name="corridor"),
