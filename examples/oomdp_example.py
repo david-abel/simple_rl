@@ -26,5 +26,5 @@ def main():
 	    # Run experiment and make plot.
 	    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=50, episodes=1, steps=2000, reset_at_terminal=True)
 
-if __name__ == "__name__":
+if __name__ == "__main__":
 	main()
