@@ -4,16 +4,11 @@ from chain.ChainStateClass import ChainState
 from grid_world.GridWorldMDPClass import GridWorldMDP
 from grid_world.GridWorldStateClass import GridWorldState
 from four_room.FourRoomMDPClass import FourRoomMDP
-from color.ColorMDPClass import ColorMDP
-from rock_climb.RockClimbMDPClass import RockClimbMDP
 from rock_sample.RockSampleMDPClass import RockSampleMDP
-from whirlpool.WhirlpoolMDPClass import WhirlpoolMDP
 from random.RandomMDPClass import RandomMDP
 from random.RandomStateClass import RandomState
 from taxi.TaxiOOMDPClass import TaxiOOMDP
 from taxi.TaxiStateClass import TaxiState
-from block_dude.BlockDudeOOMDPClass import BlockDudeOOMDP
-from block_dude.BlockDudeStateClass import BlockDudeState
 from prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
 from rock_paper_scissors.RockPaperScissorsMDPClass import RockPaperScissorsMDP
 from grid_game.GridGameMDPClass import GridGameMDP
