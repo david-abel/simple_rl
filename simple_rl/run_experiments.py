@@ -124,7 +124,8 @@ def run_agents_multi_task(agents,
                             open_plot=True,
                             verbose=False,
                             is_rec_disc_reward=False,
-                            reset_at_terminal=False):
+                            reset_at_terminal=False,
+                            resample_at_terminal=False):
     '''
     Args:
         agents (list)
@@ -177,7 +178,15 @@ def run_agents_multi_task(agents,
             mdp = mdp_distr.sample()
 
             # Run the agent.
-            run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal)
+            hit_terminal, total_steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal, resample_at_terminal)
+
+            # If we resample at terminal, keep grabbing MDPs until we're done.
+            while resample_at_terminal and hit_terminal and total_steps_taken < steps:
+                mdp = mdp_distr.sample()
+                hit_terminal, steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps - total_steps_taken, experiment, verbose, is_rec_disc_reward, reset_at_terminal, resample_at_terminal)
+                total_steps_taken += steps_taken
+
+
 
             # Reset the agent.
             agent.reset()
@@ -271,7 +280,7 @@ def run_agents_on_mdp(agents,
     # if not isinstance(mdp, GymMDP):
     experiment.make_plots(open_plot=open_plot)
 
-def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbose=False, is_rec_disc_reward=False, reset_at_terminal=False):
+def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbose=False, is_rec_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False):
     '''
     Summary:
         Main loop of a single MDP experiment.
@@ -279,10 +288,9 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     Returns:
         (dict): {key=agent, val=time}
     '''
-    
-    # if "grena" in agent.name or "fixed-panel" in agent.name or "optimal" in agent.name:
-    #     original_eps = episodes
-    #     episodes = 1
+    if reset_at_terminal and resample_at_terminal:
+        print "(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True."
+        quit()
 
     # For each episode.
     for episode in xrange(1, episodes + 1):
@@ -305,7 +313,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             prog_bar_len = _make_step_progress_bar()
             _increment_bar()
 
-        for step in xrange(steps):
+        for step in xrange(1, steps + 1):
             if verbose and int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
                 _increment_bar()
 
@@ -329,12 +337,16 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             # Record the experience.
             if experiment is not None:
                 reward_to_track = mdp.get_gamma()**(step + 1) * reward if is_rec_disc_reward else reward
-                experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock()-step_start)
+                experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
 
-            if next_state.is_terminal() and reset_at_terminal:
-                # Reset the MDP.
-                next_state = mdp.get_init_state()
-                mdp.reset()
+            if next_state.is_terminal():
+                if reset_at_terminal:
+                    # Reset the MDP.
+                    next_state = mdp.get_init_state()
+                    mdp.reset()
+                elif resample_at_terminal and step < steps:
+                    mdp.reset()
+                    return True, step
 
             # Update pointer.
             state = next_state
@@ -356,6 +368,8 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     # Process that learning instance's info at end of learning.
     if experiment is not None:
         experiment.end_of_instance(agent)
+
+    return False, steps
 
 def _make_step_progress_bar():
     '''
@@ -451,7 +465,6 @@ def main():
     else:
         # Regular experiment.
         run_agents_on_mdp(agents, mdp, instances=50, episodes=1, steps=2000)
-
 
 if __name__ == "__main__":
     main()
