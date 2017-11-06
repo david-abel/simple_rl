@@ -12,12 +12,12 @@ setup(
       'numpy',
       'matplotlib'
   ],
-  version='0.755',
+  version='0.76',
   description = 'A simple framework for experimenting with Reinforcement Learning in Python 2.7',
   author = 'David Abel',
   author_email = 'david_abel@brown.edu',
   url = 'https://github.com/david-abel/simple_rl',
-  download_url = 'https://github.com/david-abel/simple_rl/tarball/v0.755',
+  download_url = 'https://github.com/david-abel/simple_rl/tarball/v0.76',
   keywords = ['Markov Decision Process', 'MDP', 'Reinforcement Learning'],
   classifiers = [],
 )
