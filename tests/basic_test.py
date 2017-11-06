@@ -27,7 +27,7 @@ def main():
 
 	# Grab all example files.
 	example_dir = os.path.join(os.getcwd(), "..", "examples")
-	example_files = [f for f in os.listdir(example_dir) if os.path.isfile(os.path.join(example_dir, f)) and "py" == f.split(".")[-1] and "init" not in f]
+	example_files = [f for f in os.listdir(example_dir) if os.path.isfile(os.path.join(example_dir, f)) and "py" == f.split(".")[-1] and "init" not in f and "viz_exam" not in f]
 
 	print "\n" + "="*32
 	print "== Running", len(example_files), "simple_rl tests =="
