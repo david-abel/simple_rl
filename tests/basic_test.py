@@ -5,9 +5,6 @@ import subprocess
 import os
 import sys
 
-# Example imports
-from examples import example_params
-
 def run_example(path_to_example_file):
 	'''
 	Args:
