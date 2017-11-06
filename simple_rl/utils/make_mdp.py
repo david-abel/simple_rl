@@ -10,7 +10,7 @@ import random
 from collections import defaultdict
 
 # Other imports.
-from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP, FourRoomMDP, RockSampleMDP
+from simple_rl.tasks import ChainMDP, GridWorldMDP, TaxiOOMDP, RandomMDP, FourRoomMDP
 from simple_rl.tasks.grid_world.GridWorldMDPClass import make_grid_world_from_file
 from simple_rl.mdp import MDPDistribution
 
@@ -33,7 +33,6 @@ def make_mdp(mdp_class="grid", state_size=7):
     passengers = [{"x":state_size / 2, "y":state_size / 2, "dest_x":state_size-2, "dest_y":2, "in_taxi":0}]
     walls = []
 
-
     mdp = {"hall":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=hall_goal_locs),
             "pblocks_grid":make_grid_world_from_file("pblocks_grid.txt", randomize=True),
             "grid":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=[(state_size, state_size)]),
@@ -44,7 +43,7 @@ def make_mdp(mdp_class="grid", state_size=7):
 
     return mdp
 
-def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0, gamma=0.99):
+def make_mdp_distr(mdp_class="grid", grid_dim=9, horizon=0, step_cost=0, gamma=0.99):
     '''
     Args:
         mdp_class (str): one of {"grid", "random"}
@@ -74,10 +73,10 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0, gamma=0
     grid_goal_locs = tl_grid_goal_locs + tr_grid_goal_locs
 
     # Hallway.
-    hall_goal_locs = [(i, width) for i in xrange(1, height + 1)]
+    hall_goal_locs = [(i, height) for i in xrange(1, 26)]
 
     # Four room.
-    four_room_goal_locs = [(width, height), (width, 1), (1, height)] #, (1, height - 2), (width - 2, height - 2)]
+    four_room_goal_locs = [(width, height), (width, 1), (1, height), (1, height - 2), (width - 2, height - 2), (width - 2, 1)]
 
     # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}
@@ -87,6 +86,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0, gamma=0
                     "hall":hall_goal_locs,
                     "grid":grid_goal_locs,
                     "corridor":corr_goal_locs,
+                    "rock_sample":rock_rewards
                     }
 
     # MDP Probability.
@@ -95,17 +95,14 @@ def make_mdp_distr(mdp_class="grid", grid_dim=7, horizon=0, step_cost=0, gamma=0
         num_mdps = 12
     mdp_prob = 1.0 / num_mdps
 
-    rocks = [[1,2,False], [3,1,False], [4,2,False], [3,5,False], [4,5,True], [2,7,False], [6,6,True], [7,4,False]]
-
-    for i in range(num_mdps):
+    for i in xrange(num_mdps):
 
         new_mdp = {"hrooms":make_grid_world_from_file("hierarch_rooms.txt", num_goals=7, randomize=False),
                     "octo":make_grid_world_from_file("octogrid.txt", num_goals=12, randomize=False, goal_num=i),
-                    "hall":GridWorldMDP(width=25, height=height, rand_init=True, goal_locs=goal_loc_dict["hall"], name="hallway"),
+                    "hall":GridWorldMDP(width=30, height=height, rand_init=False, goal_locs=goal_loc_dict["hall"], name="hallway", is_goal_terminal=True),
                     "corridor":GridWorldMDP(width=20, height=1, init_loc=(10, 1), goal_locs=[goal_loc_dict["corridor"][i % len(goal_loc_dict["corridor"])]], is_goal_terminal=True, name="corridor"),
                     "grid":GridWorldMDP(width=width, height=height, rand_init=True, goal_locs=[goal_loc_dict["grid"][i % len(goal_loc_dict["grid"])]], is_goal_terminal=True),
-                    "four_room":FourRoomMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]]),
-                    "rock_sample":RockSampleMDP(rocks=rocks),
+                    "four_room":FourRoomMDP(width=width, height=height, goal_locs=[goal_loc_dict["four_room"][i % len(goal_loc_dict["four_room"])]], is_goal_terminal=True),
                     # THESE GOALS ARE SPECIFIED IMPLICITLY:
                     "pblocks_grid":make_grid_world_from_file("pblocks_grid.txt", randomize=True, slip_prob=0.1),
                     "chain":ChainMDP(num_states=10, reset_val=random.choice([0, 0.01, 0.05, 0.1, 0.2, 0.5])),
