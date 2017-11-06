@@ -16,12 +16,16 @@ class LinearQLearnerAgent(QLearnerAgent):
     QLearnerAgent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, num_features, name="ql-linear", alpha=0.2, gamma=0.99, epsilon=0.2, explore="uniform", rbf=False, anneal=True):
+    def __init__(self, actions, num_features, rand_init=True, name="ql-linear", alpha=0.2, gamma=0.99, epsilon=0.2, explore="uniform", rbf=False, anneal=True):
         name = name + "-rbf" if rbf else name
         QLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
         self.num_features = num_features
         # Add a basis feature.
-        self.weights = np.zeros(self.num_features*len(self.actions))
+        if rand_init:
+            self.weights = np.random.random(self.num_features*len(self.actions))
+        else:
+            self.weights = np.zeros(self.num_features*len(self.actions))
+
         self.rbf = rbf
 
     def update(self, state, action, reward, next_state):
@@ -119,9 +123,8 @@ class LinearQLearnerAgent(QLearnerAgent):
         return np.dot(self.weights, sa_feats)
 
     def reset(self):
-        self.step_number = 0
         self.weights = np.zeros(self.num_features*len(self.actions))
-        Agent.reset(self)
+        QLearnerAgent.reset(self)
 
 
 def _rbf(x):

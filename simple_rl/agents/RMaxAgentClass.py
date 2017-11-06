@@ -1,11 +1,12 @@
-''' RMaxAgentClass.py: Class for an RMaxAgent from [Brafman and Tennenholtz 2003].
+'''
+RMaxAgentClass.py: Class for an RMaxAgent from [Brafman and Tennenholtz 2003].
 
 Notes:
     - Assumes WLOG reward function codomain is [0,1] (so RMAX is 1.0)
 '''
 
 # Python imports.
-import random as r
+import random
 from collections import defaultdict
 
 # Local classes.
@@ -16,7 +17,7 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.99, horizon=5, s_a_threshold=3):
+    def __init__(self, actions, gamma=0.95, horizon=10, s_a_threshold=1):
         Agent.__init__(self, name="rmax-h" + str(horizon), actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
@@ -89,7 +90,7 @@ class RMaxAgent(Agent):
             horizon = self.horizon
 
         # Grab random initial action in case all equal
-        best_action = r.choice(self.actions)
+        best_action = random.choice(self.actions)
         max_q_val = self.get_q_value(state, best_action, horizon)
 
         # Find best action (action w/ current max predicted Q value)
@@ -152,7 +153,6 @@ class RMaxAgent(Agent):
 
         # Compute future return.
         expected_future_return = self.gamma*self._compute_exp_future_return(state, action, horizon)
-
         q_val = self._get_reward(state, action) + expected_future_return# self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
 
         return q_val

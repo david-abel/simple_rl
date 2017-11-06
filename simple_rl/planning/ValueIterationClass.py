@@ -8,7 +8,7 @@ from PlannerClass import Planner
 
 class ValueIteration(Planner):
 
-    def __init__(self, mdp, name="value_iter", delta=0.001, max_iterations=200, sample_rate=3):
+    def __init__(self, mdp, name="value_iter", delta=0.0001, max_iterations=200, sample_rate=3):
         '''
         Args:
             mdp (MDP)
@@ -25,10 +25,11 @@ class ValueIteration(Planner):
         self.value_func = defaultdict(float)
         self.reachability_done = False
         self.has_computed_matrix = False
-        self._compute_reachable_state_space()
+        self.bellman_backups = 0
 
     def _compute_matrix_from_trans_func(self):
         if self.has_computed_matrix:
+            self._compute_reachable_state_space()
             # We've already run this, just return.
             return
 
@@ -120,10 +121,13 @@ class ValueIteration(Planner):
         max_diff = float("inf")
         self._compute_matrix_from_trans_func()
         state_space = self.get_states()
+        self.bellman_backups = 0
+
         # Main loop.
         while max_diff > self.delta and iterations < self.max_iterations:
             max_diff = 0
             for s in state_space:
+                self.bellman_backups += 1
                 if s.is_terminal():
                     continue
 
@@ -137,13 +141,20 @@ class ValueIteration(Planner):
                 # Update value.
                 self.value_func[s] = max_q
             iterations += 1
-            # print "iters, val:", iterations, max_diff, len(self.get_states())
+            # print "iters, val:", iterations, max_diff
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
         
         self.has_planned = True
 
         return iterations, value_of_init_state
+
+    def get_num_backups_in_recent_run(self):
+        if self.has_planned:
+            return self.bellman_backups
+        else:
+            print "Warning: asking for num Bellman backups, but VI has not been run."
+            return 0
 
     def print_value_func(self):
         for key in self.value_func.keys():
@@ -167,7 +178,6 @@ class ValueIteration(Planner):
         action_seq = []
         state_seq = [state]
         steps = 0
-
 
         while (not state.is_terminal()) and steps < horizon:
             next_action = self._get_max_q_action(state)

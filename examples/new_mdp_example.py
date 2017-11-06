@@ -2,6 +2,7 @@
 
 # Python imports.
 from collections import defaultdict
+import sys
 
 # Other imports.
 import srl_example_setup
@@ -74,7 +75,7 @@ class ColoredGridWorldState(GridWorldState):
     def __str__(self):
         return "s: (" + str(self.x) + "," + str(self.y) + "," + str(self.color) + ")"
 
-def main():
+def main(open_plot=True):
     state_colors = defaultdict(lambda:defaultdict(lambda:"white"))
     state_colors[3][2] = "red"
 
@@ -84,7 +85,7 @@ def main():
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
-    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=15, episodes=500, steps=40) 
+    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=15, episodes=500, steps=40, open_plot=open_plot) 
 
 if __name__ == "__main__":
-    main()
+    main(open_plot=not(sys.argv[-1] == "no_plot"))

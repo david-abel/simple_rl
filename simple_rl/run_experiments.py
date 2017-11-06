@@ -30,15 +30,16 @@ from simple_rl.mdp import MarkovGameMDP
 from simple_rl.agents import QLearnerAgent, FixedPolicyAgent
 
 
-def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False):
+def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False, open_plot=True):
     '''
     Args:
         agent_list (list of Agents): See agents/AgentClass.py (and friends).
         markov_game_mdp (MarkovGameMDP): See mdp/markov_games/MarkovGameMDPClass.py.
-        instances (int) [opt]: Number of times to run each agent (for confidence intervals).
-        episodes (int) [opt]: Number of episodes for each learning instance.
-        steps (int) [opt]: Number of times to run each agent (for confidence intervals).
+        instances (int): Number of times to run each agent (for confidence intervals).
+        episodes (int): Number of episodes for each learning instance.
+        steps (int): Number of times to run each agent (for confidence intervals).
         verbose (bool)
+        open_plot (bool): If true opens plot.
     '''
 
     # Put into dict.
@@ -113,7 +114,7 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
     # Time stuff.
     print "Experiment took " + str(round(time.clock() - start, 2)) + " seconds."
 
-    experiment.make_plots()
+    experiment.make_plots(open_plot=open_plot)
 
 def run_agents_multi_task(agents,
                             mdp_distr,
@@ -221,10 +222,10 @@ def run_agents_on_mdp(agents,
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
         mdp (MDP): See mdp/MDPClass.py for the abstract class. Specific MDPs in tasks/*.
-        instances (int) [opt]: Number of times to run each agent (for confidence intervals).
-        episodes (int) [opt]: Number of episodes for each learning instance.
-        steps (int) [opt]: Number of steps per episode.
-        clear_old_results (bool) [opt]: If true, removes all results files in the relevant results dir.
+        instances (int): Number of times to run each agent (for confidence intervals).
+        episodes (int): Number of episodes for each learning instance.
+        steps (int): Number of steps per episode.
+        clear_old_results (bool): If true, removes all results files in the relevant results dir.
         rew_step_count (int): Number of steps before recording reward.
         is_rec_disc_reward (bool): If true, track (and plot) discounted reward.
         open_plot (bool): If true opens the plot at the end.
@@ -277,7 +278,6 @@ def run_agents_on_mdp(agents,
         print str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds."
     print "-------------\n"
 
-    # if not isinstance(mdp, GymMDP):
     experiment.make_plots(open_plot=open_plot)
 
 def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbose=False, is_rec_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False):

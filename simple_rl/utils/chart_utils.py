@@ -27,14 +27,18 @@ import numpy as np
 import subprocess
 import argparse
 
-color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170],\
-                [113, 198, 113],[85, 85, 85], [198, 113, 113],\
+color_ls = [[240, 163, 255], [113, 113, 198],[113, 198, 113],\
+                [197, 193, 170],[85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
 
 # Set font.
-font = {'family':'sans serif', 'size':15}
+font = {'family':'sans serif', 'size':14}
 matplotlib.rc('font', **font)
+
+CUSTOM_TITLE = None
+X_AXIS_LABEL = None
+Y_AXIS_LABEL = None
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -50,8 +54,6 @@ def load_data(experiment_dir, experiment_agents):
     for alg in experiment_agents:
 
         # Load the reward for all instances of each agent
-
-
         all_reward = open(os.path.join(experiment_dir, str(alg)) + ".csv", "r")
         all_instances = []
 
@@ -184,8 +186,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
 
     # Puts the legend into the best location in the plot and use a tight layout.
-    pyplot.rcParams['legend.loc'] = 'best'
-    pyplot.xlim(0, len(results[0]) - 1)
+    pyplot.rcParams['legend.loc'] = 'upper left'
 
     # Negate everything if we're plotting cost.
     if use_cost:
@@ -195,7 +196,6 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Make the plot.
     print_prefix = "\nAvg. cumulative reward" if cumulative else "Avg. reward"
-    print print_prefix + " last " + x_axis_unit + ":"
 
     for i, agent_name in enumerate(agents):
 
@@ -229,11 +229,15 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     disc_ext = "Discounted " if is_rec_disc_reward else ""
     plot_name = os.path.join(experiment_dir, "all_") + plot_label.lower() + "_" + unit.lower() + ".pdf"
 
+    # Set names.
     exp_dir_split_list = experiment_dir.split("/")
     exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
-    plot_title = plot_label + " " + disc_ext + unit + ": " + exp_name
-    y_axis_label = plot_label + " " + unit
-    pyplot.xlabel(x_axis_unit[0].upper() + x_axis_unit[1:] + " Number")
+    plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
+    x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
+    y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
+
+    # Pyplot calls.
+    pyplot.xlabel(x_axis_label)
     pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
@@ -294,7 +298,11 @@ def _get_agent_names(data_dir):
     Returns:
         (list)
     '''
-    params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+    try:
+        params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+    except IOError:
+        # No param file.
+        return [agent_file.replace(".csv", "") for agent_file in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, agent_file)) and ".csv" in agent_file]
 
     agent_names = []
     agent_flag = False
@@ -319,14 +327,20 @@ def _get_agent_colors(data_dir, agents):
     Returns:
         (list)
     '''
-    params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+    try:
+        params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+    except IOError:
+        # No param file.
+        d = {agent : i for i, agent in enumerate(agents)}
+        print d
+        return d
 
     colors = {}
 
     # Check if episodes > 1.
     for line in params_file.readlines():
         for agent_name in agents:
-            if agent_name in line.strip():
+            if agent_name == line.strip().split(",")[0]:
                 colors[agent_name] = int(line[-2])
 
     return colors
@@ -339,12 +353,8 @@ def _is_episodic(data_dir):
 
     # Open param file for the experiment.
     if not os.path.exists(data_dir + "parameters.txt"):
-        print data_dir.split("/")
-        if data_dir.split("/")[-2] == "times":
-            data_dir = data_dir.replace("times/","")
-        else:
-            print "Warning: no parameters file found for experiment. Assuming non-episodic."
-            return False
+        print "Warning: no parameters file found for experiment. Assuming non-episodic."
+        return False
 
     params_file = open(data_dir + "parameters.txt", "r")
 

@@ -12,7 +12,7 @@ from simple_rl.agents.AgentClass import Agent
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="qlearner", alpha=0.1, gamma=0.99, epsilon=0.2, explore="uniform", anneal=False):
+    def __init__(self, actions, name="qlearner", alpha=0.05, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):
         '''
         Args:
             actions (list): Contains strings denoting the actions.

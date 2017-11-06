@@ -2,7 +2,7 @@
 
 # Python imports.
 import math as m
-import random as r
+import random
 from collections import defaultdict
 
 # Other imports.
@@ -10,16 +10,16 @@ from PlannerClass import Planner
 
 class MCTS(Planner):
 
-    def __init__(self, mdp, name="mcts", explore_param=m.sqrt(2), rollout_depth=100, num_rollouts_per_step=50):
+    def __init__(self, mdp, name="mcts", explore_param=m.sqrt(2), rollout_depth=20, num_rollouts_per_step=10):
         Planner.__init__(self, mdp, name=name)
 
         self.rollout_depth = rollout_depth
         self.num_rollouts_per_step = num_rollouts_per_step
         self.value_total = defaultdict(lambda : defaultdict(float))
         self.explore_param = explore_param
-        self.visitation_counts = defaultdict(lambda : defaultdict(lambda : 1))
+        self.visitation_counts = defaultdict(lambda : defaultdict(lambda : 0))
 
-    def plan(self, cur_state, horizon=100):
+    def plan(self, cur_state, horizon=20):
         '''
         Args:
             cur_state (State)
@@ -32,18 +32,27 @@ class MCTS(Planner):
         state_seq = [cur_state]
         steps = 0
         while not cur_state.is_terminal() and steps < horizon:
-            action = self.policy(cur_state)
+            action = self._next_action(cur_state)
+            # Do the rollouts...
             cur_state = self.transition_func(cur_state, action)
             action_seq.append(action)
             state_seq.append(cur_state)
             steps += 1
 
+        self.has_planned = True
+
         return action_seq, state_seq
 
     def policy(self, state):
-        for i in xrange(self.num_rollouts_per_step):
-            a = self._next_action(state)
-            self._rollout(state, a)
+        '''
+        Args:
+            state (State)
+
+        Returns:
+            (str)
+        '''
+        if not self.has_planned:
+            self.plan(state)
 
         return self._next_action(state)
 
@@ -60,12 +69,17 @@ class MCTS(Planner):
         '''
         best_action = self.actions[0]
         best_score = 0
-
         total_visits = [self.visitation_counts[state][a] for a in self.actions]
+
+        print total_visits
 
         if 0 in total_visits:
             # Insufficient stats, return random.
-            return random.choice(self.actions)
+                # Should choose randomly AMONG UNSAMPLED.
+            unsampled_actions = [self.actions[i] for i, x in enumerate(total_visits) if x == 0]
+            next_action = random.choice(unsampled_actions)
+            self.visitation_counts[state][next_action] += 1
+            return next_action
 
         total = sum(total_visits)
 
@@ -82,15 +96,22 @@ class MCTS(Planner):
         return best_action
 
     def _rollout(self, cur_state, action):
+        '''
+        Args:
+            cur_state (State)
+            action (str)
+
+        Returns:
+            (float): Discounted reward from the rollout.
+        '''
         trajectory = []
         total_discounted_reward = []
         for i in range(self.rollout_depth):
 
-
-            # Simulate next.
+            # Simulate next state.
             next_action = self._next_action(cur_state)
             cur_state = self.transition_func(cur_state, next_action)
-            next_reward = self.transition_func(cur_state, next_action)
+            next_reward = self.reward_func(cur_state, next_action)
 
             # Track rewards and states.
             total_discounted_reward.append(self.gamma**i * next_reward)

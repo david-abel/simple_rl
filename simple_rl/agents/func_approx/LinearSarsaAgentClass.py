@@ -1,5 +1,5 @@
 '''
-LinearApproxSarsaAgentClass.py
+LinearSarsaAgentClass.py
 
 Contains implementation for a Q Learner with a Linear Function Approximator.
 '''
@@ -11,17 +11,14 @@ import math
 # Other imports.
 from simple_rl.agents.func_approx.LinearQLearnerAgentClass import LinearQLearnerAgent
 
-class LinearApproxSarsaAgent(LinearQLearnerAgent):
+class LinearSarsaAgent(LinearQLearnerAgent):
     '''
     Sarsa Agent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, name="sarsa-linear", alpha=0.05, gamma=0.99, epsilon=0.01, explore="uniform", rbf=False, anneal=True):
+    def __init__(self, actions, num_features, rand_init=False, name="sarsa-linear", alpha=0.05, gamma=0.99, epsilon=0.01, explore="uniform", rbf=False, anneal=True):
         name = name + "-rbf" if (name == "sarsa-linear" and rbf) else name
-        LinearQLearnerAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
-        self.num_features = 0
-        self.rbf = srbf
-        self.weights = None
+        LinearQLearnerAgent.__init__(self, actions=list(actions), rand_init=rand_init, num_features=num_features, name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
 
     def act(self, state, reward):
         '''
@@ -33,9 +30,7 @@ class LinearApproxSarsaAgent(LinearQLearnerAgent):
             The central update for SARSA.
         '''
         
-        if self.weights is None:
-            action = np.random.choice(self.actions)
-        elif self.explore == "softmax":
+        if self.explore == "softmax":
             # Softmax exploration
             action = self.soft_max_policy(state)
         else:
@@ -67,9 +62,6 @@ class LinearApproxSarsaAgent(LinearQLearnerAgent):
         '''
         # If this is the first state, initialize state-relevant data and return.
         if state is None:
-            if self.num_features == 0:
-                self.num_features = len(next_state.features())
-                self.weights = np.zeros(self.num_features*len(self.actions))
             self.prev_state = next_state
             return
 

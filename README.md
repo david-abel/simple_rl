@@ -19,11 +19,11 @@ The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just
 
 	pip install simple_rl
 
-Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.741).
+Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.755).
 
 ## Example
 
-Several examples showcasing basic functionality are included in the _examples_ directory.
+Some examples showcasing basic functionality are included in the _examples_ directory.
 
 To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ method from _simple_rl.run_experiments_ and call it with some agents for a given MDP. For example:
 
@@ -33,8 +33,8 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	from simple_rl.agents import QLearnerAgent
 
 	# Run Experiment
-	mdp = GridWorldMDP(10, 10, (1, 1), [(10, 10)])
-	agent = QLearnerAgent(mdp.actions)
+	mdp = GridWorldMDP()
+	agent = QLearnerAgent(mdp.get_actions())
 	run_agents_on_mdp([agent], mdp)
 
 ## Overview
@@ -47,7 +47,7 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 
 * (_planning_): Implementations for planning algorithms, includes ValueIteration and MCTS [[Couloum 2006]](https://hal.archives-ouvertes.fr/file/index/docid/116992/filename/CG2006.pdf).
 
-* (_tasks_): Implementations for a few standard MDPs (grid world, n-chain, and Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf)). Recently added support for the [OpenAI Gym](https://gym.openai.com/envs).
+* (_tasks_): Implementations for a few standard MDPs (grid world, n-chain, Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf), etc.). Recently added support for the [OpenAI Gym](https://gym.openai.com/envs).
 
 * (_utils_): Code for charting utilities.
 
@@ -62,7 +62,7 @@ Make an MDP subclass, which needs:
 
 * I also suggest overwriting the "\_\_str\_\_" method of the class, and adding a "\_\_init\_\_.py" file to the directory.
 
-* Create a State subclass for your MDP. I suggest overwriting the "\_\_hash\_\_", "\_\_eq\_\_", and "\_\_str\_\_" for the class to play along well with the agents.
+* Create a State subclass for your MDP (if necessary). I suggest overwriting the "\_\_hash\_\_", "\_\_eq\_\_", and "\_\_str\_\_" for the class to play along well with the agents.
 
 
 ## Making a New Agent
