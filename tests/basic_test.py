@@ -36,8 +36,6 @@ def main():
 	print "== Running", len(example_files), "simple_rl tests =="
 	print "="*32 + "\n"
 	total_passed = 0
-	example_params.OPEN_PLOT = False
-	example_params.OPEN_VIZ = False
 
 	for i, ex in enumerate(example_files):
 		print "\t [Test", str(i + 1) + "] ", ex + ": ",
