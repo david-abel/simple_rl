@@ -86,7 +86,6 @@ def make_mdp_distr(mdp_class="grid", grid_dim=9, horizon=0, step_cost=0, gamma=0
                     "hall":hall_goal_locs,
                     "grid":grid_goal_locs,
                     "corridor":corr_goal_locs,
-                    "rock_sample":rock_rewards
                     }
 
     # MDP Probability.
