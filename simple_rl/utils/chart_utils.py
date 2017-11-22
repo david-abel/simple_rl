@@ -22,19 +22,26 @@ import math
 import sys
 import os
 import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as pyplot
 import numpy as np
 import subprocess
 import argparse
 
-color_ls = [[240, 163, 255], [113, 113, 198],[113, 198, 113],\
-                [197, 193, 170],[85, 85, 85], [198, 113, 113],\
+color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170], [113, 198, 113],\
+                [85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
 
 # Set font.
-font = {'family':'sans serif', 'size':14}
+font = {'family':'serif', 'size':14}
 matplotlib.rc('font', **font)
+# matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['pdf.fonttype'] = 42
+
+fig = matplotlib.pyplot.gcf()
+# fig.set_size_inches(18.5, 10.5)
+# fig.savefig('test2png.png', dpi=100)
 
 CUSTOM_TITLE = None
 X_AXIS_LABEL = None
@@ -77,7 +84,6 @@ def average_data(data, cumulative=False):
     Returns:
         (list): a 2D matrix, [algorithm][episode], where the instance rewards have been averaged.
     '''
-
     num_algorithms = len(data)
 
     result = [None for i in xrange(num_algorithms)] # [Alg][avgRewardEpisode], where avg is summed up to episode i if @cumulative=True
@@ -233,12 +239,16 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     exp_dir_split_list = experiment_dir.split("/")
     exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
+    plot_title = plot_title.replace("_", " ")
+    plot_title = plot_title.replace(" w ", " w/ ")
+
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
 
     # Pyplot calls.
     pyplot.xlabel(x_axis_label)
-    pyplot.ylabel(y_axis_label)
+    # pyplot.ylabel(y_axis_label)
+    print plot_title
     pyplot.title(plot_title)
     pyplot.grid(True)
 
