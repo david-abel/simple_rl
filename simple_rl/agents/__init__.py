@@ -13,6 +13,7 @@ Implementations of standard RL agents:
 from AgentClass import Agent
 from FixedPolicyAgentClass import FixedPolicyAgent
 from QLearnerAgentClass import QLearnerAgent
+from DoubleQAgentClass import DoubleQAgent
 from RandomAgentClass import RandomAgent
 from RMaxAgentClass import RMaxAgent
 
