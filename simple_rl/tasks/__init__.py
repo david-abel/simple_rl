@@ -1,6 +1,7 @@
 # Grab classes.
 from chain.ChainMDPClass import ChainMDP
 from chain.ChainStateClass import ChainState
+from hanoi.HanoiMDPClass import HanoiMDP
 from grid_world.GridWorldMDPClass import GridWorldMDP
 from grid_world.GridWorldStateClass import GridWorldState
 from four_room.FourRoomMDPClass import FourRoomMDP

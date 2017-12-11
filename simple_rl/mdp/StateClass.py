@@ -22,6 +22,9 @@ class State(object):
     	'''
         return np.array(self.data).flatten()
 
+    def get_data(self):
+        return self.data
+
     def get_num_feats(self):
         return len(self.features())
 
