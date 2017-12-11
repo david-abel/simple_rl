@@ -8,7 +8,7 @@ There are loads of other great libraries out there for RL. The aim of this one i
 
 A brief tutorial for a slightly earlier version is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html).
 
-Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). I recently added a basic test script, contained in the _test/_ directory. If you don't have OpenAI Gym, you should expect to pass 9/10 tests.
+Just requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). I recently added a basic test script, contained in the _tests_ directory. If you don't have OpenAI Gym, you should expect to pass 9/10 tests.
 
 
 ## Installation
