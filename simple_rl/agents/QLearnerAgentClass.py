@@ -190,10 +190,11 @@ class QLearnerAgent(Agent):
         '''
         return self.q_func[state][action]
 
-    def get_action_distr(self, state):
+    def get_action_distr(self, state, beta=0.2):
         '''
         Args:
             state (State)
+            beta (float): Softmax temperature parameter.
 
         Returns:
             (list of floats): The i-th float corresponds to the probability
@@ -205,8 +206,8 @@ class QLearnerAgent(Agent):
             all_q_vals.append(self.get_q_value(state, action))
 
         # Softmax distribution.
-        total = sum([numpy.exp(qv) for qv in all_q_vals])
-        softmax = [numpy.exp(qv) / total for qv in all_q_vals]
+        total = sum([numpy.exp(beta * qv) for qv in all_q_vals])
+        softmax = [numpy.exp(beta * qv) / total for qv in all_q_vals]
 
         return softmax
 

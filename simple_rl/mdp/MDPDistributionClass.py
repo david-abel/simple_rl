@@ -1,6 +1,7 @@
 ''' MDPDistributionClass.py: Contains the MDP Distribution Class. '''
 
 # Python imports.
+from __future__ import print_function
 import numpy as np
 import random as rnd
 from collections import defaultdict
@@ -41,7 +42,7 @@ class MDPDistribution(object):
             try:
                 self.mdp_prob_dict.pop(mdp)
             except KeyError:
-                print "simple-rl (Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it."
+                print("(simple-rl Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it.")
                 quit()
 
         self._normalize()
@@ -57,7 +58,7 @@ class MDPDistribution(object):
         try:
             self.mdp_prob_dict.pop(mdp)
         except KeyError:
-            print "simple-rl (Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it."
+            print("(simple-rl Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it.")
             quit()
 
         self._normalize()

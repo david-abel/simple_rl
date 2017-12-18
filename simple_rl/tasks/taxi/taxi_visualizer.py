@@ -1,8 +1,9 @@
 # Python imports.
+from __future__ import print_function
 try:
     import pygame
 except ImportError:
-    print "Warning: pygame not installed (needed for visuals)."
+    print("Warning: pygame not installed (needed for visuals).")
 
 # Other imports.
 from simple_rl.utils.chart_utils import color_ls

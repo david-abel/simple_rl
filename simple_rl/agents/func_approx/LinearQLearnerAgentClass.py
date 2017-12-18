@@ -49,7 +49,7 @@ class LinearQLearnerAgent(QLearnerAgent):
         '''
         Args:
             state (State): The abstract state object.
-            action (str): A string representing an action. See namespaceAIX.
+            action (str): A string representing an action.
 
         Returns:
             (numpy array): A state-action feature vector representing the current State and action.
@@ -91,7 +91,7 @@ class LinearQLearnerAgent(QLearnerAgent):
             For each weight:
                 w_i = w_i + alpha * phi(s,a)[i] * delta
 
-            Where phi(s,a) maps the state action pair to a feature vector (see <QLearningAgent>._phi(s,a))
+            Where phi(s,a) maps the state action pair to a feature vector (see QLearningAgent._phi(s,a))
         '''
 
         # Compute temporal difference [Eq. 1]
@@ -119,7 +119,7 @@ class LinearQLearnerAgent(QLearnerAgent):
 
         # Return linear approximation of Q value
         sa_feats = self._phi(state, action)
-        # print "q s a ", round(np.dot(self.weights, sa_feats), 2), state, action
+
         return np.dot(self.weights, sa_feats)
 
     def reset(self):

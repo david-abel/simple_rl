@@ -18,6 +18,7 @@ Author: David Abel (cs.brown.edu/~dabel)
 '''
 
 # Python imports.
+from __future__ import print_function
 import math
 import sys
 import os
@@ -28,16 +29,16 @@ import numpy as np
 import subprocess
 import argparse
 
-color_ls = [[240, 163, 255], [113, 113, 198],[197, 193, 170], [113, 198, 113],\
+color_ls = [[240, 163, 255], [113, 113, 198],[113, 198, 113],[197, 193, 170],\
                 [85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
 
 # Set font.
-font = {'family':'serif', 'size':14}
+font = {'size':14}
 matplotlib.rc('font', **font)
 # matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['pdf.fonttype'] = 42
+# matplotlib.rcParams['pdf.fonttype'] = 42
 
 fig = matplotlib.pyplot.gcf()
 # fig.set_size_inches(18.5, 10.5)
@@ -97,8 +98,8 @@ def average_data(data, cumulative=False):
         try:
             avged = all_instances.sum(axis=0)/float(num_instances)
         except TypeError:
-            print 
-            print "(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters."
+            print()
+            print("(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters.")
             quit()
         
         if cumulative:
@@ -192,7 +193,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
 
     # Puts the legend into the best location in the plot and use a tight layout.
-    pyplot.rcParams['legend.loc'] = 'upper left'
+    pyplot.rcParams['legend.loc'] = 'best'
 
     # Negate everything if we're plotting cost.
     if use_cost:
@@ -218,7 +219,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
             top = np.add(y_axis, alg_conf_interv)
             bot = np.subtract(y_axis, alg_conf_interv)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
-        print "\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")"
+        print("\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")")
 
         marker_every = max(len(y_axis) / 30,1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
@@ -239,7 +240,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     exp_dir_split_list = experiment_dir.split("/")
     exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
-    plot_title = plot_title.replace("_", " ")
+    # plot_title = plot_title.replace("_", " ")
     plot_title = plot_title.replace(" w ", " w/ ")
 
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
@@ -247,8 +248,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Pyplot calls.
     pyplot.xlabel(x_axis_label)
-    # pyplot.ylabel(y_axis_label)
-    print plot_title
+    pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
 
@@ -341,9 +341,7 @@ def _get_agent_colors(data_dir, agents):
         params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
     except IOError:
         # No param file.
-        d = {agent : i for i, agent in enumerate(agents)}
-        print d
-        return d
+        return {agent : i for i, agent in enumerate(agents)}
 
     colors = {}
 
@@ -363,7 +361,7 @@ def _is_episodic(data_dir):
 
     # Open param file for the experiment.
     if not os.path.exists(data_dir + "parameters.txt"):
-        print "Warning: no parameters file found for experiment. Assuming non-episodic."
+        print("Warning: no parameters file found for experiment. Assuming non-episodic.")
         return False
 
     params_file = open(data_dir + "parameters.txt", "r")
@@ -373,6 +371,25 @@ def _is_episodic(data_dir):
         if "episodes" in line:
             vals = line.strip().split(":")
             return int(vals[1]) > 1
+
+def _is_disc_reward(data_dir):
+    '''
+    Returns:
+        (bool) True iff the experiment recorded discounted reward.
+    '''
+
+    # Open param file for the experiment.
+    if not os.path.exists(data_dir + "parameters.txt"):
+        print("Warning: no parameters file found for experiment. Assuming non-episodic.")
+        return False
+
+    params_file = open(data_dir + "parameters.txt", "r")
+
+    # Check if episodes > 1.
+    for line in params_file.readlines():
+        if "is_rec_disc_reward" in line:
+            vals = line.strip().split(":")
+            return bool(vals[1])
 
 def parse_args():
     '''
@@ -399,14 +416,15 @@ def main():
     data_dir = args.dir
     agent_names = _get_agent_names(data_dir)
     if len(agent_names) == 0:
-        print "Error: no csv files found."
+        print("Error: no csv files found.")
         quit()
 
     cumulative = not(args.a)
     episodic = _is_episodic(data_dir)
+    is_rec_disc_reward = _is_disc_reward(data_dir)
 
     # Plot.
-    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic)
+    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, is_rec_disc_reward=is_rec_disc_reward)
 
 if __name__ == "__main__":
     main()

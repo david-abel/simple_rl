@@ -1,5 +1,8 @@
 ''' MarkovGameMDP.py: Contains implementation for simple Markov Games. '''
 
+# Python imports.
+from __future__ import print_function
+
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
 
@@ -15,7 +18,7 @@ class MarkovGameMDP(MDP):
             actions (dict): an action for each agent.
         '''
         if len(action_dict.keys()) != self.num_agents:
-            print "Error: only", len(action_dict.keys()), "action(s) was/were provided, but there are", self.num_agents, "agents."
+            print("Error: only", len(action_dict.keys()), "action(s) was/were provided, but there are", self.num_agents, "agents.")
             quit()
 
         reward_dict = self.reward_func(self.cur_state, action_dict)

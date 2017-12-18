@@ -69,7 +69,6 @@ class LinUCBAgent(Agent):
             action_context = np.reshape(context[action_id], (-1, 1))
             estimated_reward[action_id] = float(theta[action_id].T.dot(action_context))
             uncertainty[action_id] = float(self.alpha * np.sqrt(action_context.T.dot(a_inv[action_id]).dot(action_context)))
-            # print "u", uncertainty[action_id],
             score_dict[action_id] = estimated_reward[action_id] + uncertainty[action_id]
 
         return score_dict
@@ -110,9 +109,7 @@ class LinUCBAgent(Agent):
         # Compute best action.
         best_action = np.random.choice(self.actions)
         max_score = float("-inf")
-        # print "context", score
         for action_id in xrange(len(self.actions)):
-            # print "\t", score[action_id], self.actions[action_id]
             if score[action_id] > max_score:
                 max_score = score[action_id]
                 best_action = self.actions[action_id]

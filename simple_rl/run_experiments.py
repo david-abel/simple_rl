@@ -14,6 +14,7 @@ Author: David Abel (cs.brown.edu/~dabel/)
 '''
 
 # Python imports.
+from __future__ import print_function
 import time
 import argparse
 import os
@@ -52,12 +53,12 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
     experiment = Experiment(agents=agent_dict, mdp=markov_game_mdp, params=exp_params, is_episodic=episodes > 1, is_markov_game=True)
 
     # Record how long each agent spends learning.
-    print "Running experiment: \n" + str(experiment)
+    print("Running experiment: \n" + str(experiment))
     start = time.clock()
 
     # For each instance of the agent.
     for instance in xrange(1, instances + 1):
-        print "\tInstance " + str(instance) + " of " + str(int(instances)) + "."
+        print("\tInstance " + str(instance) + " of " + str(int(instances)) + ".")
 
         reward_dict = defaultdict(str)
         action_dict = {}
@@ -112,7 +113,7 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
             a.reset()
 
     # Time stuff.
-    print "Experiment took " + str(round(time.clock() - start, 2)) + " seconds."
+    print("Experiment took " + str(round(time.clock() - start, 2)) + " seconds.")
 
     experiment.make_plots(open_plot=open_plot)
 
@@ -126,7 +127,8 @@ def run_agents_multi_task(agents,
                             verbose=False,
                             is_rec_disc_reward=False,
                             reset_at_terminal=False,
-                            resample_at_terminal=False):
+                            resample_at_terminal=False,
+                            cumulative_plot=True):
     '''
     Args:
         agents (list)
@@ -139,6 +141,8 @@ def run_agents_multi_task(agents,
         verbose (bool)
         is_rew_disc_reward (bool): If true records and plots discounted reward
         reset_at_terminal (bool)
+        resample_at_terminal (bool)
+        cumulative_plot (bool)
 
     Summary:
         Runs each agent on the MDP distribution according to the given parameters.
@@ -146,9 +150,9 @@ def run_agents_multi_task(agents,
     '''
 
     # Set number of steps if the horizon is given.
-    if mdp_distr.get_horizon() > 0:
-        mdp_distr.set_gamma(1.0)
-        steps = mdp_distr.get_horizon()
+    # if mdp_distr.get_horizon() > 0:
+    #     mdp_distr.set_gamma(1.0)
+    #     steps = mdp_distr.get_horizon()
 
     # Experiment (for reproducibility, plotting).
     exp_params = {"task_samples":task_samples, "episodes":episodes, "steps":steps, "gamma":mdp_distr.get_gamma()}
@@ -158,22 +162,23 @@ def run_agents_multi_task(agents,
                 is_episodic=episodes > 1,
                 is_multi_task=True,
                 clear_old_results=clear_old_results,
-                is_rec_disc_reward=is_rec_disc_reward)
+                is_rec_disc_reward=is_rec_disc_reward,
+                cumulative_plot=cumulative_plot)
 
     # Record how long each agent spends learning.
-    print "Running experiment: \n" + str(experiment)
+    print("Running experiment: \n" + str(experiment))
     start = time.clock()
 
     times = defaultdict(float)
 
     # Learn.
     for agent in agents:
-        print str(agent) + " is learning."
+        print(str(agent) + " is learning.")
         start = time.clock()
 
         # --- SAMPLE NEW MDP ---
         for new_task in xrange(task_samples):
-            print "  Sample " + str(new_task + 1) + " of " + str(task_samples) + "."
+            print("  Sample " + str(new_task + 1) + " of " + str(task_samples) + ".")
 
             # Sample the MDP.
             mdp = mdp_distr.sample()
@@ -187,8 +192,6 @@ def run_agents_multi_task(agents,
                 hit_terminal, steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps - total_steps_taken, experiment, verbose, is_rec_disc_reward, reset_at_terminal, resample_at_terminal)
                 total_steps_taken += steps_taken
 
-
-
             # Reset the agent.
             agent.reset()
 
@@ -200,10 +203,10 @@ def run_agents_multi_task(agents,
         times[agent] = round(end - start, 3)
 
     # Time stuff.
-    print "\n--- TIMES ---"
+    print("\n--- TIMES ---")
     for agent in times.keys():
-        print str(agent) + " agent took " + str(round(times[agent], 2)) + " seconds."
-    print "-------------\n"
+        print(str(agent) + " agent took " + str(round(times[agent], 2)) + " seconds.")
+    print("-------------\n")
 
     experiment.make_plots(open_plot=open_plot)
 
@@ -217,7 +220,8 @@ def run_agents_on_mdp(agents,
                         is_rec_disc_reward=False,
                         open_plot=True,
                         verbose=False,
-                        reset_at_terminal=False):
+                        reset_at_terminal=False,
+                        cumulative_plot=True):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -231,6 +235,7 @@ def run_agents_on_mdp(agents,
         open_plot (bool): If true opens the plot at the end.
         verbose (bool): If true, prints status bars per episode/instance.
         reset_at_terminal (bool): If true sends the agent to the start state after terminal.
+        cumulative_plot (bool): If true makes a cumulative plot, otherwise plots avg. reward per timestep.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
@@ -246,21 +251,22 @@ def run_agents_on_mdp(agents,
                             is_episodic= episodes > 1,
                             clear_old_results=clear_old_results,
                             is_rec_disc_reward=is_rec_disc_reward,
-                            count_r_per_n_timestep=rew_step_count)
+                            count_r_per_n_timestep=rew_step_count,
+                            cumulative_plot=cumulative_plot)
 
     # Record how long each agent spends learning.
-    print "Running experiment: \n" + str(experiment)
+    print("Running experiment: \n" + str(experiment))
     time_dict = defaultdict(float)
 
     # Learn.
     for agent in agents:
-        print str(agent) + " is learning."
+        print(str(agent) + " is learning.")
 
         start = time.clock()
 
         # For each instance.
         for instance in xrange(1, instances + 1):
-            print "  Instance " + str(instance) + " of " + str(instances) + "."
+            print("  Instance " + str(instance) + " of " + str(instances) + ".")
             sys.stdout.flush()
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal=reset_at_terminal)
             
@@ -270,13 +276,13 @@ def run_agents_on_mdp(agents,
         # Track how much time this agent took.
         end = time.clock()
         time_dict[agent] = round(end - start, 3)
-        print
+        print()
 
     # Time stuff.
-    print "\n--- TIMES ---"
+    print("\n--- TIMES ---")
     for agent in time_dict.keys():
-        print str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds."
-    print "-------------\n"
+        print(str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds.")
+    print("-------------\n")
 
     experiment.make_plots(open_plot=open_plot)
 
@@ -289,7 +295,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         (dict): {key=agent, val=time}
     '''
     if reset_at_terminal and resample_at_terminal:
-        print "(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True."
+        print("(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True.")
         quit()
 
     # For each episode.
@@ -306,9 +312,10 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         reward = 0
         episode_start_time = time.clock()
 
+
         # Extra printing if verbose.
         if verbose:
-            print
+            print()
             sys.stdout.flush()
             prog_bar_len = _make_step_progress_bar()
             _increment_bar()
@@ -363,7 +370,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         agent.end_of_episode()
 
         if verbose:
-            print "\n"
+            print("\n")
 
     # Process that learning instance's info at end of learning.
     if experiment is not None:
@@ -411,7 +418,7 @@ def choose_mdp(mdp_name, env_name="Asteroids-v0"):
         try:
             from simple_rl.tasks.gym.GymMDPClass import GymMDP
         except:
-            print "Error: OpenAI gym not installed."
+            print("Error: OpenAI gym not installed.")
             quit()
         return GymMDP(env_name, render=True)
     else:

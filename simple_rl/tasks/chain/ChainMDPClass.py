@@ -1,5 +1,8 @@
 ''' ChainMDPClass.py: Contains the ChainMDPClass class. '''
 
+# Python imports.
+from __future__ import print_function
+
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
 from ChainStateClass import ChainState
@@ -52,7 +55,7 @@ class ChainMDP(MDP):
         elif action == "reset":
             return ChainState(1)
         else:
-            #print "Error: Unrecognized action! (" + action + ")"
+            print("(simple_rl Error): Unrecognized action! (" + action + ")")
             quit()
 
     def __str__(self):

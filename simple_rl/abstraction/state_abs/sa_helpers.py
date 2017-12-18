@@ -1,9 +1,7 @@
 # Python imports.
+from __future__ import print_function
 from collections import defaultdict
-import cPickle
-import os
 import sys
-import itertools
 
 # Other imports.
 from simple_rl.planning.ValueIterationClass import ValueIteration
@@ -37,7 +35,7 @@ def make_sa(mdp, indic_func=ind_funcs._q_eps_approx_indicator, state_class=State
     Summary:
         Creates and saves a state abstraction.
     '''
-    print "  Making state abstraction... "
+    print("  Making state abstraction... ")
     q_equiv_sa = StateAbstraction(phi={}, track_act_opt_pr=track_act_opt_pr)
     if isinstance(mdp, MDPDistribution):
         q_equiv_sa = make_multitask_sa(mdp, state_class=state_class, indic_func=indic_func, epsilon=epsilon, track_act_opt_pr=track_act_opt_pr)
@@ -82,7 +80,7 @@ def make_singletask_sa(mdp, indic_func, state_class, epsilon=0.0, aa_single_act=
         (StateAbstraction)
     '''
 
-    print "\tRunning VI...",
+    print("\tRunning VI...",)
     sys.stdout.flush()
     # Run VI
     if isinstance(mdp, MDPDistribution):
@@ -90,9 +88,9 @@ def make_singletask_sa(mdp, indic_func, state_class, epsilon=0.0, aa_single_act=
 
     vi = ValueIteration(mdp)
     iters, val = vi.run_vi()
-    print " done."
+    print(" done.")
 
-    print "\tMaking state abstraction...",
+    print("\tMaking state abstraction...",)
     sys.stdout.flush()
     sa = StateAbstraction(phi={}, state_class=state_class, track_act_opt_pr=track_act_opt_pr)
     clusters = defaultdict(list)
@@ -109,7 +107,7 @@ def make_singletask_sa(mdp, indic_func, state_class, epsilon=0.0, aa_single_act=
                 clusters[state_x].append(state_y)
                 clusters[state_y].append(state_x)
 
-    print "making clusters...",
+    print("making clusters...",)
     sys.stdout.flush()
     
     # Build SA.
@@ -128,9 +126,9 @@ def make_singletask_sa(mdp, indic_func, state_class, epsilon=0.0, aa_single_act=
             a_star_set = set(vi.get_max_q_actions(ground_s))
             sa.set_actions_state_opt_dict(ground_s, a_star_set, prob_of_mdp)
 
-    print " done."
-    print "\tGround States:", num_states
-    print "\tAbstract:", sa.get_num_abstr_states()
-    print
+    print(" done.")
+    print("\tGround States:", num_states)
+    print("\tAbstract:", sa.get_num_abstr_states())
+    print()
 
     return sa

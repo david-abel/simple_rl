@@ -17,8 +17,9 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=1):
-        Agent.__init__(self, name="rmax-h" + str(horizon), actions=actions, gamma=gamma)
+    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=1, name="rmax-h"):
+        name = name + str(horizon) if name == "rmax_h" else name
+        Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
         self.s_a_threshold = s_a_threshold

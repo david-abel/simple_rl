@@ -1,9 +1,10 @@
 # Python imports.
+from __future__ import print_function
 from collections import defaultdict
 try:
     import pygame
 except ImportError:
-    print "Warning: pygame not installed (needed for visuals)."
+    print("Warning: pygame not installed (needed for visuals).")
 import random
 import sys
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Python imports.
+from __future__ import print_function
 import argparse
 import sys
 
@@ -36,10 +37,9 @@ def main():
         mdp.visualize_policy(policy)
     elif viz == "agent":
         # Solve problem and show agent interaction.
-        print "\n", str(ql_agent), "interacting with", str(mdp)
+        print("\n", str(ql_agent), "interacting with", str(mdp))
         run_single_agent_on_mdp(ql_agent, mdp, episodes=500, steps=200, open_plot=False)
         mdp.visualize_agent(ql_agent)
 
 if __name__ == "__main__":
     main()
-        

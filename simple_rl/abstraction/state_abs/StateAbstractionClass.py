@@ -136,4 +136,3 @@ class StateAbstraction(object):
         new_sa = StateAbstraction(phi=merged_state_abs)
 
         return new_sa
-

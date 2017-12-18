@@ -1,4 +1,5 @@
 # Python imports.
+from __future__ import print_function
 from collections import defaultdict
 import Queue
 import random
@@ -141,10 +142,8 @@ class ValueIteration(Planner):
                 # Update value.
                 self.value_func[s] = max_q
             iterations += 1
-            # print "iters, val:", iterations, max_diff
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
-        
         self.has_planned = True
 
         return iterations, value_of_init_state
@@ -153,12 +152,12 @@ class ValueIteration(Planner):
         if self.has_planned:
             return self.bellman_backups
         else:
-            print "Warning: asking for num Bellman backups, but VI has not been run."
+            print("Warning: asking for num Bellman backups, but VI has not been run.")
             return 0
 
     def print_value_func(self):
         for key in self.value_func.keys():
-            print key, ":", self.value_func[key]
+            print(key, ":", self.value_func[key])
 
     def plan(self, state=None, horizon=100):
         '''
@@ -173,7 +172,7 @@ class ValueIteration(Planner):
         state = self.mdp.get_init_state() if state is None else state
 
         if self.has_planned is False:
-            print "Warning: VI has not been run. Plan will be random."
+            print("Warning: VI has not been run. Plan will be random.")
 
         action_seq = []
         state_seq = [state]

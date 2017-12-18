@@ -39,7 +39,7 @@ def make_mdp(mdp_class="grid", grid_dim=7):
     mdp = {"hall":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=hall_goal_locs),
             "pblocks_grid":make_grid_world_from_file("pblocks_grid.txt", randomize=True),
             "grid":GridWorldMDP(width=width, height=height, init_loc=(1, 1), goal_locs=[(grid_dim, grid_dim)]),
-            # "four_room":FourRoomMDP(width=width, height=height, goal_locs=[four_room_goal_loc]),
+            "four_room":FourRoomMDP(width=width, height=height, goal_locs=[four_room_goal_loc]),
             "chain":ChainMDP(num_states=grid_dim),
             "random":RandomMDP(num_states=50, num_rand_trans=2),
             "hanoi":HanoiMDP(num_pegs=grid_dim, num_discs=grid_dim),

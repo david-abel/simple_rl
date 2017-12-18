@@ -1,6 +1,7 @@
 ''' GridWorldMDPClass.py: Contains the GridWorldMDP class. '''
 
 # Python imports.
+from __future__ import print_function
 import random
 import sys
 import os
@@ -22,6 +23,7 @@ class GridWorldMDP(MDP):
                 init_loc=(1,1),
                 rand_init=False,
                 goal_locs=[(5,3)],
+                lava_locs=[()],
                 walls=[],
                 is_goal_terminal=False,
                 gamma=0.99,
@@ -34,6 +36,7 @@ class GridWorldMDP(MDP):
             width (int)
             init_loc (tuple: (int, int))
             goal_locs (list of tuples: [(int, int)...])
+            lava_locs (list of tuples: [(int, int)...]): These locations return -1 reward.
         '''
 
         # Setup init location.
@@ -48,21 +51,21 @@ class GridWorldMDP(MDP):
         MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state, gamma=gamma)
 
         if type(goal_locs) is not list:
-            print "(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)]."
+            print("(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)].")
             quit()
 
         self.walls = walls
 
         for g in goal_locs:
             if g[0] > width or g[1] > height:
-                print "(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall.."
-                print "\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")"
-                print "\tProblematic Goal:", g
+                print("(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall..")
+                print("\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")")
+                print("\tProblematic Goal:", g)
                 quit()
             if self.is_wall(g[0], g[1]):
-                print "(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall.."
-                print "\tWalls:", walls
-                print "\tProblematic Goal:", g
+                print("(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall..")
+                print("\tWalls:", walls)
+                print("\tProblematic Goal:", g)
                 quit()
 
         self.width = width
@@ -72,6 +75,7 @@ class GridWorldMDP(MDP):
         self.is_goal_terminal = is_goal_terminal
         self.slip_prob = slip_prob
         self.name = name
+        self.lava_locs = lava_locs
 
     def _reward_func(self, state, action):
         '''
@@ -84,6 +88,8 @@ class GridWorldMDP(MDP):
         '''
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
+        elif (state.x, state.y) in self.lava_locs:
+            return -1.0
         else:
             return 0 - self.step_cost
 
@@ -211,11 +217,11 @@ def _error_check(state, action):
     '''
 
     if action not in GridWorldMDP.ACTIONS:
-        print "(simple_rl) GridWorldError: the action provided (" + str(action) + ") was invalid in state: " + str(state) + "."
+        print("(simple_rl) GridWorldError: the action provided (" + str(action) + ") was invalid in state: " + str(state) + ".")
         quit()
 
     if not isinstance(state, GridWorldState):
-        print "(simple_rl) GridWorldError: the given state (" + str(state) + ") was not of the correct class."
+        print("(simple_rl) GridWorldError: the given state (" + str(state) + ") was not of the correct class.")
         quit()
 
 

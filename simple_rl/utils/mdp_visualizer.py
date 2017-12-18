@@ -1,4 +1,5 @@
 # Python imports.
+from __future__ import print_function
 import sys
 try:
     import pygame
@@ -6,7 +7,7 @@ try:
     pygame.init()
     title_font = pygame.font.SysFont("CMU Serif", 32)
 except ImportError:
-    print "Error: pygame not installed (needed for visuals)."
+    print("Error: pygame not installed (needed for visuals).")
     exit()
 
 # Other imports.

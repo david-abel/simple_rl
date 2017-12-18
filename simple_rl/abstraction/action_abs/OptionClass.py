@@ -1,7 +1,9 @@
+# Python imports.
 from collections import defaultdict
 import random
-from simple_rl.mdp.StateClass import State
 
+# Other imports.
+from simple_rl.mdp.StateClass import State
 
 class Option(object):
 

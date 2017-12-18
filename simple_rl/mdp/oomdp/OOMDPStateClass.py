@@ -1,5 +1,8 @@
 ''' OOMDPStateClass.py: Contains the OOMDP State Class. '''
 
+# Python imports.
+from __future__ import print_function
+
 # Other imports.
 from simple_rl.mdp.StateClass import State
 
@@ -23,8 +26,8 @@ class OOMDPState(State):
         try:
             return self.objects[obj_class]
         except KeyError:
-            print "Error: given object class (" + str(obj_class) + ") not found in state."
-            print "\t Known classes are: ", self.objects.keys()
+            print("Error: given object class (" + str(obj_class) + ") not found in state.")
+            print("\t Known classes are: ", self.objects.keys())
             quit()
 
     def get_first_obj_of_class(self, obj_class):

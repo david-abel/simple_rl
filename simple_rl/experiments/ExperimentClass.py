@@ -8,6 +8,7 @@ Purpose:
 '''
 
 # Python imports.
+from __future__ import print_function
 import os
 from collections import defaultdict
 
@@ -49,6 +50,7 @@ class Experiment(object):
         # Store all relevant bools.
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
+        params["is_rec_disc_reward"] = is_rec_disc_reward
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.is_multi_task = is_multi_task
@@ -133,7 +135,7 @@ class Experiment(object):
         # Regular MDP.
         if self.steps_since_added_r % self.count_r_per_n_timestep == 0:
             if self.is_markov_game and self.count_r_per_n_timestep > 1:
-                print "(simple_rl) Experiment Error: can't track markov games per step. (set rew_step_count to 1)."
+                print("(simple_rl) Experiment Error: can't track markov games per step. (set rew_step_count to 1).")
                 quit()
             else:
                 self.rewards[agent] += [self.rew_since_count + reward]

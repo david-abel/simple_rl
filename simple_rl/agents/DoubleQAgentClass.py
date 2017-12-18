@@ -28,8 +28,7 @@ class DoubleQAgent(QLearnerAgent):
             epsilon (float): Exploration term.
             explore (str): One of {softmax, uniform}. Denotes explore policy.
         '''
-        name_ext = "-" + explore if explore != "uniform" else ""
-        QLearnerAgent.__init__(self, actions, name=name + name_ext, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
+        QLearnerAgent.__init__(self, actions, name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
 
         # Make two q functions.
         self.q_funcs = {"A":defaultdict(lambda : defaultdict(lambda: self.default_q)), \
