@@ -12,30 +12,29 @@ from simple_rl.agents.AgentClass import Agent
 
 
 class DelayedQLearnerAgent(Agent):
-    ''' Implementation for a delayed-Q Learning Agent '''
+    '''
+    Delayed-Q Learning Agent (Strehl, A.L., Li, L., Wiewiora, E., Langford, J. and Littman, M.L., 2006. PAC model-free reinforcement learning).
+    Implemented by Yuu Jinnai (ddyuudd@gmail.com)
+    '''
 
     def __init__(self, actions, init_q, name="delayed-Q-learning", gamma=0.99, m=1, epsilon1=0.1):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
-            init_q (2d list): AU(s, a) function
+            init_q (2d list): Initial Q function. AU(s, a) in Strehl et al 2006.
             name (str): Denotes the name of the agent.
             gamma (float): discount factor
-            m (float): number of sampling before updating Q-value
-            epsilon1 (float): update size
-        
+            m (float): Number of samples for updating Q-value
+            epsilon1 (float): Learning rate
         '''
         # name_ext = "-" + explore if explore != "uniform" else ""
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
+        self.rmax = 1  # TODO: set/get function
 
         # Set/initialize parameters and other relevant classwide data
         self.step_number = 0
-        
-        # Q Function:
-        # Key: state
-        # Val: dict
-        #   Key: action
-        #   Val: q-value
+
+        # TODO: Here we assume that init_q has Qvalue for every (s, a) pair.
         self.q_func = copy.deepcopy(init_q)
         self.default_q_func = copy.deepcopy(init_q)
 
@@ -50,8 +49,11 @@ class DelayedQLearnerAgent(Agent):
                 self.b[x][y] = 0  # b(s, a) <- 0
                 self.LEARN[x][y] = False
 
+        # TODO: Add a code to calculate m and epsilon1 from epsilon and delta.
+        # m and epsilon1 should be set according to epsilon and delta in order to be PAC-MDP.
         self.m = m
         self.epsilon1 = epsilon1
+        
         self.tstar = 0  # time of most recent action value change
 
     # --------------------------------
@@ -73,6 +75,7 @@ class DelayedQLearnerAgent(Agent):
         if learning:
             self.update(self.prev_state, self.prev_action, reward, state)
 
+        # For Delayed Q-learning it always take the action with highest Q value (no epsilon exploration required).
         action = self.greedy_q_policy(state)
 
         self.prev_state = state
@@ -228,7 +231,19 @@ class DelayedQLearnerAgent(Agent):
 
     def set_q_function(self, q_func):
         '''
-        Function for transferring q function
+        Set initial Q-function.
+        For PAC-MDP, initial Q(s, a) should be an upper bound of Q*(s, a).
         '''
         self.default_q_func = copy.deepcopy(q_func)
         self.q_func = copy.deepcopy(self.default_q_func)
+
+    def set_vmax(self):
+        '''
+        Initialize Q-values to be Vmax.
+        '''
+        vmax = self.rmax / (1 - self.gamma)
+        for x in self.q_func:
+            for y in self.q_func[x]:
+                self.q_func[x][y] = vmax
+                self.default_q_func[x][y] = vmax
+                
