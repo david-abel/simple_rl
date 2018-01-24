@@ -14,6 +14,7 @@ from AgentClass import Agent
 from FixedPolicyAgentClass import FixedPolicyAgent
 from QLearnerAgentClass import QLearnerAgent
 from DoubleQAgentClass import DoubleQAgent
+from DelayedQAgentClass import DelayedQAgent
 from RandomAgentClass import RandomAgent
 from RMaxAgentClass import RMaxAgent
 

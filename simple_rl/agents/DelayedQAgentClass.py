@@ -1,4 +1,9 @@
-''' QLearningAgentClass.py: Class for a basic QLearningAgent '''
+'''
+
+DelayedQAgentClass.py: Class for Delayed Q-Learning from [Strehl et al. 2006].
+
+Author: Yuu Jinnai (ddyuudd@gmail.com)
+'''
 
 # Python imports.
 import random
@@ -11,13 +16,12 @@ from collections import defaultdict
 from simple_rl.agents.AgentClass import Agent
 
 
-class DelayedQLearnerAgent(Agent):
+class DelayedQAgent(Agent):
     '''
     Delayed-Q Learning Agent (Strehl, A.L., Li, L., Wiewiora, E., Langford, J. and Littman, M.L., 2006. PAC model-free reinforcement learning).
-    Implemented by Yuu Jinnai (ddyuudd@gmail.com)
     '''
 
-    def __init__(self, actions, init_q, name="delayed-Q-learning", gamma=0.99, m=1, epsilon1=0.1):
+    def __init__(self, actions, init_q, name="Delayed-Q", gamma=0.99, m=1, epsilon1=0.1):
         '''
         Args:
             actions (list): Contains strings denoting the actions.

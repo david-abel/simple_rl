@@ -5,6 +5,7 @@ from __future__ import print_function
 # Grab classes.
 from chain.ChainMDPClass import ChainMDP
 from chain.ChainStateClass import ChainState
+from combo_lock.ComboLockMDPClass import ComboLockMDP
 from hanoi.HanoiMDPClass import HanoiMDP
 from grid_world.GridWorldMDPClass import GridWorldMDP
 from grid_world.GridWorldStateClass import GridWorldState

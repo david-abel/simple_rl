@@ -9,8 +9,8 @@ from PredicateClass import Predicate
 
 class ActionAbstraction(object):
 
-    def __init__(self, options, prim_actions=[], term_prob=0.0, prims_on_failure=False):
-        self.options = self._convert_to_options(options)
+    def __init__(self, options=None, prim_actions=[], term_prob=0.0, prims_on_failure=False):
+        self.options = options if options is not None else self._convert_to_options(prim_actions)
         self.is_cur_executing = False
         self.cur_option = None # The option we're executing currently.
         self.term_prob = term_prob

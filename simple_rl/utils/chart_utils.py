@@ -42,11 +42,11 @@ matplotlib.rc('font', **font)
 
 fig = matplotlib.pyplot.gcf()
 # fig.set_size_inches(18.5, 10.5)
-# fig.savefig('test2png.png', dpi=100)
 
-CUSTOM_TITLE = None
-X_AXIS_LABEL = None
-Y_AXIS_LABEL = None
+CUSTOM_TITLE = None #"Planning Time vs. Grid Width (Upworld)"
+X_AXIS_LABEL = None #"Grid Width"
+Y_AXIS_LABEL = None #"Planning Time (seconds)"
+X_AXIS_START_VAL = 0 #6
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -67,7 +67,7 @@ def load_data(experiment_dir, experiment_agents):
 
         # Put the reward instances into a list of floats.
         for instance in all_reward.readlines():
-            all_episodes_for_instance = [float(r) for r in instance.split(",")[:-1] if len(r) > 0 and "e" not in r]
+            all_episodes_for_instance = [float(r) for r in instance.split(",")[:-1] if len(r) > 0]
             if len(all_episodes_for_instance) > 0:
                 all_instances.append(all_episodes_for_instance)
 
@@ -92,14 +92,13 @@ def average_data(data, cumulative=False):
     for i, all_instances in enumerate(data):
 
         # Take the average.
-        num_instances = len(data[i])
-        all_instances = np.array(all_instances)
-        avged = None
+        num_instances = float(len(data[i]))
+        all_instances_sum = np.array(np.array(all_instances).sum(axis=0))
         try:
-            avged = all_instances.sum(axis=0)/float(num_instances)
+            avged = all_instances_sum / num_instances
         except TypeError:
             print()
-            print("(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters.")
+            print("(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters (likely inconsistent number of Episodes/Instances. Try clearing old data).")
             quit()
         
         if cumulative:
@@ -108,7 +107,6 @@ def average_data(data, cumulative=False):
             total_so_far = 0
             for rew in avged:
                 total_so_far += rew
-
                 temp.append(total_so_far)
 
             avged = temp
@@ -131,12 +129,12 @@ def compute_conf_intervals(data, cumulative=False):
         num_instances = len(data[i])
         num_episodes = len(data[i][0])
 
-        all_instances = np.array(all_instances)
+        all_instances_np_arr = np.array(all_instances)
         alg_i_ci = []
         total_so_far = np.zeros(num_instances)
         for j in xrange(num_episodes):
             # Compute datum for confidence interval.
-            episode_j_all_instances = all_instances[:, j]
+            episode_j_all_instances = all_instances_np_arr[:, j]
 
             if cumulative:
                 # Cumulative.
@@ -211,7 +209,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         series_color = colors[agent_color_index]
         series_marker = markers[agent_color_index]
         y_axis = results[i]
-        x_axis = range(len(y_axis))
+        x_axis = range(X_AXIS_START_VAL, X_AXIS_START_VAL + len(y_axis))
 
         # Plot Confidence Intervals.
         if conf_intervals != []:
@@ -240,7 +238,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     exp_dir_split_list = experiment_dir.split("/")
     exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
-    # plot_title = plot_title.replace("_", " ")
+    plot_title = plot_title.replace("_", " ")
     plot_title = plot_title.replace(" w ", " w/ ")
 
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
@@ -389,7 +387,10 @@ def _is_disc_reward(data_dir):
     for line in params_file.readlines():
         if "is_rec_disc_reward" in line:
             vals = line.strip().split(":")
-            return bool(vals[1])
+            if "True" == vals[1].strip():
+                return True
+
+    return False
 
 def parse_args():
     '''
