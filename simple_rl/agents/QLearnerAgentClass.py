@@ -4,6 +4,7 @@
 import random
 import numpy
 import time
+import copy
 from collections import defaultdict
 
 # Other imports.
@@ -12,7 +13,7 @@ from simple_rl.agents.AgentClass import Agent
 class QLearnerAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="Q-learning", alpha=0.05, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):
+    def __init__(self, actions, name="Q-learning", alpha=0.05, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False, default_q=0.0):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -30,7 +31,7 @@ class QLearnerAgent(Agent):
         self.epsilon, self.epsilon_init = epsilon, epsilon
         self.step_number = 0
         self.anneal = anneal
-        self.default_q = 0.0
+        self.default_q = default_q
         
         # Q Function:
         # Key: state
@@ -38,6 +39,7 @@ class QLearnerAgent(Agent):
         #   Key: action
         #   Val: q-value
         self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
+        self.default_q_func = None
 
         # Choose explore type.
         self.explore = explore
@@ -51,7 +53,6 @@ class QLearnerAgent(Agent):
         Args:
             state (State)
             reward (float)
-
         Summary:
             The central method called during each time step.
             Retrieves the action according to the current policy
@@ -82,7 +83,6 @@ class QLearnerAgent(Agent):
         '''
         Args:
             state (State)
-
         Returns:
             (str): action.
         '''
@@ -100,7 +100,6 @@ class QLearnerAgent(Agent):
         '''
         Args:
             state (State): Contains relevant state information.
-
         Returns:
             (str): action.
         '''
@@ -117,7 +116,6 @@ class QLearnerAgent(Agent):
             action (str)
             reward (float)
             next_state (State)
-
         Summary:
             Updates the internal Q Function according to the Bellman Equation. (Classic Q Learning update)
         '''
@@ -140,7 +138,6 @@ class QLearnerAgent(Agent):
         '''
         Args:
             state (State)
-
         Returns:
             (tuple) --> (float, str): where the float is the Qval, str is the action.
         '''
@@ -163,7 +160,6 @@ class QLearnerAgent(Agent):
         '''
         Args:
             state (State)
-
         Returns:
             (str): denoting the action with the max q value in the given @state.
         '''
@@ -173,7 +169,6 @@ class QLearnerAgent(Agent):
         '''
         Args:
             state (State)
-
         Returns:
             (float): denoting the max q value in the given @state.
         '''
@@ -184,7 +179,6 @@ class QLearnerAgent(Agent):
         Args:
             state (State)
             action (str)
-
         Returns:
             (float): denoting the q value of the (@state, @action) pair.
         '''
@@ -195,7 +189,6 @@ class QLearnerAgent(Agent):
         Args:
             state (State)
             beta (float): Softmax temperature parameter.
-
         Returns:
             (list of floats): The i-th float corresponds to the probability
             mass associated with the i-th action (indexing into self.actions)
@@ -214,7 +207,10 @@ class QLearnerAgent(Agent):
     def reset(self):
         self.step_number = 0
         self.episode_number = 0
-        self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
+        if self.default_q_func is None:
+            self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
+        else:
+            self.q_func = copy.deepcopy(self.default_q_func)
         Agent.reset(self)
 
     def end_of_episode(self):
@@ -226,3 +222,9 @@ class QLearnerAgent(Agent):
             self._anneal()
         Agent.end_of_episode(self)
 
+    def set_init_q_function(self, q_func):
+        '''
+        Function for transferring q function
+        '''
+        self.default_q_func = copy.deepcopy(q_func)
+        self.q_func = copy.deepcopy(self.default_q_func)
