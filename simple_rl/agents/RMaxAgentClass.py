@@ -1,12 +1,12 @@
 '''
 RMaxAgentClass.py: Class for an RMaxAgent from [Brafman and Tennenholtz 2003].
-
 Notes:
     - Assumes WLOG reward function codomain is [0,1] (so RMAX is 1.0)
 '''
 
 # Python imports.
 import random
+import copy
 from collections import defaultdict
 
 # Local classes.
@@ -17,12 +17,14 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=1, name="rmax-h"):
-        name = name + str(horizon) if name == "rmax_h" else name
+    def __init__(self, actions, gamma=0.95, horizon=4, s_a_threshold=1, name="RMax-h"):
+        name = name + str(horizon) if name[-2:] == "-h" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
         self.s_a_threshold = s_a_threshold
+        # self.init_q_func = None
+        self.init_q_func = defaultdict(lambda: defaultdict(lambda: 1.0 / (1.0 - gamma)))
         self.reset()
 
     def reset(self):
@@ -63,7 +65,6 @@ class RMaxAgent(Agent):
             action (str)
             reward (float)
             next_state (State)
-
         Summary:
             Updates T and R.
         '''
@@ -82,7 +83,6 @@ class RMaxAgent(Agent):
         Args:
             state (State)
             horizon (int): Indicates the level of recursion depth for computing Q.
-
         Returns:
             (tuple) --> (float, str): where the float is the Qval, str is the action.
         '''
@@ -108,7 +108,6 @@ class RMaxAgent(Agent):
         Args:
             state (State)
             horizon (int): Indicates the level of recursion depth for computing Q.
-
         Returns:
             (str): The string associated with the action with highest Q value.
         '''
@@ -123,7 +122,6 @@ class RMaxAgent(Agent):
         Args:
             state (State)
             horizon (int): Indicates the level of recursion depth for computing Q.
-
         Returns:
             (float): The Q value of the best action in this state.
         '''
@@ -139,7 +137,6 @@ class RMaxAgent(Agent):
             state (State)
             action (str)
             horizon (int): Indicates the level of recursion depth for computing Q.
-
         Returns:
             (float)
         '''
@@ -164,7 +161,6 @@ class RMaxAgent(Agent):
             state (State)
             action (str)
             horizon (int): Recursion depth to compute Q
-
         Return:
             (float): Discounted expected future return from applying @action in @state.
         '''
@@ -190,7 +186,6 @@ class RMaxAgent(Agent):
         Args:
             state (State)
             action (str)
-
         Returns:
             Believed reward of executing @action in @state. If R(s,a) is unknown
             for this s,a pair, return self.rmax. Otherwise, return the MLE.
@@ -200,6 +195,8 @@ class RMaxAgent(Agent):
             # Compute MLE if we've seen this s,a pair enough.
             rewards_s_a = self.rewards[state][action]
             return float(sum(rewards_s_a)) / len(rewards_s_a)
+        elif self.init_q_func is not None:
+            return self.init_q_func[state][action]
         else:
             # Otherwise return rmax.
             return self.rmax
@@ -208,3 +205,9 @@ class RMaxAgent(Agent):
         self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
         self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
 
+    def set_init_q_function(self, q_func):
+        '''
+        Set initial heuristic value function.
+        Qinit(s, a) <- U(s, a)
+        '''
+        self.init_q_func = copy.deepcopy(q_func)

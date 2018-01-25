@@ -249,3 +249,12 @@ class ValueIteration(Planner):
                 best_action = action
 
         return max_q_val, best_action
+
+    def get_q_function(self):
+        state_space = self.get_states()
+        q_func = defaultdict(lambda: defaultdict(lambda: 0))
+        for s in state_space:
+            for a in self.actions:
+                q_s_a = self.get_q_value(s, a)
+                q_func[s][a] = q_s_a
+        return q_func
