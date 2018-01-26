@@ -30,7 +30,7 @@ class Experiment(object):
                     is_episodic=False,
                     is_markov_game=False,
                     is_multi_task=False,
-                    is_rec_disc_reward=False,
+                    track_disc_reward=False,
                     clear_old_results=True,
                     count_r_per_n_timestep=1,
                     cumulative_plot=True):
@@ -50,11 +50,11 @@ class Experiment(object):
         # Store all relevant bools.
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
-        params["is_rec_disc_reward"] = is_rec_disc_reward
+        params["track_disc_reward"] = track_disc_reward
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.is_multi_task = is_multi_task
-        self.is_rec_disc_reward = is_rec_disc_reward
+        self.track_disc_reward = track_disc_reward
         self.count_r_per_n_timestep = count_r_per_n_timestep
         self.steps_since_added_r = 1
         self.rew_since_count = 0
@@ -96,7 +96,7 @@ class Experiment(object):
                                 agent_name_ls,
                                 episodic=self.is_episodic,
                                 cumulative=self.cumulative_plot,
-                                is_rec_disc_reward=self.is_rec_disc_reward,
+                                track_disc_reward=self.track_disc_reward,
                                 open_plot=open_plot)
 
     def _write_extra_datum_to_file(self, mdp_name, agent, datum, datum_name):

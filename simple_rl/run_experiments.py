@@ -125,7 +125,7 @@ def run_agents_multi_task(agents,
                             clear_old_results=True,
                             open_plot=True,
                             verbose=False,
-                            is_rec_disc_reward=False,
+                            track_disc_reward=False,
                             reset_at_terminal=False,
                             resample_at_terminal=False,
                             cumulative_plot=True):
@@ -139,7 +139,8 @@ def run_agents_multi_task(agents,
         clear_old_results (bool)
         open_plot (bool)
         verbose (bool)
-        is_rew_disc_reward (bool): If true records and plots discounted reward
+        track_disc_reward (bool): If true records and plots discounted reward, discounted over episodes. So, if
+            each episode is 100 steps, then episode 2 will start discounting as though it's step 101.
         reset_at_terminal (bool)
         resample_at_terminal (bool)
         cumulative_plot (bool)
@@ -162,7 +163,7 @@ def run_agents_multi_task(agents,
                 is_episodic=episodes > 1,
                 is_multi_task=True,
                 clear_old_results=clear_old_results,
-                is_rec_disc_reward=is_rec_disc_reward,
+                track_disc_reward=track_disc_reward,
                 cumulative_plot=cumulative_plot)
 
     # Record how long each agent spends learning.
@@ -184,12 +185,12 @@ def run_agents_multi_task(agents,
             mdp = mdp_distr.sample()
 
             # Run the agent.
-            hit_terminal, total_steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal, resample_at_terminal)
+            hit_terminal, total_steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal, resample_at_terminal)
 
             # If we resample at terminal, keep grabbing MDPs until we're done.
             while resample_at_terminal and hit_terminal and total_steps_taken < steps:
                 mdp = mdp_distr.sample()
-                hit_terminal, steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps - total_steps_taken, experiment, verbose, is_rec_disc_reward, reset_at_terminal, resample_at_terminal)
+                hit_terminal, steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps - total_steps_taken, experiment, verbose, track_disc_reward, reset_at_terminal, resample_at_terminal)
                 total_steps_taken += steps_taken
 
             # Reset the agent.
@@ -217,7 +218,7 @@ def run_agents_on_mdp(agents,
                         steps=200,
                         clear_old_results=True,
                         rew_step_count=1,
-                        is_rec_disc_reward=False,
+                        track_disc_reward=False,
                         open_plot=True,
                         verbose=False,
                         reset_at_terminal=False,
@@ -231,7 +232,7 @@ def run_agents_on_mdp(agents,
         steps (int): Number of steps per episode.
         clear_old_results (bool): If true, removes all results files in the relevant results dir.
         rew_step_count (int): Number of steps before recording reward.
-        is_rec_disc_reward (bool): If true, track (and plot) discounted reward.
+        track_disc_reward (bool): If true, track (and plot) discounted reward.
         open_plot (bool): If true opens the plot at the end.
         verbose (bool): If true, prints status bars per episode/instance.
         reset_at_terminal (bool): If true sends the agent to the start state after terminal.
@@ -250,7 +251,7 @@ def run_agents_on_mdp(agents,
                             params=exp_params,
                             is_episodic= episodes > 1,
                             clear_old_results=clear_old_results,
-                            is_rec_disc_reward=is_rec_disc_reward,
+                            track_disc_reward=track_disc_reward,
                             count_r_per_n_timestep=rew_step_count,
                             cumulative_plot=cumulative_plot)
 
@@ -268,7 +269,7 @@ def run_agents_on_mdp(agents,
         for instance in xrange(1, instances + 1):
             print("  Instance " + str(instance) + " of " + str(instances) + ".")
             sys.stdout.flush()
-            run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, is_rec_disc_reward, reset_at_terminal=reset_at_terminal)
+            run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal=reset_at_terminal)
             
             # Reset the agent.
             agent.reset()
@@ -286,7 +287,7 @@ def run_agents_on_mdp(agents,
 
     experiment.make_plots(open_plot=open_plot)
 
-def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbose=False, is_rec_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False):
+def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbose=False, track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False):
     '''
     Summary:
         Main loop of a single MDP experiment.
@@ -312,13 +313,11 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         reward = 0
         episode_start_time = time.clock()
 
-
         # Extra printing if verbose.
         if verbose:
             print()
             sys.stdout.flush()
             prog_bar_len = _make_step_progress_bar()
-            _increment_bar()
 
         for step in xrange(1, steps + 1):
             if verbose and int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
@@ -343,7 +342,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
             # Record the experience.
             if experiment is not None:
-                reward_to_track = mdp.get_gamma()**(step + 1) * reward if is_rec_disc_reward else reward
+                reward_to_track = mdp.get_gamma()**(step + 1 + episode*steps) * reward if track_disc_reward else reward
                 experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
 
             if next_state.is_terminal():
@@ -456,12 +455,10 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, RMaxAgent, QLearnerAgent, LinearQLearnerAgent
+    from simple_rl.agents import RandomAgent, QLearnerAgent
     
     random_agent = RandomAgent(actions)
-    rmax_agent = RMaxAgent(actions, gamma=gamma, horizon=4, s_a_threshold=2)
     qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
-    lqlearner_agent = LinearQLearnerAgent(actions, gamma=gamma, explore="uniform")
     agents = [qlearner_agent, random_agent]
 
     # Run Agents.

@@ -59,4 +59,4 @@ class ChainMDP(MDP):
             quit()
 
     def __str__(self):
-        return "chainmdp-" + str(self.num_states)
+        return "chain-" + str(self.num_states)

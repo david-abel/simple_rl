@@ -25,7 +25,7 @@ class GridWorldMDP(MDP):
                 goal_locs=[(5,3)],
                 lava_locs=[()],
                 walls=[],
-                is_goal_terminal=False,
+                is_goal_terminal=True,
                 gamma=0.99,
                 init_state=None,
                 slip_prob=0.0,
@@ -55,19 +55,6 @@ class GridWorldMDP(MDP):
             quit()
 
         self.walls = walls
-
-        for g in goal_locs:
-            if g[0] > width or g[1] > height:
-                print("(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall..")
-                print("\tGridWorld dimensions: (" + str(width) + "," + str(height) + ")")
-                print("\tProblematic Goal:", g)
-                quit()
-            if self.is_wall(g[0], g[1]):
-                print("(simple_rl) GridWorld Error: goal provided is off the map or overlaps with a wall..")
-                print("\tWalls:", walls)
-                print("\tProblematic Goal:", g)
-                quit()
-
         self.width = width
         self.height = height
         self.goal_locs = goal_locs
@@ -89,7 +76,7 @@ class GridWorldMDP(MDP):
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
         elif (state.x, state.y) in self.lava_locs:
-            return -1.0
+            return -0.1
         else:
             return 0 - self.step_cost
 
@@ -168,6 +155,7 @@ class GridWorldMDP(MDP):
         Returns:
             (bool): True iff (x,y) is a wall location.
         '''
+        
         return (x, y) in self.walls
 
     def __str__(self):

@@ -66,4 +66,4 @@ class ComboLockMDP(MDP):
             return ChainState(1)
 
     def __str__(self):
-        return "combolock_mdp-" + str(self.num_states)
+        return "combolock-" + str(self.num_states)

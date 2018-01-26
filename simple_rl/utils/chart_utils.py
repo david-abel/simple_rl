@@ -37,7 +37,7 @@ color_ls = [[240, 163, 255], [113, 113, 198],[113, 198, 113],[197, 193, 170],\
 # Set font.
 font = {'size':14}
 matplotlib.rc('font', **font)
-# matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.usetex'] = True
 # matplotlib.rcParams['pdf.fonttype'] = 42
 
 fig = matplotlib.pyplot.gcf()
@@ -165,7 +165,14 @@ def compute_single_conf_interval(datum):
     return std_error
 
 
-def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, is_rec_disc_reward=False):
+def _format_title(plot_title):
+    plot_title = plot_title.replace("_", " ")
+    plot_title = plot_title.replace("-", " ")
+    plot_title_final = " ".join([w[0].upper() + w[1:] for w in plot_title.split(" ")])
+
+    return plot_title_final
+
+def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -176,7 +183,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         open_plot (bool)
-        is_rec_disc_reward (bool): If true, plots discounted reward.
+        track_disc_reward (bool): If true, plots discounted reward.
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -222,7 +229,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         marker_every = max(len(y_axis) / 30,1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
         pyplot.legend()
-    print
+    print()
 
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
@@ -231,15 +238,15 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         # If it's a time plot.
         unit = "Time"
         experiment_dir = experiment_dir.replace("times", "")
-    disc_ext = "Discounted " if is_rec_disc_reward else ""
-    plot_name = os.path.join(experiment_dir, "all_") + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    disc_ext = "Discounted " if track_disc_reward else ""
 
     # Set names.
     exp_dir_split_list = experiment_dir.split("/")
     exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
+
+    plot_file_name = experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
-    plot_title = plot_title.replace("_", " ")
-    plot_title = plot_title.replace(" w ", " w/ ")
+    plot_title = _format_title(plot_title)
 
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
@@ -251,18 +258,18 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     pyplot.grid(True)
 
     # Save the plot.
-    pyplot.savefig(plot_name, format="pdf")
+    pyplot.savefig(plot_file_name, format="pdf")
     
     if open_plot:
         # Open it.
         open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
-        os.system(open_prefix + "open " + plot_name)
+        os.system(open_prefix + "open " + plot_file_name)
 
     # Clear and close.
     pyplot.cla()
     pyplot.close()
 
-def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=True, is_rec_disc_reward=False):
+def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False):
     '''
     Args:
         experiment_dir (str): path to results.
@@ -270,7 +277,7 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
         cumulative (bool): If true, plots show cumulative results.
         use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
-        is_rec_disc_reward (bool): If true, plots discounted reward (changes plot title, too).
+        track_disc_reward (bool): If true, plots discounted reward (changes plot title, too).
 
     Summary:
         Creates plots for all agents run under the experiment.
@@ -296,7 +303,7 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
                 cumulative=cumulative,
                 episodic=episodic,
                 open_plot=open_plot,
-                is_rec_disc_reward=is_rec_disc_reward)
+                track_disc_reward=track_disc_reward)
 
 def _get_agent_names(data_dir):
     '''
@@ -385,7 +392,7 @@ def _is_disc_reward(data_dir):
 
     # Check if episodes > 1.
     for line in params_file.readlines():
-        if "is_rec_disc_reward" in line:
+        if "track_disc_reward" in line:
             vals = line.strip().split(":")
             if "True" == vals[1].strip():
                 return True
@@ -422,10 +429,10 @@ def main():
 
     cumulative = not(args.a)
     episodic = _is_episodic(data_dir)
-    is_rec_disc_reward = _is_disc_reward(data_dir)
+    track_disc_reward = _is_disc_reward(data_dir)
 
     # Plot.
-    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, is_rec_disc_reward=is_rec_disc_reward)
+    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, track_disc_reward=track_disc_reward)
 
 if __name__ == "__main__":
     main()
