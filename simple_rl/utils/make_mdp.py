@@ -42,7 +42,7 @@ def make_mdp(mdp_class="grid", grid_dim=7):
             "four_room":FourRoomMDP(width=width, height=height, goal_locs=[four_room_goal_loc]),
             "chain":ChainMDP(num_states=grid_dim),
             "random":RandomMDP(num_states=50, num_rand_trans=2),
-            "hanoi":HanoiMDP(num_pegs=grid_dim, num_discs=grid_dim),
+            "hanoi":HanoiMDP(num_pegs=grid_dim, num_discs=3),
             "taxi":TaxiOOMDP(width=grid_dim, height=grid_dim, slip_prob=0.0, agent=agent, walls=walls, passengers=passengers)}[mdp_class]
 
     return mdp
@@ -80,7 +80,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=9, horizon=0, step_cost=0, gamma=0
     hall_goal_locs = [(i, height) for i in xrange(1, 30)]
 
     # Four room.
-    four_room_goal_locs = [(width, height), (width, 1), (1, height), (1, height - 2), (width - 2, height - 2), (width - 2, 1)]
+    four_room_goal_locs = [(width, height), (width, 1), (1, height), (1, height - 2), (width - 2, height - 2)]#, (width - 2, 1)]
 
     # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}

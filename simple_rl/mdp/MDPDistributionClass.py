@@ -3,7 +3,6 @@
 # Python imports.
 from __future__ import print_function
 import numpy as np
-import random as rnd
 from collections import defaultdict
 
 class MDPDistribution(object):

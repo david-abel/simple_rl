@@ -12,7 +12,7 @@ from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 class FourRoomMDP(GridWorldMDP):
     ''' Class for a FourRoom '''
 
-    def __init__(self, width=9, height=9, init_loc=(1,1), goal_locs=[(9,9)], gamma=0.99, slip_prob=0.00, name="fourroom", is_goal_terminal=True):
+    def __init__(self, width=9, height=9, init_loc=(1,1), goal_locs=[(9,9)], gamma=0.99, slip_prob=0.00, name="four_room", is_goal_terminal=True):
         '''
         Args:
             height (int)

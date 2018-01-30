@@ -3,6 +3,7 @@ from __future__ import print_function
 
 
 # Grab classes.
+from bandit.BanditMDPClass import BanditMDP
 from chain.ChainMDPClass import ChainMDP
 from chain.ChainStateClass import ChainState
 from combo_lock.ComboLockMDPClass import ComboLockMDP

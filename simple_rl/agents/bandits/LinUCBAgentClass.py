@@ -6,7 +6,7 @@ Basic LinUCB implementation.
 import numpy as np
 
 # Other imports.
-from ..AgentClass import Agent
+from simple_rl.agents.AgentClass import Agent
 
 class LinUCBAgent(Agent):
     '''
@@ -16,7 +16,7 @@ class LinUCBAgent(Agent):
         International Conference on World Wide Web (WWW), 2010.
     '''
 
-    def __init__(self, actions, name="lin-ucb", rand_init=True, context_size=None, alpha=1.5):
+    def __init__(self, actions, name="LinUCB", rand_init=True, context_size=1, alpha=1.5):
         '''
         Args:
             actions (list): Contains a string for each action.
@@ -123,6 +123,10 @@ class LinUCBAgent(Agent):
         return best_action
 
     def _pre_process_context(self, context):
+        if context.get_num_feats() == 1:
+            # If there's no context (that is, we're just in a regular bandit).
+            context = context.features()
+
         if not hasattr(context[0], '__iter__'):
             # If we only have a single context.
             new_context = {}
@@ -135,5 +139,3 @@ class LinUCBAgent(Agent):
             self._init_action_model()
 
         return context
-
-
