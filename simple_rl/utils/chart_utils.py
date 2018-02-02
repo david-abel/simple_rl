@@ -1,5 +1,5 @@
 '''
-chart_utils.py: Charting utilities for RL.
+chart_utils.py: Charting utilities for RL experiments.
 
 Functions:
     load_data: Loads data from csv files into lists.
@@ -9,8 +9,8 @@ Functions:
     plot: Creates (and opens) a single plot using matplotlib.pyplot
     make_plots: Puts everything in order to create the plot.
     _get_agent_names: Grabs the agent names from parameters.txt.
-    _get_aget_colors: Determines the relevant colors/markers for the plot.
-    _is_epidosic: Determines if the experiment was episodic from parameters.txt.
+    _get_agent_colors: Determines the relevant colors/markers for the plot.
+    _is_episodic: Determines if the experiment was episodic from parameters.txt.
     parse_args: Parse command line arguments.
     main: Loads data from a given path and creates plot.
 
@@ -29,8 +29,8 @@ import numpy as np
 import subprocess
 import argparse
 
-color_ls = [[240, 163, 255], [113, 113, 198],[113, 198, 113],[197, 193, 170],\
-                [85, 85, 85], [198, 113, 113],\
+color_ls = [[240, 163, 255], [102, 120, 173],[113, 198, 113],\
+                [197, 193, 170],[85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
 
@@ -38,10 +38,7 @@ color_ls = [[240, 163, 255], [113, 113, 198],[113, 198, 113],[197, 193, 170],\
 font = {'size':14}
 matplotlib.rc('font', **font)
 matplotlib.rcParams['text.usetex'] = True
-# matplotlib.rcParams['pdf.fonttype'] = 42
-
 fig = matplotlib.pyplot.gcf()
-# fig.set_size_inches(18.5, 10.5)
 
 CUSTOM_TITLE = None #"Planning Time vs. Grid Width (Upworld)"
 X_AXIS_LABEL = None #"Grid Width"
@@ -230,7 +227,6 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
         pyplot.legend()
     print()
-
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
     plot_label = "Cumulative" if cumulative else "Average"
@@ -242,9 +238,12 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
 
     # Set names.
     exp_dir_split_list = experiment_dir.split("/")
-    exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
+    if 'results' in exp_dir_split_list:
+        exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
+    else:
+        exp_name = exp_dir_split_list[0]
 
-    plot_file_name = experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    plot_file_name = experiment_dir + "/" + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
     plot_title = _format_title(plot_title)
 
@@ -274,14 +273,14 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
     Args:
         experiment_dir (str): path to results.
         experiment_agents (list): agent names (looks for "<agent-name>.csv").
-        cumulative (bool): If true, plots show cumulative results.
+        cumulative (bool): If true, plots show cumulative trr
         use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         track_disc_reward (bool): If true, plots discounted reward (changes plot title, too).
 
     Summary:
         Creates plots for all agents run under the experiment.
-        Stores the plot in results/<experiment_name>/results.pdf
+        Stores the plot in results/<experiment_name>/<plot_name>.pdf
     '''
 
     # experiment_agents.sort()
@@ -420,7 +419,6 @@ def main():
     args = parse_args()
 
     # Grab agents.
-
     data_dir = args.dir
     agent_names = _get_agent_names(data_dir)
     if len(agent_names) == 0:

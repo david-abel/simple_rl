@@ -21,16 +21,16 @@ except ImportError:
     quit()
 
 # simple_rl classes.
-from ..QLearnerAgentClass import QLearnerAgent
+from ..QLearningAgentClass import QLearningAgent
 
-class GradientBoostingAgent(QLearnerAgent):
+class GradientBoostingAgent(QLearningAgent):
     '''
-    QLearnerAgent that uses gradient boosting with additive regression trees to approximate the Q Function.
+    QLearningAgent that uses gradient boosting with additive regression trees to approximate the Q Function.
     '''
 
     def __init__(self, actions, name="grad_boost", gamma=0.99, explore="softmax", markov_window=20, update_window=500):
         name += "-m" if markov_window > 0 else ""
-        QLearnerAgent.__init__(self, actions=actions, name=name, gamma=gamma, explore=explore)
+        QLearningAgent.__init__(self, actions=actions, name=name, gamma=gamma, explore=explore)
         self.weak_learners = []
         self.model = []
         self.most_recent_episode = []

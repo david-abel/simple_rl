@@ -1,7 +1,6 @@
 # Python imports.
 from __future__ import print_function
 
-
 # Grab classes.
 from bandit.BanditMDPClass import BanditMDP
 from chain.ChainMDPClass import ChainMDP

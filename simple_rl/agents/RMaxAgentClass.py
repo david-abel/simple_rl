@@ -203,8 +203,3 @@ class RMaxAgent(Agent):
         else:
             # Otherwise return rmax.
             return self.rmax
-
-    def _reset_reward(self):
-        self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
-        self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
-

@@ -21,7 +21,7 @@ class DelayedQAgent(Agent):
     Delayed-Q Learning Agent (Strehl, A.L., Li, L., Wiewiora, E., Langford, J. and Littman, M.L., 2006. PAC model-free reinforcement learning).
     '''
 
-    def __init__(self, actions, init_q, name="Delayed-Q", gamma=0.99, m=1, epsilon1=0.1):
+    def __init__(self, actions, init_q=None, name="Delayed-Q", gamma=0.99, m=10, epsilon1=0.1):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -31,7 +31,9 @@ class DelayedQAgent(Agent):
             m (float): Number of samples for updating Q-value
             epsilon1 (float): Learning rate
         '''
-        # name_ext = "-" + explore if explore != "uniform" else ""
+        # Set initial q func.
+        init_q = defaultdict(lambda : defaultdict(lambda: 0)) if init_q is None else init_q
+
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.rmax = 1  # TODO: set/get function
 
@@ -215,14 +217,6 @@ class DelayedQAgent(Agent):
     def reset(self):
         self.step_number = 0
         self.episode_number = 0
-        # print "#####################################"
-        # print "Reset", self.name, "Q-function"
-        # # print self.q_func
-        # for x in self.q_func:
-        #     print (x)
-        #     for y in self.q_func[x]:
-        #         print (y, ':', self.q_func[x][y])
-        
         self.q_func = copy.deepcopy(self.default_q_func)
         Agent.reset(self)
 

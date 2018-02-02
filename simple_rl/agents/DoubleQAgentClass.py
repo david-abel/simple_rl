@@ -12,10 +12,10 @@ import random
 from collections import defaultdict
 
 # Other imports
-from simple_rl.agents.QLearnerAgentClass import QLearnerAgent
+from simple_rl.agents.QLearningAgentClass import QLearningAgent
 from simple_rl.agents.AgentClass import Agent
 
-class DoubleQAgent(QLearnerAgent):
+class DoubleQAgent(QLearningAgent):
     ''' Class for an agent using Double Q Learning. '''
 
     def __init__(self, actions, name="Double-Q", alpha=0.05, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):
@@ -28,7 +28,7 @@ class DoubleQAgent(QLearnerAgent):
             epsilon (float): Exploration term.
             explore (str): One of {softmax, uniform}. Denotes explore policy.
         '''
-        QLearnerAgent.__init__(self, actions, name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
+        QLearningAgent.__init__(self, actions, name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
 
         # Make two q functions.
         self.q_funcs = {"A":defaultdict(lambda : defaultdict(lambda: self.default_q)), \

@@ -2,7 +2,7 @@
 simple_rl
 	agents/
 		AgentClass.py
-		QLearnerAgentClass.py
+		QLearningAgentClass.py
 		RandomAgentClass.py
 		RMaxAgentClass.py
 	experiments/

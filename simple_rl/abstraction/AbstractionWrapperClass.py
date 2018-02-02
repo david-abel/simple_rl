@@ -11,6 +11,7 @@ class AbstractionWrapper(Agent):
     def __init__(self,
                     SubAgentClass,
                     actions,
+                    agent_params={},
                     state_abstr=None,
                     action_abstr=None,
                     name_ext="abstr"):
@@ -18,13 +19,16 @@ class AbstractionWrapper(Agent):
         Args:
             SubAgentClass (simple_rl.AgentClass)
             actions (list of str)
+            agent_params (dict): A dictionary with key=param_name, val=param_value,
+                to be given to the constructor for the instance of @SubAgentClass.
             state_abstr (StateAbstraction)
             state_abstr (ActionAbstraction)
             name_ext (str)
         '''
 
+        print("AP:",agent_params)
         # Setup the abstracted agent.
-        self.agent = SubAgentClass(actions=actions)
+        self.agent = SubAgentClass(actions=actions, **agent_params)
         self.action_abstr = ActionAbstraction(prim_actions=self.agent.actions) if action_abstr is None else action_abstr
         self.state_abstr = StateAbstraction({}) if state_abstr is None else state_abstr
 

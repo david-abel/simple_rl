@@ -28,11 +28,11 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	# Imports
 	from simple_rl.run_experiments import run_agents_on_mdp
 	from simple_rl.tasks import GridWorldMDP
-	from simple_rl.agents import QLearnerAgent
+	from simple_rl.agents import QLearningAgent
 
 	# Run Experiment
 	mdp = GridWorldMDP()
-	agent = QLearnerAgent(mdp.get_actions())
+	agent = QLearningAgent(mdp.get_actions())
 	run_agents_on_mdp([agent], mdp)
 
 ## Overview

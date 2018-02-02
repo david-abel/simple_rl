@@ -28,7 +28,7 @@ from collections import defaultdict
 from simple_rl.planning import ValueIteration
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
-from simple_rl.agents import QLearnerAgent, FixedPolicyAgent
+from simple_rl.agents import QLearningAgent, FixedPolicyAgent
 
 
 def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False, open_plot=True):
@@ -196,9 +196,6 @@ def run_agents_multi_task(agents,
             # Reset the agent.
             agent.reset()
 
-            if "rmax" in agent.name:
-                agent._reset_reward()
-
         # Track how much time this agent took.
         end = time.clock()
         times[agent] = round(end - start, 3)
@@ -343,6 +340,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             # Record the experience.
             if experiment is not None:
                 reward_to_track = mdp.get_gamma()**(step + 1 + episode*steps) * reward if track_disc_reward else reward
+                reward_to_track = round(reward_to_track, 5)
                 experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
 
             if next_state.is_terminal():
@@ -455,10 +453,10 @@ def main():
     gamma = mdp.get_gamma()
 
     # Setup agents.
-    from simple_rl.agents import RandomAgent, QLearnerAgent
+    from simple_rl.agents import RandomAgent, QLearningAgent
     
     random_agent = RandomAgent(actions)
-    qlearner_agent = QLearnerAgent(actions, gamma=gamma, explore="uniform")
+    qlearner_agent = QLearningAgent(actions, gamma=gamma, explore="uniform")
     agents = [qlearner_agent, random_agent]
 
     # Run Agents.

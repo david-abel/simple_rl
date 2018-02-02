@@ -34,6 +34,15 @@ class BanditMDP(MDP):
         self.distr_params = self.init_distr_params() if distr_params is None else distr_params    
 
     def init_distr_params(self):
+        '''
+        Summary:
+            Creates default distribution parameters for each of
+                the @self.num_arms arms. Defaults to Gaussian bandits
+                with each mu ~ Unif(-1,1) and sigma ~ Unif(0,2).
+
+        Returns:
+            (dict)
+        '''
         distr_params = defaultdict(lambda: defaultdict(list))
         
         for i in xrange(self.num_arms):

@@ -29,8 +29,7 @@ class LinUCBAgent(Agent):
         self.context_size = context_size
         self.prev_context = None
         self.step_number = 0
-        if context_size is not None:
-            self._init_action_model(rand_init)
+        self._init_action_model(rand_init)
 
     def _init_action_model(self, rand_init=True):
         '''
@@ -133,9 +132,5 @@ class LinUCBAgent(Agent):
             for action_id in xrange(len(self.actions)):
                 new_context[action_id] = context
             context = new_context
-
-        if self.context_size is None:
-            self.context_size = len(context[0])
-            self._init_action_model()
 
         return context

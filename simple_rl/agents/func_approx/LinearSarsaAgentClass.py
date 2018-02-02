@@ -9,16 +9,16 @@ import numpy as np
 import math
 
 # Other imports.
-from simple_rl.agents.func_approx.LinearQLearnerAgentClass import LinearQLearnerAgent
+from simple_rl.agents.func_approx.LinearQAgentClass import LinearQAgent
 
-class LinearSarsaAgent(LinearQLearnerAgent):
+class LinearSarsaAgent(LinearQAgent):
     '''
     Sarsa Agent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, num_features, rand_init=False, name="sarsa-linear", alpha=0.05, gamma=0.99, epsilon=0.01, explore="uniform", rbf=False, anneal=True):
+    def __init__(self, actions, num_features, rand_init=False, name="Linear-SARSA", alpha=0.05, gamma=0.99, epsilon=0.01, explore="uniform", rbf=False, anneal=True):
         name = name + "-rbf" if (name == "sarsa-linear" and rbf) else name
-        LinearQLearnerAgent.__init__(self, actions=list(actions), rand_init=rand_init, num_features=num_features, name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
+        LinearQAgent.__init__(self, actions=list(actions), rand_init=rand_init, num_features=num_features, name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
 
     def act(self, state, reward):
         '''

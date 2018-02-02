@@ -51,9 +51,9 @@ class Experiment(object):
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
         params["track_disc_reward"] = track_disc_reward
+        params["is_multi_task"] = is_multi_task
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
-        self.is_multi_task = is_multi_task
         self.track_disc_reward = track_disc_reward
         self.count_r_per_n_timestep = count_r_per_n_timestep
         self.steps_since_added_r = 1

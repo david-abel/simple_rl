@@ -9,7 +9,7 @@ from collections import defaultdict
 # Other imports.
 from simple_rl.agents.AgentClass import Agent
 
-class QLearnerAgent(Agent):
+class QLearningAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
     def __init__(self, actions, name="Q-learning", alpha=0.05, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):

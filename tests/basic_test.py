@@ -15,8 +15,8 @@ def run_example(path_to_example_file):
         (bool): True if pass, Fail if error.
     '''
     try:
-        FNULL = open(os.devnull, 'w')
-        subprocess.check_call(["python", path_to_example_file, "no_plot"], stdout=FNULL)
+        fnull = open(os.devnull, 'w')
+        subprocess.check_call(["python", path_to_example_file, "no_plot"], stdout=fnull)
         return True
     except subprocess.CalledProcessError:
         return False
@@ -28,8 +28,8 @@ def main():
 
     # Grab all example files.
     example_dir = os.path.join(os.getcwd(), "..", "examples")
-    example_files = [f for f in os.listdir(example_dir) if os.path.isfile(os.path.join(example_dir, f)) and "py" == f.split(".")[-1]]
-    
+    example_files = [f for f in os.listdir(example_dir) if os.path.isfile(os.path.join(example_dir, f)) and f.split(".")[-1] == "py"]
+
     # Remove non-tests.
     non_tests = ["init", "viz_exam", "blank", "gym"]
     for phrase in non_tests:

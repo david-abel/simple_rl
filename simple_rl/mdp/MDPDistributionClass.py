@@ -156,7 +156,7 @@ class MDPDistribution(object):
         Notes:
             Not all MDPs are guaranteed to share a name (for instance, might include dimensions).
         '''
-        return "multitask-" + str(self.mdp_prob_dict.keys()[0])
+        return "lifelong-" + str(self.mdp_prob_dict.keys()[0])
 
 def main():
     # Simple test code.
