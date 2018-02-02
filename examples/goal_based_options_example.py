@@ -4,7 +4,7 @@
 import sys
 
 # Other imports.
-import examples.srl_example_setup
+import srl_example_setup
 from simple_rl.utils import make_mdp
 from simple_rl.agents import QLearningAgent, RandomAgent
 from simple_rl.run_experiments import run_agents_multi_task

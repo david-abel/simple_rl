@@ -5,7 +5,7 @@ import random
 import sys
 
 # Other imports.
-import examples.srl_example_setup
+import srl_example_setup
 from simple_rl.agents import QLearningAgent, FixedPolicyAgent
 from simple_rl.tasks import RockPaperScissorsMDP
 from simple_rl.run_experiments import play_markov_game 

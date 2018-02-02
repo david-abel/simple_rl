@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 # Other imports.
-import examples.srl_example_setup
+import srl_example_setup
 from simple_rl.tasks import GridWorldMDP
 from simple_rl.planning import ValueIteration
 

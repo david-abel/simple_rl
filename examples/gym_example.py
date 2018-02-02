@@ -5,7 +5,7 @@ import sys
 import logging
 
 # Other imports.
-import examples.srl_example_setup
+import srl_example_setup
 from simple_rl.agents import LinearQLearningAgent, RandomAgent
 from simple_rl.tasks import GymMDP
 from simple_rl.run_experiments import run_agents_on_mdp

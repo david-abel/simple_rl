@@ -5,7 +5,7 @@ from __future__ import print_function
 import argparse
 
 # Other imports.
-import examples.srl_example_setup
+import srl_example_setup
 from simple_rl.agents import QLearningAgent
 from simple_rl.run_experiments import run_single_agent_on_mdp 
 from simple_rl.tasks import FourRoomMDP
