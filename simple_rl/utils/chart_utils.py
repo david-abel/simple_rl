@@ -40,10 +40,11 @@ matplotlib.rc('font', **font)
 matplotlib.rcParams['text.usetex'] = True
 fig = matplotlib.pyplot.gcf()
 
-CUSTOM_TITLE = None #"Planning Time vs. Grid Width (Upworld)"
-X_AXIS_LABEL = None #"Grid Width"
-Y_AXIS_LABEL = None #"Planning Time (seconds)"
-X_AXIS_START_VAL = 0 #6
+CUSTOM_TITLE = None
+X_AXIS_LABEL = None
+Y_AXIS_LABEL = None
+X_AXIS_START_VAL = 0 
+Y_AXIS_END_VAL = None # Doesn't work? TODO
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -206,6 +207,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     # Make the plot.
     print_prefix = "\nAvg. cumulative reward" if cumulative else "Avg. reward"
 
+
     for i, agent_name in enumerate(agents):
 
         # Add figure for this algorithm.
@@ -214,6 +216,8 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         series_marker = markers[agent_color_index]
         y_axis = results[i]
         x_axis = range(X_AXIS_START_VAL, X_AXIS_START_VAL + len(y_axis))
+
+        # Y_AXIS_END_VAL = y_axis if Y_AXIS_END_VAL is None else Y_AXIS_END_VAL
 
         # Plot Confidence Intervals.
         if conf_intervals != []:
@@ -227,6 +231,11 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
         pyplot.legend()
     print()
+    
+    # Adjust axes
+    # axes = pyplot.gca()
+    # axes.set_ylim([0, X_AXIS_START_VAL + 3000])
+
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
     plot_label = "Cumulative" if cumulative else "Average"
@@ -424,6 +433,9 @@ def main():
     if len(agent_names) == 0:
         print("Error: no csv files found.")
         quit()
+
+    if data_dir[-1] != "/":
+        data_dir = data_dir + "/"
 
     cumulative = not(args.a)
     episodic = _is_episodic(data_dir)
