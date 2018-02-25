@@ -20,5 +20,6 @@ from RMaxAgentClass import RMaxAgent
 
 from func_approx.LinearQAgentClass import LinearQAgent
 from func_approx.LinearSarsaAgentClass import LinearSarsaAgent
+from func_approx.DQNAgentClass import DQNAgent
 
 from bandits.LinUCBAgentClass import LinUCBAgent
