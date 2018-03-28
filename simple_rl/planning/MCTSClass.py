@@ -71,7 +71,7 @@ class MCTS(Planner):
         best_score = 0
         total_visits = [self.visitation_counts[state][a] for a in self.actions]
 
-        print total_visits
+        print(total_visits)
 
         if 0 in total_visits:
             # Insufficient stats, return random.

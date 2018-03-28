@@ -38,7 +38,7 @@ class DQNAgent(Agent):
         # Load model from a checkpoint
         if not (from_checkpoint is None):
             self.saver.restore(self.sess, from_checkpoint)
-            print 'Restored model from checkpoint: {}'.format(from_checkpoint)
+            print('Restored model from checkpoint: {}'.format(from_checkpoint))
 
     def act(self, state, reward):
         '''
@@ -64,7 +64,7 @@ class DQNAgent(Agent):
             l = self.mainQN.train(self.sess, s, a, y)
 
             if self.print_loss and (self.total_steps % self.print_every == 0):
-                print 'Loss for step {}: {}'.format(self.total_steps, l)
+                print('Loss for step {}: {}'.format(self.total_steps, l))
 
             update_target(self.target_ops, self.sess)
 
@@ -86,7 +86,7 @@ class DQNAgent(Agent):
         # Saving checkpoints (NOTE: We only save checkpoints when training)
         if self.should_train and self.should_save and self.total_steps > 0 and self.total_steps % self.save_every == 0:
             save_path = self.saver.save(self.sess, '/tmp/{}.ckpt'.format(self.name))
-            print 'At step {}, saved model to {}'.format(self.total_steps, save_path)
+            print('At step {}, saved model to {}'.format(self.total_steps, save_path))
 
         self.curr_step += 1
         self.total_steps += 1

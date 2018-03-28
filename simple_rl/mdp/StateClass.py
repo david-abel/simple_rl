@@ -11,15 +11,14 @@ class State(object):
         self._is_terminal = is_terminal
 
     def features(self):
-    	'''
-    	Summary
-    		Used by function approximators to represent the state.
-    		Override this method in State subclasses to have functiona
-    		approximators use a different set of features.
-
+        '''
+        Summary
+            Used by function approximators to represent the state.
+            Override this method in State subclasses to have functiona
+            approximators use a different set of features.
         Returns:
             (iterable)
-    	'''
+        '''
         return np.array(self.data).flatten()
 
     def get_data(self):
