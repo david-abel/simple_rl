@@ -1,8 +1,14 @@
 # Python imports.
 from __future__ import print_function
 from collections import defaultdict
-import Queue
 import random
+
+# Check python version for queue module.
+import sys
+if sys.version_info[0] < 3:
+	import Queue as queue
+else:
+	import queue
 
 # Other imports.
 from PlannerClass import Planner
@@ -99,7 +105,7 @@ class ValueIteration(Planner):
         if self.reachability_done:
             return
 
-        state_queue = Queue.Queue()
+        state_queue = queue.Queue()
         state_queue.put(self.init_state)
         self.states.add(self.init_state)
 
