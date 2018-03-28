@@ -41,11 +41,11 @@ matplotlib.rc('font', **font)
 matplotlib.rcParams['text.usetex'] = True
 fig = matplotlib.pyplot.gcf()
 
-CUSTOM_TITLE = None #"Planning Time in Trench with a PAC Abstraction"
-X_AXIS_LABEL = None #"Trench Grid Width"
-Y_AXIS_LABEL = None #"Planning Time (seconds)"
-X_AXIS_START_VAL = 0 #3
-Y_AXIS_END_VAL = None # Doesn't work? TODO
+CUSTOM_TITLE = None
+X_AXIS_LABEL = None
+Y_AXIS_LABEL = None
+X_AXIS_START_VAL = 0
+Y_AXIS_END_VAL = None
 
 def load_data(experiment_dir, experiment_agents):
     '''
