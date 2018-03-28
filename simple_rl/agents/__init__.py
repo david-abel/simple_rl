@@ -20,6 +20,10 @@ from RMaxAgentClass import RMaxAgent
 
 from func_approx.LinearQAgentClass import LinearQAgent
 from func_approx.LinearSarsaAgentClass import LinearSarsaAgent
-from func_approx.DQNAgentClass import DQNAgent
+try:
+	from func_approx.DQNAgentClass import DQNAgent
+except ImportError:
+	print("Warning: Tensorflow not installed.")
+	pass
 
 from bandits.LinUCBAgentClass import LinUCBAgent
