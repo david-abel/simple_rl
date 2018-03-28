@@ -16,5 +16,4 @@ class PolicyFromDict(Policy):
             print("(PolicyFromDict) Warning: unseen state (" + str(state) + "). Acting randomly.")
             return random.choice(list(set(self.policy_dict.values())))
         else:
-            print("Seen state!:" + str(state))
             return self.policy_dict[state]

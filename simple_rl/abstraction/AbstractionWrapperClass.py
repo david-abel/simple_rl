@@ -3,8 +3,8 @@ import os
 
 # Other imports.
 from simple_rl.agents import Agent, RMaxAgent
-from state_abs.StateAbstractionClass import StateAbstraction
-from action_abs.ActionAbstractionClass import ActionAbstraction
+from simple_rl.abstraction.state_abs.StateAbstractionClass import StateAbstraction
+from simple_rl.abstraction.action_abs.ActionAbstractionClass import ActionAbstraction
 
 class AbstractionWrapper(Agent):
 
@@ -26,7 +26,6 @@ class AbstractionWrapper(Agent):
             name_ext (str)
         '''
 
-        print("AP:",agent_params)
         # Setup the abstracted agent.
         self.agent = SubAgentClass(actions=actions, **agent_params)
         self.action_abstr = ActionAbstraction(prim_actions=self.agent.actions) if action_abstr is None else action_abstr

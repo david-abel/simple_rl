@@ -61,4 +61,3 @@ class GymMDP(MDP):
 
     def __str__(self):
         return "gym-" + str(self.env_name)
-

@@ -10,10 +10,8 @@ class TransitionFunc(object):
 
 	def transition_func(self, state, action):
 		next_state_sample_list = list(np.random.multinomial(1, self.transition_dict[state][action].values()).tolist())
-		# print state, action, next_state_sample_list, 
-		# for s_prime in self.transition_dict[state][action].keys():
-			# print s_prime,
-		# print 
+		if len(self.transition_dict[state][action].keys()) == 0:
+			return state
 		return self.transition_dict[state][action].keys()[next_state_sample_list.index(1)]
 
 def make_dict_from_lambda(transition_func_lambda, state_space, action_space, sample_rate=1):

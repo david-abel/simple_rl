@@ -15,13 +15,12 @@ from collections import defaultdict
 # Other imports.
 from simple_rl.agents.AgentClass import Agent
 
-
 class DelayedQAgent(Agent):
     '''
     Delayed-Q Learning Agent (Strehl, A.L., Li, L., Wiewiora, E., Langford, J. and Littman, M.L., 2006. PAC model-free reinforcement learning).
     '''
 
-    def __init__(self, actions, init_q=None, name="Delayed-Q", gamma=0.99, m=10, epsilon1=0.1):
+    def __init__(self, actions, init_q=None, name="Delayed-Q", gamma=0.99, m=5, epsilon1=0.1):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -32,10 +31,10 @@ class DelayedQAgent(Agent):
             epsilon1 (float): Learning rate
         '''
         # Set initial q func.
-        init_q = defaultdict(lambda : defaultdict(lambda: 0)) if init_q is None else init_q
+        self.rmax = 1  # TODO: set/get function
+        init_q = defaultdict(lambda : defaultdict(lambda: self.rmax / (1 - gamma))) if init_q is None else init_q
 
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
-        self.rmax = 1  # TODO: set/get function
 
         # Set/initialize parameters and other relevant classwide data
         self.step_number = 0
@@ -131,6 +130,7 @@ class DelayedQAgent(Agent):
             nextq, _ = self._compute_max_qval_action_pair(next_state)
             self.AU[state][action] = self.AU[state][action] + reward + self.gamma * nextq
             if self.l[state][action] == self.m:
+
                 if self.q_func[state][action] - self.AU[state][action] / self.m >= 2 * self.epsilon1:
                     self.q_func[state][action] = self.AU[state][action] / self.m + self.epsilon1
                     self.tstar = self.step_number

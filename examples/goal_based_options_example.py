@@ -7,7 +7,7 @@ import sys
 import srl_example_setup
 from simple_rl.utils import make_mdp
 from simple_rl.agents import QLearningAgent, RandomAgent
-from simple_rl.run_experiments import run_agents_multi_task
+from simple_rl.run_experiments import run_agents_lifelong
 from simple_rl.abstraction import AbstractionWrapper, aa_helpers, ActionAbstraction
 
 def main(open_plot=True):
@@ -22,7 +22,7 @@ def main(open_plot=True):
     option_agent = AbstractionWrapper(QLearningAgent, actions=mdp_distr.get_actions(), action_abstr=goal_based_aa)
 
     # Run experiment and make plot.
-    run_agents_multi_task([ql_agent, rand_agent, option_agent], mdp_distr, task_samples=10, episodes=100, steps=150, open_plot=open_plot)
+    run_agents_lifelong([ql_agent, rand_agent, option_agent], mdp_distr, samples=10, episodes=100, steps=150, open_plot=open_plot)
 
 if __name__ == "__main__":
     main(open_plot=not sys.argv[-1] == "no_plot")

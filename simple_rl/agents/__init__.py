@@ -10,20 +10,20 @@ Implementations of standard RL agents:
 '''
 
 # Grab classes.
-from AgentClass import Agent
-from FixedPolicyAgentClass import FixedPolicyAgent
-from QLearningAgentClass import QLearningAgent
-from DoubleQAgentClass import DoubleQAgent
-from DelayedQAgentClass import DelayedQAgent
-from RandomAgentClass import RandomAgent
-from RMaxAgentClass import RMaxAgent
+from simple_rl.agents.AgentClass import Agent
+from simple_rl.agents.FixedPolicyAgentClass import FixedPolicyAgent
+from simple_rl.agents.QLearningAgentClass import QLearningAgent
+from simple_rl.agents.DoubleQAgentClass import DoubleQAgent
+from simple_rl.agents.DelayedQAgentClass import DelayedQAgent
+from simple_rl.agents.RandomAgentClass import RandomAgent
+from simple_rl.agents.RMaxAgentClass import RMaxAgent
 
-from func_approx.LinearQAgentClass import LinearQAgent
-from func_approx.LinearSarsaAgentClass import LinearSarsaAgent
+from simple_rl.agents.func_approx.LinearQAgentClass import LinearQAgent
+from simple_rl.agents.func_approx.LinearSarsaAgentClass import LinearSarsaAgent
 try:
-	from func_approx.DQNAgentClass import DQNAgent
+	from simple_rl.agents.func_approx.DQNAgentClass import DQNAgent
 except ImportError:
 	print("Warning: Tensorflow not installed.")
 	pass
 
-from bandits.LinUCBAgentClass import LinUCBAgent
+from simple_rl.agents.bandits.LinUCBAgentClass import LinUCBAgent

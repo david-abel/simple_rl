@@ -8,7 +8,7 @@ from simple_rl.tasks import FourRoomMDP
 
 def _four_rooms(state_x, state_y, vi, actions, epsilon=0.0):
     if not isinstance(vi.mdp, FourRoomMDP):
-        print("Abstraction Error: four_rooms SA only available for FourRoomMDP. (" + str(vi.mdp) + "given)." )
+        print("Abstraction Error: four_rooms SA only available for FourRoomMDP/Color. (" + str(vi.mdp) + "given)." )
         quit()
     height, width = vi.mdp.width, vi.mdp.height
 

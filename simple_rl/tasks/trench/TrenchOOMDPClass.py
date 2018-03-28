@@ -1,7 +1,7 @@
 import copy
 import random
 
-from simple_rl.agents import QLearnerAgent
+from simple_rl.agents import QLearningAgent
 from simple_rl.agents import RandomAgent
 from simple_rl.mdp import OOMDP
 from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
@@ -67,7 +67,6 @@ class TrenchOOMDP(OOMDP):
         '''
 
         if self._is_goal_state_action(state, action):
-            # print 'REACHED'
             return 10.0
         elif self._is_lava_state_action(state, action):
             return -1.0
@@ -162,8 +161,6 @@ class TrenchOOMDP(OOMDP):
         # All OOMDP states must be updated.
         next_state.update()
 
-        # print state, action, next_state, next_state.is_terminal()
-        # raw_input()
         return next_state
 
     def _is_terminal_state(self, state):
@@ -272,18 +269,11 @@ def main():
     lavas = [{"x": x, "y": y} for x, y in map(lambda z: (z + 1, (size + 1) / 2), xrange(size))]
 
     mdp = TrenchOOMDP(size, size, agent, blocks, lavas)
-    ql_agent = QLearnerAgent(actions=mdp.get_actions())
+    ql_agent = QLearningAgent(actions=mdp.get_actions())
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
-    # run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=30, episodes=250, steps=250)
-
-    vi = ValueIteration(mdp, delta=0.0001, max_iterations=5000)
-    iters, val = vi.run_vi()
-    print " done."
-    states = vi.get_states()
-    num_states = len(states)
-    print num_states, states
+    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=30, episodes=250, steps=250)
 
 if __name__ == "__main__":
     main()

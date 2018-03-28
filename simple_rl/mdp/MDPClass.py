@@ -67,3 +67,6 @@ class MDP(object):
     def reset(self):
         self.cur_state = copy.deepcopy(self.init_state)
 
+
+    def end_of_instance(self):
+        pass

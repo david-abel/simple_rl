@@ -150,7 +150,6 @@ class MDPDistribution(object):
 
         return mdps_to_return
         
-
     def __str__(self):
         '''
         Notes:
@@ -170,7 +169,6 @@ def main():
         next_mdp = GridWorldMDP(width=width, height=width, init_loc=(1, 1), goal_locs=r.sample(zip(range(1, width + 1), [height] * width), 2), is_goal_terminal=True)
 
         mdp_distr[next_mdp] = prob_list[i]
-
 
     m = MDPDistribution(mdp_distr)
     m.sample()

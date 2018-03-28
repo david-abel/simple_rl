@@ -29,6 +29,7 @@ class GridWorldMDP(MDP):
                 gamma=0.99,
                 init_state=None,
                 slip_prob=0.0,
+                step_cost=0.0,
                 name="gridworld"):
         '''
         Args:
@@ -53,7 +54,7 @@ class GridWorldMDP(MDP):
         if type(goal_locs) is not list:
             print("(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)].")
             quit()
-
+        self.step_cost = step_cost
         self.walls = walls
         self.width = width
         self.height = height
@@ -76,7 +77,7 @@ class GridWorldMDP(MDP):
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
         elif (state.x, state.y) in self.lava_locs:
-            return -0.1
+            return -1.0
         else:
             return 0 - self.step_cost
 
@@ -164,6 +165,9 @@ class GridWorldMDP(MDP):
     def get_goal_locs(self):
         return self.goal_locs
 
+    def get_lava_locs(self):
+        return self.lava_locs
+
     def visualize_policy(self, policy):
         from simple_rl.utils import mdp_visualizer as mdpv
         from grid_visualizer import _draw_state
@@ -193,6 +197,11 @@ class GridWorldMDP(MDP):
         mdpv.visualize_value(self, _draw_state)
         raw_input("Press anything to quit ")
 
+    def visualize_learning(self, agent):
+        from simple_rl.utils import mdp_visualizer as mdpv
+        from grid_visualizer import _draw_state
+        mdpv.visualize_learning(self, agent, _draw_state)
+        raw_input("Press anything to quit ")
 
 def _error_check(state, action):
     '''

@@ -58,7 +58,7 @@ class LinearQAgent(QLearningAgent):
             The resulting feature vector multiplies the state vector by |A| (size of action space), and only the action passed in retains
             the original vector, all other values are set to 0.
         '''
-        result = [0 for i in xrange(self.num_features * len(self.actions))]
+        result = np.zeros(self.num_features * len(self.actions))
         act_index = self.actions.index(action)
 
         basis_feats = state.features()
@@ -68,14 +68,7 @@ class LinearQAgent(QLearningAgent):
 
         result[act_index*self.num_features:(act_index + 1)*self.num_features] = basis_feats
 
-        return np.array(self._normalize(result))
-
-    def _normalize(self, vec):
-        # return vec
-        tot = sum(vec)
-        if tot <= 0:
-            return vec
-        return [float(i) / tot for i in vec]
+        return result
 
     def _update_weights(self, reward, cur_state):
         '''

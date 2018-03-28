@@ -62,6 +62,7 @@ class ActionAbstraction(object):
         Returns:
             (list): Contains all active options.
         '''
+
         return [o for o in self.options if o.is_init_true(state)]
 
     def _convert_to_options(self, action_list):
@@ -80,6 +81,8 @@ class ActionAbstraction(object):
                             term_predicate=Predicate(make_lambda(True)),
                             policy=make_lambda(ground_action),
                             name="prim." + ground_action)
+            else:
+                print(type(ground_action))
             options.append(o)
         return options
 

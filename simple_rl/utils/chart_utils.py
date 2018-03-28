@@ -29,7 +29,8 @@ import numpy as np
 import subprocess
 import argparse
 
-color_ls = [[240, 163, 255], [102, 120, 173],[113, 198, 113],\
+# first_five = [102, 120, 173], [118, 167, 125], [118, 167, 125], [94, 94, 94], [240, 167, 125]
+color_ls = [[240, 163, 255], [102, 120, 173], [113, 198, 113],\
                 [197, 193, 170],[85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
@@ -40,10 +41,10 @@ matplotlib.rc('font', **font)
 matplotlib.rcParams['text.usetex'] = True
 fig = matplotlib.pyplot.gcf()
 
-CUSTOM_TITLE = None
-X_AXIS_LABEL = None
-Y_AXIS_LABEL = None
-X_AXIS_START_VAL = 0 
+CUSTOM_TITLE = None #"Planning Time in Trench with a PAC Abstraction"
+X_AXIS_LABEL = None #"Trench Grid Width"
+Y_AXIS_LABEL = None #"Planning Time (seconds)"
+X_AXIS_START_VAL = 0 #3
 Y_AXIS_END_VAL = None # Doesn't work? TODO
 
 def load_data(experiment_dir, experiment_agents):
@@ -166,7 +167,8 @@ def compute_single_conf_interval(datum):
 def _format_title(plot_title):
     plot_title = plot_title.replace("_", " ")
     plot_title = plot_title.replace("-", " ")
-    plot_title_final = " ".join([w[0].upper() + w[1:] for w in plot_title.split(" ")])
+    if len(plot_title.split(" ")) > 1:
+        plot_title_final = " ".join([w[0].upper() + w[1:] for w in plot_title.strip().split(" ")])
 
     return plot_title_final
 
@@ -211,7 +213,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     for i, agent_name in enumerate(agents):
 
         # Add figure for this algorithm.
-        agent_color_index = agent_colors[agent_name]
+        agent_color_index = i if agent_name not in agent_colors else agent_colors[agent_name]
         series_color = colors[agent_color_index]
         series_marker = markers[agent_color_index]
         y_axis = results[i]
@@ -242,7 +244,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     if "times" in experiment_dir:
         # If it's a time plot.
         unit = "Time"
-        experiment_dir = experiment_dir.replace("times", "")
+
     disc_ext = "Discounted " if track_disc_reward else ""
 
     # Set names.
@@ -252,9 +254,11 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     else:
         exp_name = exp_dir_split_list[0]
 
-    plot_file_name = experiment_dir + "/" + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    experiment_dir = experiment_dir + "/" if experiment_dir[-1] != "/" else experiment_dir
+    plot_file_name = experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
-    plot_title = _format_title(plot_title)
+    if CUSTOM_TITLE is None:
+        plot_title = _format_title(plot_title)
 
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit

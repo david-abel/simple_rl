@@ -29,7 +29,7 @@ class Experiment(object):
                     params=None,
                     is_episodic=False,
                     is_markov_game=False,
-                    is_multi_task=False,
+                    is_lifelong=False,
                     track_disc_reward=False,
                     clear_old_results=True,
                     count_r_per_n_timestep=1,
@@ -42,7 +42,7 @@ class Experiment(object):
             params (dict)
             is_episodic (bool)
             is_markov_game (bool)
-            is_multi_task (bool)
+            is_lifelong (bool)
             clear_old_results (bool)
             count_r_per_n_timestep (int)
             cumulative_plot (bool)
@@ -51,7 +51,7 @@ class Experiment(object):
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
         params["track_disc_reward"] = track_disc_reward
-        params["is_multi_task"] = is_multi_task
+        params["is_lifelong"] = is_lifelong
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.track_disc_reward = track_disc_reward

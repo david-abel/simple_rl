@@ -12,7 +12,7 @@ from simple_rl.run_experiments import run_agents_on_mdp
 
 def main(open_plot=True):
     # Gym MDP
-    gym_mdp = GymMDP(env_name='Breakout-v0', render=False)
+    gym_mdp = GymMDP(env_name='Breakout-v0', render=True)
     num_feats = gym_mdp.get_num_state_feats()
 
     # Setup agents and run.

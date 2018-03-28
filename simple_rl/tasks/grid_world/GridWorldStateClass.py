@@ -8,8 +8,8 @@ class GridWorldState(State):
 
     def __init__(self, x, y):
         State.__init__(self, data=[x, y])
-        self.x = round(x, 3)
-        self.y = round(y, 3)
+        self.x = round(x, 5)
+        self.y = round(y, 5)
 
     def __hash__(self):
         return hash(tuple(self.data))

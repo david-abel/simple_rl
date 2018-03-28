@@ -9,7 +9,7 @@ from PlannerClass import Planner
 
 class ValueIteration(Planner):
 
-    def __init__(self, mdp, name="value_iter", delta=0.0001, max_iterations=200, sample_rate=3):
+    def __init__(self, mdp, name="value_iter", delta=0.0001, max_iterations=500, sample_rate=3):
         '''
         Args:
             mdp (MDP)
@@ -47,6 +47,9 @@ class ValueIteration(Planner):
                     self.trans_dict[s][a][s_prime] += 1.0 / self.sample_rate
 
         self.has_computed_matrix = True
+
+    def get_gamma(self):
+        return self.mdp.get_gamma()
 
     def get_num_states(self):
         if not self.reachability_done:
@@ -129,6 +132,7 @@ class ValueIteration(Planner):
             max_diff = 0
             for s in state_space:
                 self.bellman_backups += 1
+                # print("s", s)
                 if s.is_terminal():
                     continue
 
@@ -136,6 +140,10 @@ class ValueIteration(Planner):
                 for a in self.actions:
                     q_s_a = self.get_q_value(s, a)
                     max_q = q_s_a if q_s_a > max_q else max_q
+
+                #     print("\tq_s_a", a, q_s_a)
+                # print()
+
                 # Check terminating condition.
                 max_diff = max(abs(self.value_func[s] - max_q), max_diff)
 

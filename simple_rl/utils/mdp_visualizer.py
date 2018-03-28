@@ -28,8 +28,9 @@ def val_to_color(val, good_col=(169, 193, 249), bad_col=(255, 255, 255)):
         if @val is 1, we get good_col, if it's 0.5, we get a color
         halfway between the two, and so on.
     '''
+    val_normalized = (val + 1) / 2.0
     diff_list = [bad_col[i] - good_col[i] for i in range(3)]
-    result = tuple([max(min(int(bad_col[i] - (val**4)*diff_list[i]), 255), 0) for i in range(3)])
+    result = tuple([max(min(int(bad_col[i] - (val_normalized**4)*diff_list[i]), 255), 0) for i in range(3)])
     return result
 
 def _draw_title_text(mdp, screen):
@@ -67,22 +68,23 @@ def _draw_agent_text(agent, screen):
     agent_text = title_font.render(formatted_agent_text, True, (46, 49, 49))
     screen.blit(agent_text, agent_text_point)
 
-def _draw_state_text(state, screen):
+def _draw_lower_left_text(state, screen, score=-1):
     '''
     Args:
         state (simple_rl.State)
         screen (pygame.Surface)
+        score (int)
 
     Summary:
         Draws the name of the current state to the bottom left of the screen.
     '''
     scr_width, scr_height = screen.get_width(), screen.get_height()
     # Clear.
-    formatted_state_text = str(state)
+    formatted_state_text = str(state) if score == -1 else score
     if len(formatted_state_text) > 20:
         # State text is too long, ignore.
         return
-    state_text_point = (scr_width / 4.0 - len(formatted_state_text)*6, 18*scr_height / 20.0)
+    state_text_point = (scr_width / 4.0 - len(formatted_state_text)*7, 18*scr_height / 20.0)
     pygame.draw.rect(screen, (255,255,255), (state_text_point[0] - 20, state_text_point[1]) + (200,40))
     state_text = title_font.render(formatted_state_text, True, (46, 49, 49))
     screen.blit(state_text, state_text_point)
@@ -127,6 +129,74 @@ def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=7
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
     draw_state(screen, mdp, cur_state, show_value=True, draw_statics=True)
 
+def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
+    '''
+    Args:
+        mdp (MDP)
+        agent (Agent)
+        draw_state (lambda: State --> pygame.Rect)
+        cur_state (State)
+        scr_width (int)
+        scr_height (int)
+
+    Summary:
+        Creates a *live* 2d visual of the agent's
+        interactions with the MDP, showing the agent's
+        estimated values of each state.
+    '''
+    screen = pygame.display.set_mode((scr_width, scr_height))
+
+    # Setup and draw initial state.
+    cur_state = mdp.get_init_state() if cur_state is None else cur_state
+    reward = 0
+    score = 0
+    default_goal_x, default_goal_y = mdp.width, mdp.height
+    agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+    done = False
+
+    # Main loop.
+    while not done:
+        # Check for key presses.
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                # Quit.
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN and event.key == K_r:
+                score = 0
+                agent.reset()
+                mdp.goal_locs = [(default_goal_x, default_goal_y)]
+                mdp.reset()
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                x, y = pos[0], pos[1]
+                width_buffer = scr_width / 10.0
+                height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
+                cell_x, cell_y = convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp.width, mdp.height)
+
+                if event.button == 1:
+                    # Left clicked a cell, move the goal.
+                    mdp.goal_locs = [(cell_x, cell_y)]
+                    mdp.reset()
+                elif event.button == 3:
+                    # Right clicked a cell, move the lava lava.
+                    mdp.lava_locs = [(cell_x, cell_y)]
+                    # mdp.reset()
+
+        # Move agent.
+        action = agent.act(cur_state, reward)
+        reward, cur_state = mdp.execute_agent_action(action)
+        agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
+
+        if cur_state.is_terminal():
+            score += 1
+            cur_state = mdp.get_init_state()
+            mdp.reset()
+            agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+
+        pygame.display.update()
+
 def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
     '''
     Args:
@@ -163,7 +233,7 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
                 agent_shape = draw_state(screen, mdp, cur_state, agent_shape=agent_shape)
 
                 # Update state text.
-                _draw_state_text(cur_state, screen)
+                _draw_lower_left_text(cur_state, screen)
 
         if cur_state.is_terminal():
             # Done! Agent found goal.
@@ -175,7 +245,7 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
 
         pygame.display.update()
 
-def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False):
+def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False, score=-1):
     # Pygame setup.
     pygame.init()
     screen.fill((255, 255, 255))
@@ -186,9 +256,30 @@ def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False):
     _draw_title_text(mdp, screen)
     if agent is not None:
         _draw_agent_text(agent, screen)
-    if not value:
-        # If we're not visualizing the value.
-        _draw_state_text(cur_state, screen)
-        agent_shape = draw_state(screen, mdp, cur_state, draw_statics=True)
+    
+    if score != -1:
+        _draw_lower_left_text("Score: " + str(score), screen)
+    agent_shape = draw_state(screen, mdp, cur_state, draw_statics=True)
 
-        return agent_shape
+    return agent_shape
+
+def convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp_width, mdp_height):
+    '''
+    Args:
+        x (int)
+        y (int)
+        scr_width (int)
+        scr_height (int)
+        num
+    '''
+    width_buffer = scr_width / 10.0
+    height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
+
+    lower_left_x, lower_left_y = x - width_buffer, scr_height - y - height_buffer
+    
+    cell_width = (scr_width - width_buffer * 2) / mdp_width
+    cell_height = (scr_height - height_buffer * 2) / mdp_height
+
+    cell_x, cell_y = int(lower_left_x / cell_width) + 1, int(lower_left_y / cell_height) + 1
+
+    return cell_x, cell_y

@@ -4,3 +4,4 @@ build/
 dist/
 todo.txt
 update.py
+.DS_Store

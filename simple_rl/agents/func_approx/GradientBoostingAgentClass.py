@@ -21,7 +21,7 @@ except ImportError:
     quit()
 
 # simple_rl classes.
-from ..QLearningAgentClass import QLearningAgent
+from simple_rl.agents.QLearningAgentClass import QLearningAgent
 
 class GradientBoostingAgent(QLearningAgent):
     '''

@@ -6,7 +6,7 @@ Instructions:
     (1) Create an MDP.
     (2) Create agents.
     (3) Set experiment parameters (instances, episodes, steps).
-    (4) Call run_agents_on_mdp(agents, mdp) (or the multi_task/markov game equivalents).
+    (4) Call run_agents_on_mdp(agents, mdp) (or the lifelong/markov game equivalents).
 
     -> Runs all experiments and will open a plot with results when finished.
 
@@ -117,9 +117,9 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
 
     experiment.make_plots(open_plot=open_plot)
 
-def run_agents_multi_task(agents,
+def run_agents_lifelong(agents,
                             mdp_distr,
-                            task_samples=5,
+                            samples=5,
                             episodes=1,
                             steps=100,
                             clear_old_results=True,
@@ -133,7 +133,7 @@ def run_agents_multi_task(agents,
     Args:
         agents (list)
         mdp_distr (MDPDistribution)
-        task_samples (int)
+        samples (int)
         episodes (int)
         steps (int)
         clear_old_results (bool)
@@ -156,12 +156,12 @@ def run_agents_multi_task(agents,
     #     steps = mdp_distr.get_horizon()
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"task_samples":task_samples, "episodes":episodes, "steps":steps, "gamma":mdp_distr.get_gamma()}
+    exp_params = {"samples":samples, "episodes":episodes, "steps":steps, "gamma":mdp_distr.get_gamma()}
     experiment = Experiment(agents=agents,
                 mdp=mdp_distr,
                 params=exp_params,
                 is_episodic=episodes > 1,
-                is_multi_task=True,
+                is_lifelong=True,
                 clear_old_results=clear_old_results,
                 track_disc_reward=track_disc_reward,
                 cumulative_plot=cumulative_plot)
@@ -177,9 +177,10 @@ def run_agents_multi_task(agents,
         print(str(agent) + " is learning.")
         start = time.clock()
 
+
         # --- SAMPLE NEW MDP ---
-        for new_task in xrange(task_samples):
-            print("  Sample " + str(new_task + 1) + " of " + str(task_samples) + ".")
+        for new_task in xrange(samples):
+            print("  Sample " + str(new_task + 1) + " of " + str(samples) + ".")
 
             # Sample the MDP.
             mdp = mdp_distr.sample()
@@ -199,6 +200,7 @@ def run_agents_multi_task(agents,
         # Track how much time this agent took.
         end = time.clock()
         times[agent] = round(end - start, 3)
+
 
     # Time stuff.
     print("\n--- TIMES ---")
@@ -270,6 +272,7 @@ def run_agents_on_mdp(agents,
             
             # Reset the agent.
             agent.reset()
+            mdp.end_of_instance()
 
         # Track how much time this agent took.
         end = time.clock()

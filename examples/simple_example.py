@@ -17,7 +17,7 @@ def main(open_plot=True):
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
-    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=10, episodes=50, steps=10, open_plot=open_plot)
+    run_agents_on_mdp([ql_agent, rand_agent], mdp, instances=10, episodes=1, steps=20, open_plot=open_plot)
 
 if __name__ == "__main__":
     main(open_plot=not sys.argv[-1] == "no_plot")

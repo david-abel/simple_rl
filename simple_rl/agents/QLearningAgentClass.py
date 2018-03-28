@@ -12,7 +12,7 @@ from simple_rl.agents.AgentClass import Agent
 class QLearningAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="Q-learning", alpha=0.05, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):
+    def __init__(self, actions, name="Q-learning", alpha=0.1, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -30,7 +30,7 @@ class QLearningAgent(Agent):
         self.epsilon, self.epsilon_init = epsilon, epsilon
         self.step_number = 0
         self.anneal = anneal
-        self.default_q = 0.0
+        self.default_q = 0 #1 / (1 - self.gamma)
         
         # Q Function:
         # Key: state
@@ -51,6 +51,9 @@ class QLearningAgent(Agent):
         Args:
             state (State)
             reward (float)
+
+        Returns:
+        	(str)
 
         Summary:
             The central method called during each time step.
@@ -178,6 +181,16 @@ class QLearningAgent(Agent):
             (float): denoting the max q value in the given @state.
         '''
         return self._compute_max_qval_action_pair(state)[0]
+
+    def get_value(self, state):
+        '''
+        Args:
+            state (State)
+
+        Returns:
+            (float)
+        '''
+        return self.get_max_q_value(state)
 
     def get_q_value(self, state, action):
         '''

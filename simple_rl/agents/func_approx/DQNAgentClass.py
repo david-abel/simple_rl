@@ -2,10 +2,12 @@
 in DeepMind, Multi-agent RL in Sequential Social Dilemmas paper. '''
 
 # Python imports.
-from simple_rl.agents.AgentClass import Agent
 import tensorflow as tf
 import numpy as np
 import random
+
+# Other imports.
+from simple_rl.agents.AgentClass import Agent
 
 class DQNAgent(Agent):
 
