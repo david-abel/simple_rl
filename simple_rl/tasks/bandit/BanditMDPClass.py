@@ -27,7 +27,7 @@ class BanditMDP(MDP):
             distr_params (dict): If None is given, default mu/sigma for normal
                 distribution are initialized randomly.
         '''
-        BanditMDP.ACTIONS = [str(i) for i in xrange(1, num_arms + 1)]
+        BanditMDP.ACTIONS = [str(i) for i in range(1, num_arms + 1)]
         MDP.__init__(self, BanditMDP.ACTIONS, self._transition_func, self._reward_func, init_state=State(1), gamma=1.0)
         self.num_arms = num_arms
         self.distr_family = distr_family
@@ -45,7 +45,7 @@ class BanditMDP(MDP):
         '''
         distr_params = defaultdict(lambda: defaultdict(list))
         
-        for i in xrange(self.num_arms):
+        for i in range(self.num_arms):
             next_mu = np.random.uniform(-1.0, 1.0)
             next_sigma = np.random.uniform(0, 2.0)
             distr_params[str(i)] = [next_mu, next_sigma]

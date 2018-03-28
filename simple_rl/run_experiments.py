@@ -30,7 +30,6 @@ from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
 from simple_rl.agents import QLearningAgent, FixedPolicyAgent
 
-
 def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False, open_plot=True):
     '''
     Args:
@@ -57,13 +56,13 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
     start = time.clock()
 
     # For each instance of the agent.
-    for instance in xrange(1, instances + 1):
+    for instance in range(1, instances + 1):
         print("\tInstance " + str(instance) + " of " + str(int(instances)) + ".")
 
         reward_dict = defaultdict(str)
         action_dict = {}
 
-        for episode in xrange(1, episodes + 1):
+        for episode in range(1, episodes + 1):
             if verbose:
                 sys.stdout.write("\tEpisode %s of %s" % (episode, episodes))
                 sys.stdout.write("\b" * len("\tEpisode %s of %s" % (episode, episodes)))
@@ -72,7 +71,7 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
             # Compute initial state/reward.
             state = markov_game_mdp.get_init_state()
 
-            for step in xrange(steps):
+            for step in range(steps):
 
                 # Compute each agent's policy.
                 for a in agent_dict.values():
@@ -179,7 +178,7 @@ def run_agents_lifelong(agents,
 
 
         # --- SAMPLE NEW MDP ---
-        for new_task in xrange(samples):
+        for new_task in range(samples):
             print("  Sample " + str(new_task + 1) + " of " + str(samples) + ".")
 
             # Sample the MDP.
@@ -265,7 +264,7 @@ def run_agents_on_mdp(agents,
         start = time.clock()
 
         # For each instance.
-        for instance in xrange(1, instances + 1):
+        for instance in range(1, instances + 1):
             print("  Instance " + str(instance) + " of " + str(instances) + ".")
             sys.stdout.flush()
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal=reset_at_terminal)
@@ -300,7 +299,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         quit()
 
     # For each episode.
-    for episode in xrange(1, episodes + 1):
+    for episode in range(1, episodes + 1):
 
         if verbose:
             # Print episode numbers out nicely.
@@ -319,7 +318,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             sys.stdout.flush()
             prog_bar_len = _make_step_progress_bar()
 
-        for step in xrange(1, steps + 1):
+        for step in range(1, steps + 1):
             if verbose and int(prog_bar_len*float(step) / steps) > int(prog_bar_len*float(step-1) / steps):
                 _increment_bar()
 

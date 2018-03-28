@@ -145,7 +145,7 @@ class MDPDistribution(object):
         mdps_to_return = []
 
         for i in indices:
-            for copies in xrange(sampled_mdp_id_list[i]):
+            for copies in range(sampled_mdp_id_list[i]):
                 mdps_to_return.append(self.mdp_prob_dict.keys()[i])
 
         return mdps_to_return

@@ -41,7 +41,7 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=25
 		# Compute reward.
 		total_reward = 0
 		for ground_s in lower_states:
-			for sample in xrange(sample_rate):
+			for sample in range(sample_rate):
 				s_prime, reward = abstr_action.rollout(ground_s, lower_reward_func, lower_trans_func, step_cost=step_cost)
 				total_reward += float(reward) / (len(lower_states) * sample_rate) # Add weighted reward.
 
@@ -57,7 +57,7 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=25
 		s_prime_prob_dict = defaultdict(int)
 		total_reward = 0
 		for ground_s in lower_states:
-			for sample in xrange(sample_rate):
+			for sample in range(sample_rate):
 				s_prime, reward = abstr_action.rollout(ground_s, lower_reward_func, lower_trans_func)
 				s_prime_prob_dict[s_prime] += (1.0 / (len(lower_states) * sample_rate)) # Weighted average.
 		
@@ -124,7 +124,7 @@ def make_abstr_mdp_multi_level(mdp, state_abstr_stack, action_abstr_stack, step_
 	'''
 	mdp_level = min(state_abstr_stack.get_num_levels(), action_abstr_stack.get_num_levels())
 
-	for i in xrange(1, mdp_level + 1):
+	for i in range(1, mdp_level + 1):
 		state_abstr_stack.set_level(i)
 		action_abstr_stack.set_level(i)
 		mdp = make_abstr_mdp(mdp, state_abstr_stack, action_abstr_stack, step_cost, sample_rate)
@@ -156,7 +156,7 @@ def _rew_dict_from_lambda(input_lambda, state_space, action_space, sample_rate):
 	result_dict = defaultdict(lambda:defaultdict(float))
 	for s in state_space:
 		for a in action_space:
-			for i in xrange(sample_rate):
+			for i in range(sample_rate):
 				result_dict[s][a] = input_lambda(s,a) / sample_rate
 
 	return result_dict

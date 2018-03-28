@@ -14,7 +14,7 @@ def make_dict_from_lambda(reward_func_lambda, state_space, action_space, sample_
 	reward_dict = defaultdict(lambda:defaultdict(float))
 	for s in state_space:
 		for a in action_space:
-			for i in xrange(sample_rate):
+			for i in range(sample_rate):
 				reward_dict[s][a] = reward_func_lambda(s, a) / sample_rate
 
 	return reward_dict

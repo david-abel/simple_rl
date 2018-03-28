@@ -42,7 +42,7 @@ class HierarchicalValueIteration(ValueIteration):
 
         for s in self.get_states():
             for a in self.actions:
-                for sample in xrange(self.sample_rate):
+                for sample in range(self.sample_rate):
                     s_prime = self.transition_func(s, a)
                     self.trans_dict[s][a][s_prime] += 1.0 / self.sample_rate
 
@@ -56,7 +56,7 @@ class HierarchicalValueIteration(ValueIteration):
         '''
         state_queue = Queue.Queue()
 
-        for lvl in xrange(self.sa_stack.get_num_levels()):
+        for lvl in range(self.sa_stack.get_num_levels()):
             abstr_state = self.sa_stack.phi(self.init_state, lvl)
             self.states.add(abstr_state)
             state_queue.put(abstr_state)
@@ -64,7 +64,7 @@ class HierarchicalValueIteration(ValueIteration):
         while not state_queue.empty():
             s = state_queue.get()
             for a in self.actions:
-                for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
+                for samples in range(self.sample_rate): # Take @sample_rate samples to estimate E[V]
                     next_state = self.transition_func(s,a) # Need to use T w.r.t. the abstract MDP...
 
                     if next_state not in self.states:

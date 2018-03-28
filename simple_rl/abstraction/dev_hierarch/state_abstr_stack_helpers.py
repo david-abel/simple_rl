@@ -37,7 +37,7 @@ def make_random_sa_stack(mdp_distr, cluster_size_ratio=0.5, max_num_levels=2):
     sa_stack = StateAbstractionStack(list_of_phi=[])
 
     # Each loop adds a stack.
-    for i in xrange(max_num_levels - 1):
+    for i in range(max_num_levels - 1):
 
         # Grab curent state space (at level i).
         cur_state_space = _get_level_i_state_space(ground_state_space, sa_stack, i)

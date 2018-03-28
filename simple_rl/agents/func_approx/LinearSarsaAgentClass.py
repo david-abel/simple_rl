@@ -94,5 +94,5 @@ class LinearSarsaAgent(LinearQAgent):
         active_feats_index = self.actions.index(self.prev_action) * self.num_features
 
         # Sparsely update the weights (only update weights associated with the action we used).
-        for i in xrange(active_feats_index, active_feats_index + self.num_features):
+        for i in range(active_feats_index, active_feats_index + self.num_features):
             self.weights[i] = self.weights[i] + self.alpha * phi[i] * self.most_recent_loss

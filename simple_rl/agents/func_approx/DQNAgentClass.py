@@ -58,7 +58,7 @@ class DQNAgent(Agent):
 
             # Compute y-vals
             y = np.zeros(self.batch_size)
-            for i in xrange(self.batch_size):
+            for i in range(self.batch_size):
                 if t[i]:
                     y[i] = r[i]
                 else:

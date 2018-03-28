@@ -204,7 +204,7 @@ class DelayedQAgent(Agent):
             mass associated with the i-th action (indexing into self.actions)
         '''
         all_q_vals = []
-        for i in xrange(len(self.actions)):
+        for i in range(len(self.actions)):
             action = self.actions[i]
             all_q_vals.append(self.get_q_value(state, action))
 

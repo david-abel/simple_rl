@@ -48,7 +48,7 @@ class ValueIteration(Planner):
 
         for s in self.get_states():
             for a in self.actions:
-                for sample in xrange(self.sample_rate):
+                for sample in range(self.sample_rate):
                     s_prime = self.transition_func(s, a)
                     self.trans_dict[s][a][s_prime] += 1.0 / self.sample_rate
 
@@ -112,7 +112,7 @@ class ValueIteration(Planner):
         while not state_queue.empty():
             s = state_queue.get()
             for a in self.actions:
-                for samples in xrange(self.sample_rate): # Take @sample_rate samples to estimate E[V]
+                for samples in range(self.sample_rate): # Take @sample_rate samples to estimate E[V]
                     next_state = self.transition_func(s,a)
 
                     if next_state not in self.states:

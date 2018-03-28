@@ -17,7 +17,7 @@ class ComboLockMDP(MDP):
         Args:
             num_states (int) [optional]: Number of states in the chain.
         '''
-        ComboLockMDP.ACTIONS = [str(i) for i in xrange(1, num_actions + 1)]
+        ComboLockMDP.ACTIONS = [str(i) for i in range(1, num_actions + 1)]
         self.num_states = len(combo) if num_states is None else num_states
         self.num_actions = num_actions
         self.combo = combo

@@ -37,7 +37,7 @@ class LinUCBAgent(Agent):
             Initializes model parameters
         '''
         self.model = {'act': {}, 'act_inv': {}, 'theta': {}, 'b': {}}
-        for action_id in xrange(len(self.actions)):
+        for action_id in range(len(self.actions)):
             self.model['act'][action_id] = np.identity(self.context_size)
             self.model['act_inv'][action_id] = np.identity(self.context_size)
             if rand_init:
@@ -64,7 +64,7 @@ class LinUCBAgent(Agent):
         uncertainty = {}
         score_dict = {}
         max_score = 0
-        for action_id in xrange(len(self.actions)):
+        for action_id in range(len(self.actions)):
             action_context = np.reshape(context[action_id], (-1, 1))
             estimated_reward[action_id] = float(theta[action_id].T.dot(action_context))
             uncertainty[action_id] = float(self.alpha * np.sqrt(action_context.T.dot(a_inv[action_id]).dot(action_context)))
@@ -108,7 +108,7 @@ class LinUCBAgent(Agent):
         # Compute best action.
         best_action = np.random.choice(self.actions)
         max_score = float("-inf")
-        for action_id in xrange(len(self.actions)):
+        for action_id in range(len(self.actions)):
             if score[action_id] > max_score:
                 max_score = score[action_id]
                 best_action = self.actions[action_id]
@@ -129,7 +129,7 @@ class LinUCBAgent(Agent):
         if not hasattr(context[0], '__iter__'):
             # If we only have a single context.
             new_context = {}
-            for action_id in xrange(len(self.actions)):
+            for action_id in range(len(self.actions)):
                 new_context[action_id] = context
             context = new_context
 

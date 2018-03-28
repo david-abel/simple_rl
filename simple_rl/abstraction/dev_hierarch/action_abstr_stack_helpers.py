@@ -64,7 +64,7 @@ def make_directed_options_aa_from_sa_stack(mdp_distr, sa_stack):
 
     aa_stack = ActionAbstractionStack(list_of_aa=[], prim_actions=mdp_distr.get_actions())
 
-    for level in xrange(1, sa_stack.get_num_levels() + 1):
+    for level in range(1, sa_stack.get_num_levels() + 1):
         
         # Make directed options for the current level.
         sa_stack.set_level(level)

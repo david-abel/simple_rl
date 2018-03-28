@@ -21,12 +21,12 @@ class HanoiMDP(MDP):
         '''
         self.num_pegs = num_pegs
         self.num_discs = num_discs
-        HanoiMDP.ACTIONS = [str(x) + str(y) for x, y in itertools.product(xrange(self.num_pegs), xrange(self.num_pegs)) if x != y]
+        HanoiMDP.ACTIONS = [str(x) + str(y) for x, y in itertools.product(range(self.num_pegs), range(self.num_pegs)) if x != y]
 
         # Setup init state.
-        init_state = [" " for peg in xrange(num_pegs)]
+        init_state = [" " for peg in range(num_pegs)]
         x = ""
-        for i in xrange(num_discs):
+        for i in range(num_discs):
             x += chr(97 + i)
         init_state[0] = x
         init_state = State(data=init_state)

@@ -27,5 +27,13 @@ Last Updated: July 25th, 2017
 Contact: dabel@cs.brown.edu
 License: MIT
 '''
+# Fix xrange.
+try:
+    xrange
+except NameError:
+    xrange = range
+
+# Imports.
+
 import simple_rl.agents, simple_rl.experiments, simple_rl.mdp, simple_rl.planning, simple_rl.tasks, simple_rl.utils
 import simple_rl.run_experiments

@@ -38,7 +38,7 @@ def make_hierarchy(mdp_distr, num_levels):
     aa_stack = ActionAbstractionStack(list_of_aa=[], prim_actions=mdp_distr.get_actions())
     epsilon = 0.0
 
-    for i in xrange(1, num_levels):
+    for i in range(1, num_levels):
         print "\n" + "=" * 20
         print "== Making layer " + str(i + 1) + " =="
         print "=" * 20 + "\n"

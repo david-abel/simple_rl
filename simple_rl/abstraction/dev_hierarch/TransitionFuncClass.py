@@ -18,7 +18,7 @@ def make_dict_from_lambda(transition_func_lambda, state_space, action_space, sam
 	transition_dict = defaultdict(lambda:defaultdict(lambda:defaultdict(int)))
 	for s in state_space:
 		for a in action_space:
-			for i in xrange(sample_rate):
+			for i in range(sample_rate):
 				s_prime = transition_func_lambda(s, a)
 				transition_dict[s][a][s_prime] +=  (1.0 / sample_rate)
 

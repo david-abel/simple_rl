@@ -102,7 +102,7 @@ class RockSampleMDP(GridWorldMDP):
 
     def _get_rock_at_agent_loc(self, state):
         result = None
-        for i in xrange(2, len(state.data), 3):
+        for i in range(2, len(state.data), 3):
             if state.data[i] == state[0] and state.data[i + 1] == state[1]:
                 return i
 

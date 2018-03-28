@@ -66,18 +66,18 @@ def make_mdp_distr(mdp_class="grid", grid_dim=9, horizon=0, step_cost=0, gamma=0
     # Corridor.
     corr_width = 20
     corr_goal_magnitude = 1 #random.randint(1, 5)
-    corr_goal_cols = [i for i in xrange(1, corr_goal_magnitude + 1)] + [j for j in xrange(corr_width-corr_goal_magnitude + 1, corr_width + 1)]
+    corr_goal_cols = [i for i in range(1, corr_goal_magnitude + 1)] + [j for j in range(corr_width-corr_goal_magnitude + 1, corr_width + 1)]
     corr_goal_locs  = list(itertools.product(corr_goal_cols, [1]))
 
     # Grid World
-    tl_grid_world_rows, tl_grid_world_cols = [i for i in xrange(width - 4, width)], [j for j in xrange(height - 4, height)]
+    tl_grid_world_rows, tl_grid_world_cols = [i for i in range(width - 4, width)], [j for j in range(height - 4, height)]
     tl_grid_goal_locs = list(itertools.product(tl_grid_world_rows, tl_grid_world_cols))
-    tr_grid_world_rows, tr_grid_world_cols = [i for i in xrange(1, 4)], [j for j in xrange(height - 4, height)]
+    tr_grid_world_rows, tr_grid_world_cols = [i for i in range(1, 4)], [j for j in range(height - 4, height)]
     tr_grid_goal_locs = list(itertools.product(tr_grid_world_rows, tr_grid_world_cols))
     grid_goal_locs = tl_grid_goal_locs + tr_grid_goal_locs
 
     # Hallway.
-    hall_goal_locs = [(i, height) for i in xrange(1, 30)]
+    hall_goal_locs = [(i, height) for i in range(1, 30)]
 
     # Four room.
     four_room_goal_locs = [(width, height), (width, 1), (1, height), (1, height - 2), (width - 2, height - 2)]#, (width - 2, 1)]
@@ -98,7 +98,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=9, horizon=0, step_cost=0, gamma=0
         num_mdps = 12
     mdp_prob = 1.0 / num_mdps
 
-    for i in xrange(num_mdps):
+    for i in range(num_mdps):
 
         new_mdp = {"hrooms":make_grid_world_from_file("hierarch_rooms.txt", num_goals=7, randomize=False),
                     "octo":make_grid_world_from_file("octogrid.txt", num_goals=12, randomize=False, goal_num=i),

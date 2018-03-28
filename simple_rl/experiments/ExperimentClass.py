@@ -155,11 +155,11 @@ class Experiment(object):
             Writes reward data from this episode to file and resets the reward.
         '''
         if self.is_episodic:
-            for x in xrange(num_times_to_write):
+            for x in range(num_times_to_write):
                 self.write_datum_to_file(agent, sum(self.rewards[agent]))
                 self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
         else:
-            for x in xrange(num_times_to_write):
+            for x in range(num_times_to_write):
                 for step_reward in self.rewards[agent]:
                     self.write_datum_to_file(agent, step_reward)
         self.rewards[agent] = []

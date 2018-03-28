@@ -266,7 +266,7 @@ def main():
     size = 5
     agent = {"x": 1, "y": 1, "dx": 1, "dy": 0, "dest_x": size, "dest_y": size, "has_block": 0}
     blocks = [{"x": size, "y": 1}]
-    lavas = [{"x": x, "y": y} for x, y in map(lambda z: (z + 1, (size + 1) / 2), xrange(size))]
+    lavas = [{"x": x, "y": y} for x, y in map(lambda z: (z + 1, (size + 1) / 2), range(size))]
 
     mdp = TrenchOOMDP(size, size, agent, blocks, lavas)
     ql_agent = QLearningAgent(actions=mdp.get_actions())

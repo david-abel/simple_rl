@@ -86,7 +86,7 @@ def average_data(data, cumulative=False):
     '''
     num_algorithms = len(data)
 
-    result = [None for i in xrange(num_algorithms)] # [Alg][avgRewardEpisode], where avg is summed up to episode i if @cumulative=True
+    result = [None for i in range(num_algorithms)] # [Alg][avgRewardEpisode], where avg is summed up to episode i if @cumulative=True
 
     for i, all_instances in enumerate(data):
 
@@ -131,7 +131,7 @@ def compute_conf_intervals(data, cumulative=False):
         all_instances_np_arr = np.array(all_instances)
         alg_i_ci = []
         total_so_far = np.zeros(num_instances)
-        for j in xrange(num_episodes):
+        for j in range(num_episodes):
             # Compute datum for confidence interval.
             episode_j_all_instances = all_instances_np_arr[:, j]
 
