@@ -129,7 +129,6 @@ def compute_conf_intervals(data, cumulative=False):
         num_episodes = len(data[i][0])
 
         all_instances_np_arr = np.array(all_instances)
-        print("shape:", all_instances_np_arr.shape)
         alg_i_ci = []
         total_so_far = np.zeros(num_instances)
         for j in xrange(num_episodes):

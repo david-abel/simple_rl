@@ -1,1 +1,1 @@
-from ExperimentClass import Experiment
+from simple_rl.experiments.ExperimentClass import Experiment
