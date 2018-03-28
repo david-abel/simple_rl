@@ -31,7 +31,7 @@ def make_hierarchy(mdp_distr, num_levels):
     '''
 
     if num_levels <= 0:
-        print "(hiearchy_helpers.py) Error: @num_levels must be > 0 (given value: " + str(num_levels) + ")."
+        print("(hiearchy_helpers.py) Error: @num_levels must be > 0 (given value: " + str(num_levels) + ").")
         quit()
 
     sa_stack = StateAbstractionStack(list_of_phi=[])
@@ -39,9 +39,9 @@ def make_hierarchy(mdp_distr, num_levels):
     epsilon = 0.0
 
     for i in range(1, num_levels):
-        print "\n" + "=" * 20
-        print "== Making layer " + str(i + 1) + " =="
-        print "=" * 20 + "\n"
+        print("\n" + "=" * 20)
+        print("== Making layer " + str(i + 1) + " ==")
+        print("=" * 20 + "\n")
         sa_stack, aa_stack, epsilon = add_layer(mdp_distr, sa_stack, aa_stack, init_epsilon=epsilon)
         # Update MDP Distribution
 
@@ -68,7 +68,7 @@ def add_layer(mdp_distr, sa_stack, aa_stack, init_epsilon=0.0):
     epsilon, epsilon_incr = init_epsilon, 0.01
 
     while epsilon < 1.0:
-        print "Abstraction rate (epsilon):", epsilon
+        print("Abstraction rate (epsilon):", epsilon)
 
         # Set level to the largest shared between sa_stack and aa_stack.
         abstr_mdp_level = min(sa_stack.get_num_levels(), aa_stack.get_num_levels())
@@ -110,7 +110,7 @@ def add_layer_to_sa_stack(mdp_distr, sa_stack, aa_stack, epsilon):
         abstr_mdp_distr = mdp_distr
 
     # Make new phi.
-    new_sa = sa_helpers.make_multitask_sa(abstr_mdp_distr, epsilon=epsilon)    
+    new_sa = sa_helpers.make_multitask_sa(abstr_mdp_distr, epsilon=epsilon)
     new_phi = _convert_abstr_states(new_sa._phi, sa_stack.get_num_levels() + 1)
     sa_stack.add_phi(new_phi)
 
@@ -161,7 +161,7 @@ def add_layer_to_aa_stack(mdp_distr, sa_stack, aa_stack):
         return aa_stack, True
 
     next_aa = ActionAbstraction(options=next_options, prim_actions=mdp_distr.get_actions())
-    
+
     aa_stack.add_aa(next_aa)
     return aa_stack, False
 
