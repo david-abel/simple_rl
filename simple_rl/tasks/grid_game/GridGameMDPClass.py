@@ -5,7 +5,7 @@ import random
 
 # Other imports.
 from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
-from GridGameStateClass import GridGameState
+from simple_rl.tasks.grid_game.GridGameStateClass import GridGameState
 
 class GridGameMDP(MarkovGameMDP):
     ''' Class for a Two Player Grid Game '''

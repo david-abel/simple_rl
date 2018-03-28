@@ -1,6 +1,5 @@
 from simple_rl.mdp.oomdp.OOMDPStateClass import OOMDPState
 
-
 class TrenchOOMDPState(OOMDPState):
     ''' Class for Trench World States '''
 

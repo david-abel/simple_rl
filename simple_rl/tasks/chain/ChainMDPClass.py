@@ -5,7 +5,7 @@ from __future__ import print_function
 
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
-from ChainStateClass import ChainState
+from simple_rl.tasks.chain.ChainStateClass import ChainState
 
 class ChainMDP(MDP):
     ''' Imeplementation for a standard Chain MDP '''
