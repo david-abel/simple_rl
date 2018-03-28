@@ -18,7 +18,7 @@ import copy
 from simple_rl.mdp.oomdp.OOMDPClass import OOMDP
 from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
 from simple_rl.tasks.taxi.TaxiStateClass import TaxiState
-import taxi_helpers
+from simple_rl.tasks.taxi import taxi_helpers
 
 class TaxiOOMDP(OOMDP):
     ''' Class for a Taxi OO-MDP '''
