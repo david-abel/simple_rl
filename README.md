@@ -8,7 +8,7 @@ There are loads of other great libraries out there for RL. The aim of this one i
 
 A brief tutorial for a slightly earlier version is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html). As of version 0.77, the library should work with both Python 2 and Python 3. Please let me know if you find that is not the case!
 
-simple_rl requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). I recently added a basic test script, contained in the _tests_ directory. If you don't have OpenAI Gym, you should expect to pass 9/10 tests.
+simple_rl requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). I recently added a basic test script, contained in the _tests_ directory.
 
 
 ## Installation
@@ -41,9 +41,9 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 
 * (_experiments_): Code for an Experiment class to track parameters and reproduce results.
 
-* (_mdp_): Code for a basic MDP and MDPState class, and an MDPDistribution class (for multitask or lifelong learning). Also contains OO-MDP implementation [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf).
+* (_mdp_): Code for a basic MDP and MDPState class, and an MDPDistribution class (for  lifelong learning). Also contains OO-MDP implementation [[Diuk et al. 2008]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.149.7056&rep=rep1&type=pdf).
 
-* (_planning_): Implementations for planning algorithms, includes ValueIteration and MCTS [[Couloum 2006]](https://hal.archives-ouvertes.fr/file/index/docid/116992/filename/CG2006.pdf).
+* (_planning_): Implementations for planning algorithms, includes ValueIteration and MCTS [[Couloum 2006]](https://hal.archives-ouvertes.fr/file/index/docid/116992/filename/CG2006.pdf), the latter being still in development.
 
 * (_tasks_): Implementations for a few standard MDPs (grid world, N-chain, Taxi [[Dietterich 2000]](http://www.scs.cmu.edu/afs/cs/project/jair/pub/volume13/dietterich00a.pdf), and the [OpenAI Gym](https://gym.openai.com/envs)).
 
@@ -71,6 +71,9 @@ Make an Agent subclass, which requires:
 
 * A method, _reset()_, that puts the agent back to its _tabula rasa_ state.
 
+## In Development
+
+A few features are in development, including MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf) and the DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf).
 
 Let me know if you have any questions or suggestions.
 
