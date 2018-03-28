@@ -129,6 +129,7 @@ def compute_conf_intervals(data, cumulative=False):
         num_episodes = len(data[i][0])
 
         all_instances_np_arr = np.array(all_instances)
+        print("shape:", all_instances_np_arr.shape)
         alg_i_ci = []
         total_so_far = np.zeros(num_instances)
         for j in xrange(num_episodes):
@@ -234,10 +235,6 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         pyplot.legend()
     print()
     
-    # Adjust axes
-    # axes = pyplot.gca()
-    # axes.set_ylim([0, X_AXIS_START_VAL + 3000])
-
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
     plot_label = "Cumulative" if cumulative else "Average"
