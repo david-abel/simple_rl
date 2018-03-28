@@ -11,7 +11,7 @@ else:
 	import queue
 
 # Other imports.
-from PlannerClass import Planner
+from simple_rl.planning.PlannerClass import Planner
 
 class ValueIteration(Planner):
 
