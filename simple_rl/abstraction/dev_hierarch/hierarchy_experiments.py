@@ -24,11 +24,11 @@ def main():
     sa_stack, aa_stack = hierarchy_helpers.make_hierarchy(environment, num_levels=3)
 
     # Debug.
-    print "\n" + ("=" * 30)
-    print "== Done making abstraction. =="
-    print "=" * 30 + "\n"
+    print("\n" + ("=" * 30))
+    print("== Done making abstraction. ==")
+    print("=" * 30 + "\n")
     sa_stack.print_state_space_sizes()
-    print "Num Action Abstractions:", len(aa_stack.get_aa_list())
+    print("Num Action Abstractions:", len(aa_stack.get_aa_list()))
 
     # ===================
     # === Make Agents ===
@@ -42,9 +42,9 @@ def main():
     dynamic_hierarch_agent = DynamicHierarchyAgent(QLearningAgent, sa_stack=sa_stack, aa_stack=aa_stack, cur_level=1, name_ext="-$d$")
     # dynamic_rmax_hierarch_agent = DynamicHierarchyAgent(RMaxAgent, sa_stack=sa_stack, aa_stack=aa_stack, cur_level=1, name_ext="-$d$")
 
-    print "\n" + ("=" * 26)
-    print "== Running experiments. =="
-    print "=" * 26 + "\n"
+    print("\n" + ("=" * 26))
+    print("== Running experiments. ==")
+    print("=" * 26 + "\n")
 
     # ======================
     # === Run Experiment ===
