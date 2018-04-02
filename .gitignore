@@ -4,4 +4,6 @@ build/
 dist/
 todo.txt
 update.py
+*.egg-info
+*.idea
 .DS_Store
