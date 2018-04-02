@@ -17,7 +17,7 @@ class HierarchyAgent(Agent):
         self.cur_level = cur_level
         self.agent = SubAgentClass(actions=self.get_cur_actions())
         Agent.__init__(self, name=self.agent.name + "-hierarch" + name_ext, actions=self.get_cur_actions())
-    
+
     # -- Accessors --
 
     def get_num_levels(self):
@@ -49,7 +49,7 @@ class HierarchyAgent(Agent):
 
     def set_level(self, new_level):
         if new_level < 0 or new_level > self.get_num_levels():
-            print "HierarchyAgentError: the given level (" + str(new_level) +") exceeds the hierarchy height (" + str(self.get_num_levels()) + ")"
+            print("HierarchyAgentError: the given level (" + str(new_level) +") exceeds the hierarchy height (" + str(self.get_num_levels()) + ")")
             quit()
 
         self.cur_level = new_level
@@ -67,7 +67,7 @@ class HierarchyAgent(Agent):
         '''
         # Give the SA stack, ground state, and reward to the AA stack.
         return self.action_abstr_stack.act(self.agent, self.state_abstr_stack, ground_state, reward, level=self.cur_level)
-   
+
     # -- Reset --
 
     def reset(self):
