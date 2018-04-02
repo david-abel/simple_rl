@@ -52,8 +52,7 @@ class GridWorldMDP(MDP):
         MDP.__init__(self, GridWorldMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state, gamma=gamma)
 
         if type(goal_locs) is not list:
-            print("(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)].")
-            quit()
+            raise ValueError("(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)].")
         self.step_cost = step_cost
         self.walls = walls
         self.width = width
@@ -182,8 +181,6 @@ class GridWorldMDP(MDP):
 
         mdpv.visualize_policy(self, policy, _draw_state, action_char_dict)
         raw_input("Press anything to quit ")
-        quit()
-
 
     def visualize_agent(self, agent):
         from simple_rl.utils import mdp_visualizer as mdpv
@@ -214,12 +211,10 @@ def _error_check(state, action):
     '''
 
     if action not in GridWorldMDP.ACTIONS:
-        print("(simple_rl) GridWorldError: the action provided (" + str(action) + ") was invalid in state: " + str(state) + ".")
-        quit()
+        raise ValueError("(simple_rl) GridWorldError: the action provided (" + str(action) + ") was invalid in state: " + str(state) + ".")
 
     if not isinstance(state, GridWorldState):
-        print("(simple_rl) GridWorldError: the given state (" + str(state) + ") was not of the correct class.")
-        quit()
+        raise ValueError("(simple_rl) GridWorldError: the given state (" + str(state) + ") was not of the correct class.")
 
 
 def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None, goal_num=None, slip_prob=0.0):
