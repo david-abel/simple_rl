@@ -155,7 +155,7 @@ class GridWorldMDP(MDP):
         Returns:
             (bool): True iff (x,y) is a wall location.
         '''
-        
+
         return (x, y) in self.walls
 
     def __str__(self):
@@ -169,7 +169,7 @@ class GridWorldMDP(MDP):
 
     def visualize_policy(self, policy):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         ["up", "down", "left", "right"]
 
         action_char_dict = {
@@ -180,25 +180,21 @@ class GridWorldMDP(MDP):
         }
 
         mdpv.visualize_policy(self, policy, _draw_state, action_char_dict)
-        raw_input("Press anything to quit ")
 
     def visualize_agent(self, agent):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_agent(self, agent, _draw_state)
-        raw_input("Press anything to quit ")
 
     def visualize_value(self):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_value(self, _draw_state)
-        raw_input("Press anything to quit ")
 
     def visualize_learning(self, agent):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_learning(self, agent, _draw_state)
-        raw_input("Press anything to quit ")
 
 def _error_check(state, action):
     '''
