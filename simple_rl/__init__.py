@@ -39,6 +39,12 @@ try:
 except NameError:
     xrange = range
 
+# Fix input
+try:
+   input = raw_input
+except NameError:
+   pass
+
 # Imports.
 import simple_rl.abstraction, simple_rl.agents, simple_rl.experiments, simple_rl.mdp, simple_rl.planning, simple_rl.tasks, simple_rl.utils
 import simple_rl.run_experiments
