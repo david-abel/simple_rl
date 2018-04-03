@@ -96,9 +96,7 @@ def average_data(data, cumulative=False):
         try:
             avged = all_instances_sum / num_instances
         except TypeError:
-            print()
-            print("(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters (likely inconsistent number of Episodes/Instances. Try clearing old data).")
-            quit()
+            raise ValueError("(simple_rl) Plotting Error: an algorithm was run with inconsistent parameters (likely inconsistent number of Episodes/Instances. Try clearing old data).")
         
         if cumulative:
             # If we're summing over episodes.

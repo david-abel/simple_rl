@@ -26,9 +26,7 @@ class OOMDPState(State):
         try:
             return self.objects[obj_class]
         except KeyError:
-            print("Error: given object class (" + str(obj_class) + ") not found in state.")
-            print("\t Known classes are: ", self.objects.keys())
-            quit()
+            raise ValueError("Error: given object class (" + str(obj_class) + ") not found in state.\n\t Known classes are: ", self.objects.keys())
 
     def get_first_obj_of_class(self, obj_class):
         return self.get_objects_of_class(obj_class)[0]

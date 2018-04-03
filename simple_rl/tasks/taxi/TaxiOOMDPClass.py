@@ -145,7 +145,7 @@ class TaxiOOMDP(OOMDP):
         from taxi_visualizer import _draw_state
         visualize_agent(self, agent, _draw_state)
         raw_input("Press anything to quit ")
-        quit()
+        sys.exit(1)
 
     # ----------------------------
     # -- Action Implementations --
