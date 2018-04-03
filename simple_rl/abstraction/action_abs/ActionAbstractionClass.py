@@ -43,8 +43,7 @@ class ActionAbstraction(object):
                     agent.actions = self._convert_to_options(self.prim_actions)
                 else:
                     # No actions available.
-                    print("Error: no actions available in state " + str(ground_state) + ".")
-                    quit()
+                    raise ValueError("(simple_rl) Error: no actions available in state " + str(ground_state) + ".")
             else:
                 # Give agent available options.
                 agent.actions = active_options
@@ -95,8 +94,7 @@ class ActionAbstraction(object):
 
     def set_option_executing(self, option):
         if option not in self.options and "prim" not in option.name:
-            print("Error: agent chose a non-existent option (" + str(option) + ").")
-            quit()
+            raise ValueError("(simple_rl) Error: agent chose a non-existent option (" + str(option) + ").")
 
         self.cur_option = option
         self.is_cur_executing = True

@@ -237,12 +237,10 @@ def _error_check(state, action):
     '''
 
     if action not in TaxiOOMDP.ACTIONS:
-        print("Error: the action provided (" + str(action) + ") was invalid.")
-        quit()
+        raise ValueError("Error: the action provided (" + str(action) + ") was invalid.")
 
     if not isinstance(state, TaxiState):
-        print("Error: the given state (" + str(state) + ") was not of the correct class.")
-        quit()
+        raise ValueError("Error: the given state (" + str(state) + ") was not of the correct class.")
 
 
 def main():

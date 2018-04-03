@@ -295,8 +295,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         (dict): {key=agent, val=time}
     '''
     if reset_at_terminal and resample_at_terminal:
-        print("(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True.")
-        quit()
+        raise ValueError("(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True.")
 
     # For each episode.
     for episode in range(1, episodes + 1):
@@ -417,8 +416,7 @@ def choose_mdp(mdp_name, env_name="Asteroids-v0"):
         try:
             from simple_rl.tasks.gym.GymMDPClass import GymMDP
         except:
-            print("Error: OpenAI gym not installed.")
-            quit()
+            raise ValueError("(simple_rl) Error: OpenAI gym not installed.")
         return GymMDP(env_name, render=True)
     else:
         return {"grid":GridWorldMDP(5, 5, (1, 1), goal_locs=[(5, 3), (4,1)]),

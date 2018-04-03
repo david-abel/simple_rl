@@ -18,7 +18,7 @@ def main():
     action_seq, state_seq = value_iter.plan(mdp.get_init_state())
 
     print("Plan for", mdp)
-    for i in xrange(len(action_seq)):
+    for i in range(len(action_seq)):
         print("\t", action_seq[i], state_seq[i])
 
 if __name__ == "__main__":

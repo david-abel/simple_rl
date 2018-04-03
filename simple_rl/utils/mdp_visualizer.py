@@ -13,7 +13,7 @@ except ImportError:
 # Other imports.
 from simple_rl.utils.chart_utils import color_ls
 
-def val_to_color(val, good_col=(169, 193, 249), bad_col=(255, 255, 255)):
+def val_to_color(val, good_col=(169, 193, 249), bad_col=(249, 193, 169)):
     '''
     Args:
         val (float)
@@ -28,9 +28,16 @@ def val_to_color(val, good_col=(169, 193, 249), bad_col=(255, 255, 255)):
         if @val is 1, we get good_col, if it's 0.5, we get a color
         halfway between the two, and so on.
     '''
-    val_normalized = (val + 1) / 2.0
-    diff_list = [bad_col[i] - good_col[i] for i in range(3)]
-    result = tuple([max(min(int(bad_col[i] - (val_normalized**4)*diff_list[i]), 255), 0) for i in range(3)])
+    # Make sure val is in the appropriate range.
+    val = max(min(1.0, val), -1.0)
+
+    if val > 0:
+        # Show positive as interpolated between white (0) and good_cal (1.0)
+        result = tuple([255 * (1 - val) + col * val for col in good_col])
+    else:
+        # Show negative as interpolated between white (0) and bad_col (-1.0)
+        result = tuple([255 * (1 - abs(val)) + col * abs(val) for col in bad_col])
+
     return result
 
 def _draw_title_text(mdp, screen):
@@ -181,13 +188,17 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                     mdp.reset()
                 elif event.button == 3:
                     # Right clicked a cell, move the lava lava.
-                    mdp.lava_locs = [(cell_x, cell_y)]
-                    # mdp.reset()
+                    if (cell_x, cell_y) in mdp.lava_locs:
+                        mdp.lava_locs.remove((cell_x, cell_y))
+                    else:
+                        mdp.lava_locs += [(cell_x, cell_y)]
 
         # Move agent.
         action = agent.act(cur_state, reward)
         reward, cur_state = mdp.execute_agent_action(action)
         agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
+
+        score += int(reward)
 
         if cur_state.is_terminal():
             score += 1

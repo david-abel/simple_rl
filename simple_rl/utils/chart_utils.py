@@ -38,7 +38,7 @@ color_ls = [[240, 163, 255], [102, 120, 173], [113, 198, 113],\
 # Set font.
 font = {'size':14}
 matplotlib.rc('font', **font)
-matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.usetex'] = False
 fig = matplotlib.pyplot.gcf()
 
 CUSTOM_TITLE = None
@@ -431,8 +431,7 @@ def main():
     data_dir = args.dir
     agent_names = _get_agent_names(data_dir)
     if len(agent_names) == 0:
-        print("Error: no csv files found.")
-        quit()
+        raise ValueError("Error: no csv files found.")
 
     if data_dir[-1] != "/":
         data_dir = data_dir + "/"

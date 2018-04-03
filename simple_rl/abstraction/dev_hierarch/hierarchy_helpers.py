@@ -31,8 +31,7 @@ def make_hierarchy(mdp_distr, num_levels):
     '''
 
     if num_levels <= 0:
-        print("(hiearchy_helpers.py) Error: @num_levels must be > 0 (given value: " + str(num_levels) + ").")
-        quit()
+        raise ValueError("(hiearchy_helpers.py) Error: @num_levels must be > 0 (given value: " + str(num_levels) + ").")
 
     sa_stack = StateAbstractionStack(list_of_phi=[])
     aa_stack = ActionAbstractionStack(list_of_aa=[], prim_actions=mdp_distr.get_actions())

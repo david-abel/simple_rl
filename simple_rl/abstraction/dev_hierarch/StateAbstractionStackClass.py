@@ -39,9 +39,8 @@ class StateAbstractionStack(StateAbstraction):
 
     def set_level(self, new_level):
         if new_level > self.get_num_levels() or new_level < 0:
-            print("StateAbstractionStack Error: given level (" + str(new_level) + ") is invalid. Must be between" + \
+            raise ValueError("StateAbstractionStack Error: given level (" + str(new_level) + ") is invalid. Must be between" + \
                 "0 and the number of levels in the stack (" + str(self.get_num_levels()) + ").")
-            quit()
         self.level = new_level
 
     def phi(self, lower_state, level=None):

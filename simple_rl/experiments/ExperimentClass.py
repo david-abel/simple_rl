@@ -135,8 +135,7 @@ class Experiment(object):
         # Regular MDP.
         if self.steps_since_added_r % self.count_r_per_n_timestep == 0:
             if self.is_markov_game and self.count_r_per_n_timestep > 1:
-                print("(simple_rl) Experiment Error: can't track markov games per step. (set rew_step_count to 1).")
-                quit()
+                raise ValueError("(simple_rl) Experiment Error: can't track markov games per step. (set rew_step_count to 1).")
             else:
                 self.rewards[agent] += [self.rew_since_count + reward]
                 self.times[agent] += [time_taken]

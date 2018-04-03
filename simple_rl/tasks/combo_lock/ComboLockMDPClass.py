@@ -23,11 +23,9 @@ class ComboLockMDP(MDP):
         self.combo = combo
 
         if len(combo) != self.num_states:
-            print("(simple_rl.ComboLockMDP Error): Combo length (" + str(len(combo)) + ") must be the same as num_states (" + str(self.num_states) + ").")
-            quit()
+            raise ValueError("(simple_rl.ComboLockMDP Error): Combo length (" + str(len(combo)) + ") must be the same as num_states (" + str(self.num_states) + ").")
         elif max(combo) > num_actions:
-            print("(simple_rl.ComboLockMDP Error): Combo (" + str(combo) + ") must only contain values less than or equal to @num_actions (" + str(num_actions) +").")
-            quit()
+            raise ValueError("(simple_rl.ComboLockMDP Error): Combo (" + str(combo) + ") must only contain values less than or equal to @num_actions (" + str(num_actions) +").")
 
         MDP.__init__(self, ComboLockMDP.ACTIONS, self._transition_func, self._reward_func, init_state=ChainState(1), gamma=gamma)
 

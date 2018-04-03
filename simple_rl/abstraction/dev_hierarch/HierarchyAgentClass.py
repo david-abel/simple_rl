@@ -49,8 +49,7 @@ class HierarchyAgent(Agent):
 
     def set_level(self, new_level):
         if new_level < 0 or new_level > self.get_num_levels():
-            print("HierarchyAgentError: the given level (" + str(new_level) +") exceeds the hierarchy height (" + str(self.get_num_levels()) + ")")
-            quit()
+            raise ValueError("HierarchyAgentError: the given level (" + str(new_level) +") exceeds the hierarchy height (" + str(self.get_num_levels()) + ")")
 
         self.cur_level = new_level
 

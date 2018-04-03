@@ -17,8 +17,7 @@ import time
 try:
     from sklearn.ensemble import GradientBoostingRegressor
 except ImportError:
-    print("Error: sklearn not installed. See: http://scikit-learn.org/stable/install.html")
-    quit()
+    raise ValueError("Error: sklearn not installed. See: http://scikit-learn.org/stable/install.html")
 
 # simple_rl classes.
 from simple_rl.agents.QLearningAgentClass import QLearningAgent

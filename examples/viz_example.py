@@ -6,7 +6,7 @@ import argparse
 
 # Other imports.
 import srl_example_setup
-from simple_rl.agents import QLearningAgent
+from simple_rl.agents import QLearningAgent, RMaxAgent
 from simple_rl.run_experiments import run_single_agent_on_mdp 
 from simple_rl.tasks import FourRoomMDP
 from simple_rl.tasks.grid_world.GridWorldMDPClass import make_grid_world_from_file
@@ -23,7 +23,8 @@ def main():
     # Setup MDP, Agents.
     mdp = FourRoomMDP(5, 5, goal_locs=[(5, 5)], gamma=0.99, step_cost=0.01)
     # mdp = make_grid_world_from_file("octogrid.txt", num_goals=12, randomize=False)
-    ql_agent = QLearningAgent(mdp.get_actions(), epsilon=0.2)
+    ql_agent = QLearningAgent(mdp.get_actions(), epsilon=0.2, alpha=0.5) 
+    rm_agent = RMaxAgent(mdp.get_actions())
     viz = parse_args()
     viz = "learning"
 

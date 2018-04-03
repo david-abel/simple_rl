@@ -41,8 +41,7 @@ class MDPDistribution(object):
             try:
                 self.mdp_prob_dict.pop(mdp)
             except KeyError:
-                print("(simple-rl Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it.")
-                quit()
+                raise ValueError("(simple-rl Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it.")
 
         self._normalize()
 
@@ -57,8 +56,7 @@ class MDPDistribution(object):
         try:
             self.mdp_prob_dict.pop(mdp)
         except KeyError:
-            print("(simple-rl Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it.")
-            quit()
+            raise ValueError("(simple-rl Error): Trying to remove MDP (" + str(mdp) + ") from MDP Distribution that doesn't contain it.")
 
         self._normalize()
 
