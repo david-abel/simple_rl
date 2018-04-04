@@ -4,6 +4,7 @@
 from __future__ import print_function
 import numpy as np
 from simple_rl.tasks import GridWorldMDP
+from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class NavigationMDP(GridWorldMDP):
     
@@ -70,7 +71,7 @@ class NavigationMDP(GridWorldMDP):
         for g in goal_locs:
             self.cells[self.height-(g[1]), g[0]-1] = len(cell_types) # allocate the next type to the goal
             self.cell_rewards[self.height-(g[1]), g[0]-1] = self.goal_reward
-    
+
     def _reward_func(self, state, action):
         '''
         Args:
@@ -81,12 +82,20 @@ class NavigationMDP(GridWorldMDP):
             (float)
         '''
         if self._is_goal_state_action(state, action):
-            return self.goal_reward - self.step_cost
+            return self.goal_reward + self.cell_rewards[self.height-(state.y), state.x-1] - self.step_cost
         elif self.cell_rewards[self.height-(state.y), state.x-1] == 0:
             return 0 - self.step_cost
         else:
             return self.cell_rewards[self.height-(state.y), state.x-1]
-        
+
+    def get_random_init_state(self):
+        """
+        Returns a random empty/white cell 
+        """
+        rows, cols = np.where(self.cells == 0)
+        rand_idx = np.random.randint(len(rows))
+        return GridWorldState(cols[rand_idx]+1, self.height-rows[rand_idx])
+
     def visualize_grid(self, paths=None):
         """
         Args:
@@ -94,6 +103,7 @@ class NavigationMDP(GridWorldMDP):
         """
         import matplotlib.pyplot as plt
         from matplotlib import colors
+        plt.figure(figsize=(self.height//4, self.width//4))
         cmap = colors.ListedColormap(['white','yellow','red','lime','magenta', 'blue'])
         plt.imshow(self.cells, cmap=cmap)
         ax = plt.gca()
@@ -101,13 +111,14 @@ class NavigationMDP(GridWorldMDP):
         ax.set_yticklabels('')
         ax.set_xticks(np.arange(self.width), minor=True)
         ax.set_yticks(np.arange(self.height), minor=True)
-        ax.set_xticklabels(np.arange(self.width), minor=True)
-        ax.set_yticklabels(np.arange(self.height)[::-1], minor=True)
+        ax.set_xticklabels(1+np.arange(self.width), minor=True, fontsize=8)
+        ax.set_yticklabels(1+np.arange(self.height)[::-1], minor=True, fontsize=8)
 
         if paths:
             for state_seq in paths:
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
+                plt.plot(path_xs[0], path_ys[0], ".k", markersize=10)
                 plt.plot(path_xs, path_ys, "k", linewidth=0.7)
 
         plt.show()
