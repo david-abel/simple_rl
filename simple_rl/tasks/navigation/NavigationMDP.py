@@ -50,7 +50,7 @@ class NavigationMDP(GridWorldMDP):
         self.cells = np.random.choice(len(cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
         self.cell_rewards = np.asarray([[cell_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
         self.goal_reward = goal_reward
-        
+
         GridWorldMDP.__init__(self, 
                             width=width, 
                             height=height,
@@ -65,6 +65,11 @@ class NavigationMDP(GridWorldMDP):
                             slip_prob=slip_prob,
                             step_cost=step_cost,
                             name=name)
+
+        # Set goals and their rewards in the matrix
+        for g in goal_locs:
+            self.cells[self.height-(g[1]), g[0]-1] = len(cell_types) # allocate the next type to the goal
+            self.cell_rewards[self.height-(g[1]), g[0]-1] = self.goal_reward
     
     def _reward_func(self, state, action):
         '''
@@ -77,17 +82,32 @@ class NavigationMDP(GridWorldMDP):
         '''
         if self._is_goal_state_action(state, action):
             return self.goal_reward - self.step_cost
-        elif self.cell_rewards[state.x-1, state.y-1] == 0:
+        elif self.cell_rewards[self.height-(state.y), state.x-1] == 0:
             return 0 - self.step_cost
         else:
-            return self.cell_rewards[state.x-1, state.y-1]
+            return self.cell_rewards[self.height-(state.y), state.x-1]
         
-    def visualize_grid(self):
+    def visualize_grid(self, paths=None):
+        """
+        Args:
+            paths ([state1, state2, ...]): path to be shown on the grid 
+        """
         import matplotlib.pyplot as plt
         from matplotlib import colors
-        cmap = colors.ListedColormap(['white','yellow','red','lime','magenta'])
-        
-        plt.imshow(self.cells[:,::-1].transpose(1,0), cmap=cmap)
-        plt.xticks([])
-        plt.yticks([])
+        cmap = colors.ListedColormap(['white','yellow','red','lime','magenta', 'blue'])
+        plt.imshow(self.cells, cmap=cmap)
+        ax = plt.gca()
+        ax.set_xticklabels('')
+        ax.set_yticklabels('')
+        ax.set_xticks(np.arange(self.width), minor=True)
+        ax.set_yticks(np.arange(self.height), minor=True)
+        ax.set_xticklabels(np.arange(self.width), minor=True)
+        ax.set_yticklabels(np.arange(self.height)[::-1], minor=True)
+
+        if paths:
+            for state_seq in paths:
+                path_xs = [s.x - 1 for s in state_seq]
+                path_ys = [self.height - (s.y) for s in state_seq]
+                plt.plot(path_xs, path_ys, "k", linewidth=0.7)
+
         plt.show()
