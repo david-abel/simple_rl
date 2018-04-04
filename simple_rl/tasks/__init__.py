@@ -19,6 +19,7 @@ from simple_rl.tasks.taxi.TaxiStateClass import TaxiState
 from simple_rl.tasks.prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
 from simple_rl.tasks.rock_paper_scissors.RockPaperScissorsMDPClass import RockPaperScissorsMDP
 from simple_rl.tasks.grid_game.GridGameMDPClass import GridGameMDP
+from simple_rl.tasks.navigation.NavigationMDP import NavigationMDP
 try:
 	from simple_rl.tasks.gym.GymMDPClass import GymMDP
 except ImportError:
