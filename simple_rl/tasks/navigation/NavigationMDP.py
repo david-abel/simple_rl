@@ -96,10 +96,10 @@ class NavigationMDP(GridWorldMDP):
         rand_idx = np.random.randint(len(rows))
         return GridWorldState(cols[rand_idx]+1, self.height-rows[rand_idx])
 
-    def visualize_grid(self, paths=None):
+    def visualize_grid(self, trajectories=None):
         """
         Args:
-            paths ([state1, state2, ...]): path to be shown on the grid 
+            trajectories ([[state1, state2, ...], [state7, state4, ...], ...]): trajectories to be shown on the grid
         """
         import matplotlib.pyplot as plt
         from matplotlib import colors
@@ -114,11 +114,10 @@ class NavigationMDP(GridWorldMDP):
         ax.set_xticklabels(1+np.arange(self.width), minor=True, fontsize=8)
         ax.set_yticklabels(1+np.arange(self.height)[::-1], minor=True, fontsize=8)
 
-        if paths:
-            for state_seq in paths:
+        if trajectories is not None and trajectories:
+            for state_seq in trajectories:
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
                 plt.plot(path_xs[0], path_ys[0], ".k", markersize=10)
                 plt.plot(path_xs, path_ys, "k", linewidth=0.7)
-
         plt.show()
