@@ -43,12 +43,15 @@ class NavigationMDP(GridWorldMDP):
         """
         
         assert height > 0 and isinstance(height, int) and width > 0 and isinstance(width, int), "height and widht must be integers and > 0"
-        
+        self.cell_types = cell_types
+
         # Probability of each cell type
         vacancy_prob = 0.8
+        # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for square lattice).
+        # This is just an approximation as the paper isn't concerned about cell probabilities or mention it.
         self.cell_prob = [4.*vacancy_prob/5., vacancy_prob/5.] + [(1-vacancy_prob)/3.] * 3
         # Matrix for identifying cell type and associated reward
-        self.cells = np.random.choice(len(cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
+        self.cells = np.random.choice(len(self.cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
         self.cell_rewards = np.asarray([[cell_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
         self.goal_reward = goal_reward
 
@@ -69,7 +72,7 @@ class NavigationMDP(GridWorldMDP):
 
         # Set goals and their rewards in the matrix
         for g in goal_locs:
-            self.cells[self.height-(g[1]), g[0]-1] = len(cell_types) # allocate the next type to the goal
+            self.cells[self.height-(g[1]), g[0]-1] = len(self.cell_types) # allocate the next type to the goal
             self.cell_rewards[self.height-(g[1]), g[0]-1] = self.goal_reward
 
     def _reward_func(self, state, action):
