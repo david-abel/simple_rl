@@ -1,5 +1,9 @@
+''' NavigationMDP.py: Contains the NavigationMDP class. '''
+
+# Python imports.
+from __future__ import print_function
 import numpy as np
-from simple_rl.mdp.MDPClass import MDP
+from simple_rl.tasks import GridWorldMDP
 
 class NavigationMDP(GridWorldMDP):
     
@@ -24,7 +28,7 @@ class NavigationMDP(GridWorldMDP):
                  goal_reward=1.0,
                  is_goal_terminal=True,
                  init_state=None,
-                 name="navigation MDP"):
+                 name="Navigation MDP"):
         """
         Note: 1. locations and state dimensions start from 1 instead of 0. 
               2. 2d locations are interpreted in (x,y) format.
@@ -39,10 +43,11 @@ class NavigationMDP(GridWorldMDP):
         
         assert height > 0 and isinstance(height, int) and width > 0 and isinstance(width, int), "height and widht must be integers and > 0"
         
+        # Probability of each cell type
+        vacancy_prob = 0.8
+        self.cell_prob = [4.*vacancy_prob/5., vacancy_prob/5.] + [(1-vacancy_prob)/3.] * 3
         # Matrix for identifying cell type and associated reward
-        vacancy_prob = 0.8 #593
-        self.cell_ps = [4.*vacancy_prob/5., vacancy_prob/5.] + [(1-vacancy_prob)/3.] * 3
-        self.cells = np.random.choice(len(cell_types), p=self.cell_ps, size=height*width).reshape(height,width)
+        self.cells = np.random.choice(len(cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
         self.cell_rewards = np.asarray([[cell_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
         self.goal_reward = goal_reward
         
@@ -80,7 +85,9 @@ class NavigationMDP(GridWorldMDP):
     def visualize_grid(self):
         import matplotlib.pyplot as plt
         from matplotlib import colors
-        cmap = colors.ListedColormap(['w','yellow','red','lime','magenta'])
+        cmap = colors.ListedColormap(['white','yellow','red','lime','magenta'])
+        
         plt.imshow(self.cells[:,::-1].transpose(1,0), cmap=cmap)
         plt.xticks([])
         plt.yticks([])
+        plt.show()
