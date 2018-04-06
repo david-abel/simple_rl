@@ -106,7 +106,7 @@ class NavigationMDP(GridWorldMDP):
         """
         import matplotlib.pyplot as plt
         from matplotlib import colors
-        plt.figure(figsize=(self.height//4, self.width//4))
+        plt.figure(figsize=( max(self.height//4, 6), max(self.width//4, 6)))
         cmap = colors.ListedColormap(['white','yellow','red','lime','magenta', 'blue'])
         plt.imshow(self.cells, cmap=cmap)
         ax = plt.gca()
