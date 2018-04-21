@@ -13,7 +13,7 @@ from simple_rl.abstraction.abstr_mdp.TransitionFuncClass import TransitionFunc
 # -- Single Level --
 # ------------------
 
-def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=25):
+def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=5):
 	'''
 	Args:
 		mdp (MDP)
@@ -25,10 +25,6 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=25
 	Returns:
 		(MDP)
 	'''
-
-	# Grab ground state space.
-	vi = ValueIteration(mdp, delta=0.001, max_iterations=1000, sample_rate=5)
-	state_space = vi.get_states()
 
 	# Make abstract reward and transition functions.
 	def abstr_reward_lambda(abstr_state, abstr_action):
@@ -61,18 +57,17 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=25
 				s_prime_prob_dict[s_prime] += (1.0 / (len(lower_states) * sample_rate)) # Weighted average.
 		
 		# Form distribution and sample s_prime.
-		next_state_sample_list = list(np.random.multinomial(1, s_prime_prob_dict.values()).tolist())
-		end_ground_state = s_prime_prob_dict.keys()[next_state_sample_list.index(1)]
+		next_state_sample_list = list(np.random.multinomial(1, list(s_prime_prob_dict.values())).tolist())
+		end_ground_state = list(s_prime_prob_dict.keys())[next_state_sample_list.index(1)]
 		end_abstr_state = state_abstr.phi(end_ground_state)
 
 		return end_abstr_state
 	
-
-	# Make the components of the MDP.
+	# Make the components of the Abstract MDP.
 	abstr_init_state = state_abstr.phi(mdp.get_init_state())
 	abstr_action_space = action_abstr.get_actions()
-	abstr_state_space = state_abstr.get_abs_states()
 	
+	abstr_state_space = state_abstr.get_abs_states()
 	abstr_reward_func = RewardFunc(abstr_reward_lambda, abstr_state_space, abstr_action_space)
 	abstr_transition_func = TransitionFunc(abstr_transition_lambda, abstr_state_space, abstr_action_space, sample_rate=sample_rate)
 

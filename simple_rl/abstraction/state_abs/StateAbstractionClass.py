@@ -7,13 +7,13 @@ from simple_rl.mdp.MDPClass import MDP
 
 class StateAbstraction(object):
 
-    def __init__(self, phi=None):
+    def __init__(self, phi=None, ground_state_space=[]):
         '''
         Args:
             phi (dict)
         '''
-        self.identity = phi is None
-        self._phi = phi if not self.identity else {} # key:state, val:int. (int represents an abstract state).
+        # key:state, val:int. (int represents an abstract state).
+        self._phi = phi if phi is not None else {s_g: s_g for s_g in ground_state_space}
 
     def set_phi(self, new_phi):
         self._phi = new_phi
@@ -26,9 +26,6 @@ class StateAbstraction(object):
         Returns:
             state (State)
         '''
-        if self.identity:
-            self._phi[state] = state
-            return state
 
         # Setup phi for new states.
         if state not in self._phi.keys():
@@ -77,13 +74,10 @@ class StateAbstraction(object):
         return self.get_ground_states_in_abs_state(abs_state)
 
     def get_abs_states(self):
-        if self.identity:
-            return self.get_ground_states()
         # For each ground state, get its abstract state.
         return set([self.phi(val) for val in set(self._phi.keys())])
 
     def get_abs_cluster_num(self, abs_state):
-        # FIX: Specific to one abstract state class.
         return list(set(self._phi.values())).index(abs_state.data)
 
     def get_ground_states(self):

@@ -6,29 +6,36 @@ from collections import defaultdict
 from simple_rl.utils import make_mdp
 from simple_rl.abstraction.action_abs.ActionAbstractionClass import ActionAbstraction
 from simple_rl.abstraction.state_abs.StateAbstractionClass import StateAbstraction
-from simple_rl.abstraction.abstr_mdp import make_abstr_mdp
+from simple_rl.abstraction.abstr_mdp import abstr_mdp_funcs
 from simple_rl.planning.PlannerClass import Planner
 from simple_rl.planning.ValueIterationClass import ValueIteration
 
 class AbstractValueIteration(ValueIteration):
     ''' AbstractValueIteration: Runs ValueIteration on an abstract MDP induced by the given state and action abstraction '''
 
-    def __init__(self, ground_mdp, state_abstr=None, action_abstr=None, sample_rate=10, delta=0.001, max_iterations=1000):
+    def __init__(self, ground_mdp, state_abstr=None, action_abstr=None, vi_sample_rate=5, max_iterations=1000, amdp_sample_rate=5, delta=0.001):
         '''
         Args:
             ground_mdp (simple_rl.MDP)
             state_abstr (simple_rl.StateAbstraction)
             action_abstr (simple_rl.ActionAbstraction)
+            vi_sample_rate (int): Num samples per transition for running VI.
+            max_iterations (int): Usual VI # Iteration bound.
+            amdp_sample_rate (int): Num samples per abstract transition to use for computing R_abstract, T_abstract.
         '''
         self.ground_mdp = ground_mdp
+    
+        # Grab ground state space.
+        vi = ValueIteration(self.ground_mdp, delta=0.001, max_iterations=1000, sample_rate=5)
+        state_space = vi.get_states()
 
-        # If None is given for either, set the sa/aa to defaults.
-        self.state_abstr = state_abstr if state_abstr is not None else StateAbstraction()
+        # Make the abstract MDP.
+        self.state_abstr = state_abstr if state_abstr is not None else StateAbstraction(ground_state_space=state_space)
         self.action_abstr = action_abstr if action_abstr is not None else ActionAbstraction(prim_actions=ground_mdp.get_actions())
+        abstr_mdp = abstr_mdp_funcs.make_abstr_mdp(ground_mdp, self.state_abstr, self.action_abstr, step_cost=0.0, sample_rate=amdp_sample_rate)
 
-        mdp = make_abstr_mdp(ground_mdp, self.state_abstr, self.action_abstr, step_cost=0.0)
-
-        ValueIteration.__init__(self, mdp, sample_rate, delta, max_iterations)
+        # Create VI with the abstract MDP.
+        ValueIteration.__init__(self, abstr_mdp, vi_sample_rate, delta, max_iterations)
 
     def policy(self, state):
         '''
