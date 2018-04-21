@@ -147,6 +147,14 @@ class TaxiOOMDP(OOMDP):
         raw_input("Press anything to quit ")
         sys.exit(1)
 
+    def visualize_interaction(self):
+        from simple_rl.utils.mdp_visualizer import visualize_interaction
+        from taxi_visualizer import _draw_state
+        visualize_interaction(self, _draw_state)
+        raw_input("Press anything to quit ")
+        sys.exit(1)
+
+
     # ----------------------------
     # -- Action Implementations --
     # ----------------------------

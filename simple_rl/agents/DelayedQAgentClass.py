@@ -1,5 +1,4 @@
 '''
-
 DelayedQAgentClass.py: Class for Delayed Q-Learning from [Strehl et al. 2006].
 
 Author: Yuu Jinnai (ddyuudd@gmail.com)
@@ -244,4 +243,3 @@ class DelayedQAgent(Agent):
             for y in self.q_func[x]:
                 self.q_func[x][y] = vmax
                 self.default_q_func[x][y] = vmax
-                

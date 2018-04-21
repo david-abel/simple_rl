@@ -7,8 +7,8 @@ import sys
 from simple_rl.planning.ValueIterationClass import ValueIteration
 from simple_rl.mdp import State
 from simple_rl.mdp import MDPDistribution
-import indicator_funcs as ind_funcs
-from StateAbstractionClass import StateAbstraction
+from simple_rl.abstraction.state_abs import indicator_funcs as ind_funcs
+from simple_rl.abstraction.state_abs.StateAbstractionClass import StateAbstraction
 
 def merge_state_abs(list_of_sa, track_act_opt_pr=False):
     '''

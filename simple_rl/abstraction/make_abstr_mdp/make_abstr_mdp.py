@@ -6,9 +6,8 @@ import numpy as np
 from simple_rl.planning import ValueIteration
 from simple_rl.mdp import MDP
 from simple_rl.mdp import MDPDistribution
-from RewardFuncClass import RewardFunc
-from TransitionFuncClass import TransitionFunc
-from HierarchyStateClass import HierarchyState
+from simple_rl.abstraction.make_abstr_mdp.RewardFuncClass import RewardFunc
+from simple_rl.abstraction.make_abstr_mdp.TransitionFuncClass import TransitionFunc
 
 # ------------------
 # -- Single Level --
@@ -130,7 +129,6 @@ def make_abstr_mdp_multi_level(mdp, state_abstr_stack, action_abstr_stack, step_
 		mdp = make_abstr_mdp(mdp, state_abstr_stack, action_abstr_stack, step_cost, sample_rate)
 
 	return mdp
-
 
 def make_abstr_mdp_distr_multi_level(mdp_distr, state_abstr, action_abstr, step_cost=0.1):
 	'''

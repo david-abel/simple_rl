@@ -1,5 +1,8 @@
 '''
 simple_rl
+	abstraction/
+		action_abs/
+		state_abs/
 	agents/
 		AgentClass.py
 		QLearningAgentClass.py
@@ -37,7 +40,7 @@ except NameError:
     xrange = range
 
 # Imports.
-import simple_rl.agents, simple_rl.experiments, simple_rl.mdp, simple_rl.planning, simple_rl.tasks, simple_rl.utils
+import simple_rl.abstraction, simple_rl.agents, simple_rl.experiments, simple_rl.mdp, simple_rl.planning, simple_rl.tasks, simple_rl.utils
 import simple_rl.run_experiments
 
 from simple_rl._version import __version__

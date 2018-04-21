@@ -7,3 +7,4 @@ update.py
 *.egg-info
 *.idea
 .DS_Store
+to_update_instr.txt

@@ -75,7 +75,7 @@ class GridWorldMDP(MDP):
         '''
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
-        elif (state.x, state.y) in self.lava_locs:
+        elif (int(state.x), int(state.y)) in self.lava_locs:
             return -1.0
         else:
             return 0 - self.step_cost
@@ -93,15 +93,13 @@ class GridWorldMDP(MDP):
             # Already at terminal.
             return False
 
-        goals = self.goal_locs
-
-        if action == "left" and (state.x - 1, state.y) in goals:
+        if action == "left" and (state.x - 1, state.y) in self.goal_locs:
             return True
-        elif action == "right" and (state.x + 1, state.y) in goals:
+        elif action == "right" and (state.x + 1, state.y) in self.goal_locs:
             return True
-        elif action == "down" and (state.x, state.y - 1) in goals:
+        elif action == "down" and (state.x, state.y - 1) in self.goal_locs:
             return True
-        elif action == "up" and (state.x, state.y + 1) in goals:
+        elif action == "up" and (state.x, state.y + 1) in self.goal_locs:
             return True
         else:
             return False
@@ -194,11 +192,18 @@ class GridWorldMDP(MDP):
         mdpv.visualize_value(self, _draw_state)
         raw_input("Press anything to quit ")
 
-    def visualize_learning(self, agent):
+    def visualize_learning(self, agent, delay=0.0):
         from simple_rl.utils import mdp_visualizer as mdpv
         from grid_visualizer import _draw_state
-        mdpv.visualize_learning(self, agent, _draw_state)
+        mdpv.visualize_learning(self, agent, _draw_state, delay=delay)
         raw_input("Press anything to quit ")
+
+    def visualize_interaction(self):
+        from simple_rl.utils import mdp_visualizer as mdpv
+        from grid_visualizer import _draw_state
+        mdpv.visualize_interaction(self, _draw_state)
+        raw_input("Press anything to quit ")
+
 
 def _error_check(state, action):
     '''

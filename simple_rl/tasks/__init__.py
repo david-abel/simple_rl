@@ -11,6 +11,7 @@ from simple_rl.tasks.gather.GatherMDPClass import GatherMDP
 from simple_rl.tasks.gather.GatherStateClass import GatherState
 from simple_rl.tasks.grid_world.GridWorldMDPClass import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
+from simple_rl.tasks.puddle.PuddleMDPClass import PuddleMDP
 from simple_rl.tasks.four_room.FourRoomMDPClass import FourRoomMDP
 from simple_rl.tasks.random.RandomMDPClass import RandomMDP
 from simple_rl.tasks.random.RandomStateClass import RandomState

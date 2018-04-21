@@ -31,7 +31,6 @@ def _draw_state(screen,
     cell_height = (scr_height - height_buffer * 2) / taxi_oomdp.height
     objects = state.get_objects()
     agent_x, agent_y = objects["agent"][0]["x"], objects["agent"][0]["y"]
-  
 
     if agent_shape is not None:
         # Clear the old shape.
@@ -50,10 +49,10 @@ def _draw_state(screen,
     for i, p in enumerate(objects["passenger"]):
         # Passenger
         pass_x, pass_y = p["x"], p["y"]
-        in_taxi_size = min(cell_width, cell_height) / 2.5 if p["in_taxi"] else min(cell_width, cell_height) / 5.0
-        top_left_point = width_buffer + cell_width*(pass_x - 1) + in_taxi_size , height_buffer + cell_height*(taxi_oomdp.height - pass_y) + in_taxi_size
-        pygame.draw.rect(screen, color_ls[-i-1], top_left_point + (cell_width - 2*in_taxi_size, cell_height - 2*in_taxi_size), 0)
-
+        taxi_size = int(min(cell_width, cell_height) / 8.5) if p["in_taxi"] else int(min(cell_width, cell_height) / 5.0)
+        top_left_point = int(width_buffer + cell_width*(pass_x - 1) + taxi_size + 38) , int(height_buffer + cell_height*(taxi_oomdp.height - pass_y) + taxi_size + 35)
+        dest_col = (max(color_ls[-i-1][0]-30, 0), max(color_ls[-i-1][1]-30, 0), max(color_ls[-i-1][2]-30, 0))
+        pygame.draw.circle(screen, dest_col, top_left_point, taxi_size)
     
     # Statics
     if draw_statics:
@@ -75,9 +74,8 @@ def _draw_state(screen,
         # Dest.
         dest_x, dest_y = p["dest_x"], p["dest_y"]
         top_left_point = int(width_buffer + cell_width*(dest_x - 1) + 25), int(height_buffer + cell_height*(taxi_oomdp.height - dest_y) + 25)
-        # circle_center = int(top_left_point[0] + cell_width/2.0), int(top_left_point[1] + cell_height/2.0)
-        dest_col = (max(color_ls[-i-1][0]-30, 0), max(color_ls[-i-1][1]-30, 0), max(color_ls[-i-1][2]-30, 0))
-        pygame.draw.circle(screen, dest_col, top_left_point, int(min(cell_width, cell_height) / 8.0))
+        dest_col = (int(max(color_ls[-i-1][0]-30, 0)), int(max(color_ls[-i-1][1]-30, 0)), int(max(color_ls[-i-1][2]-30, 0)))
+        pygame.draw.rect(screen, dest_col, top_left_point + (cell_width / 6, cell_height / 6), 0)
 
     pygame.display.flip()
 
@@ -92,14 +90,10 @@ def _draw_agent(center_point, screen, base_size=30):
     Returns:
         (pygame.rect)
     '''
-    # taxi_image = pygame.image.load("taxi.png")
-    # image_rect = taxi_image.get_rect()
-
     tri_bot_left = center_point[0] - base_size, center_point[1] + base_size
     tri_bot_right = center_point[0] + base_size, center_point[1] + base_size
     tri_top = center_point[0], center_point[1] - base_size
     tri = [tri_bot_left, tri_top, tri_bot_right]
     tri_color = (98, 140, 190)
-    # screen.blit(taxi_image, image_rect)
-    # return image_rect
+
     return pygame.draw.polygon(screen, tri_color, tri)

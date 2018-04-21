@@ -31,16 +31,15 @@ class QLearningAgent(Agent):
         self.step_number = 0
         self.anneal = anneal
         self.default_q = 0 #1 / (1 - self.gamma)
-        
+        self.explore = explore
+
         # Q Function:
+        self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
         # Key: state
         # Val: dict
-        #   Key: action
-        #   Val: q-value
-        self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
+            #   Key: action
+            #   Val: q-value
 
-        # Choose explore type.
-        self.explore = explore
 
     # --------------------------------
     # ---- CENTRAL ACTION METHODS ----

@@ -1,14 +1,16 @@
 # Python imports.
 from __future__ import print_function
 import sys
+import time
 try:
     import pygame
     from pygame.locals import *
     pygame.init()
-    title_font = pygame.font.SysFont("CMU Serif", 32)
+    title_font = pygame.font.SysFont("CMU Serif", 48)
 except ImportError:
     print("Error: pygame not installed (needed for visuals).")
     exit()
+
 
 # Other imports.
 from simple_rl.utils.chart_utils import color_ls
@@ -136,7 +138,7 @@ def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=7
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
     draw_state(screen, mdp, cur_state, show_value=True, draw_statics=True)
 
-def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
+def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720, delay=0):
     '''
     Args:
         mdp (MDP)
@@ -145,6 +147,7 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
         cur_state (State)
         scr_width (int)
         scr_height (int)
+        delay (float): seconds to add in between actions.
 
     Summary:
         Creates a *live* 2d visual of the agent's
@@ -200,13 +203,17 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
 
         score += int(reward)
 
+        pygame.display.update()
+
+
+        time.sleep(delay)
+
         if cur_state.is_terminal():
             score += 1
             cur_state = mdp.get_init_state()
             mdp.reset()
             agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
 
-        pygame.display.update()
 
 def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
     '''
@@ -249,6 +256,57 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
         if cur_state.is_terminal():
             # Done! Agent found goal.
             goal_text = "Victory!"
+            goal_text_rendered = title_font.render(goal_text, True, (206, 147, 66))
+            goal_text_point = scr_width / 2.0 - (len(goal_text)*7), 18*scr_height / 20.0
+            screen.blit(goal_text_rendered, goal_text_point)
+            done = True
+
+        pygame.display.update()
+
+def visualize_interaction(mdp, draw_state, cur_state=None, scr_width=720, scr_height=720):
+    '''
+    Args:
+        mdp (MDP)
+        draw_state (lambda: State --> pygame.Rect)
+
+    Summary:
+        Creates a 2d visual of the agent's interactions with the MDP.
+    '''
+    screen = pygame.display.set_mode((scr_width, scr_height))
+
+    from simple_rl.agents import RandomAgent
+    agent = RandomAgent
+
+    # Setup and draw initial state.
+    cur_state = mdp.get_init_state() if cur_state is None else cur_state
+    reward = 0
+    agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent)
+
+    actions = mdp.get_actions()
+
+    keys = [K_1, K_2, K_3, K_4, K_5, K_6]
+    keys = keys[:len(actions)]
+
+    done = False
+    while not done:
+
+        # Check for key presses.
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                # Quit.
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN and event.key in keys:
+                action = actions[keys.index(event.key)]
+                reward, cur_state = mdp.execute_agent_action(action=action)
+                agent_shape = draw_state(screen, mdp, cur_state, agent_shape=agent_shape)
+
+                # Update state text.
+                _draw_lower_left_text(cur_state, screen)
+
+        if cur_state.is_terminal():
+            # Done! Agent found goal.
+            goal_text = "Victory!"
             goal_text_rendered = title_font.render(goal_text, True, (246, 207, 106))
             goal_text_point = scr_width / 2.0 - (len(goal_text)*7), 18*scr_height / 20.0
             screen.blit(goal_text_rendered, goal_text_point)
@@ -263,11 +321,6 @@ def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False, score
     pygame.display.update()
     done = False
 
-    # Draw name of MDP:
-    _draw_title_text(mdp, screen)
-    if agent is not None:
-        _draw_agent_text(agent, screen)
-    
     if score != -1:
         _draw_lower_left_text("Score: " + str(score), screen)
     agent_shape = draw_state(screen, mdp, cur_state, draw_statics=True)

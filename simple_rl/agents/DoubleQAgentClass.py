@@ -177,4 +177,3 @@ class DoubleQAgent(QLearningAgent):
             (float): denoting the avg. q value of the (@state, @action) pair.
         '''
         return (self.q_funcs["A"][state][action] + self.q_funcs["B"][state][action]) / 2.0
-

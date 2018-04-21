@@ -1,13 +1,12 @@
 # Python imports.
 import random
-import Queue
 from collections import defaultdict
 
 # Other imports.
 from simple_rl.utils import make_mdp
-from simple_rl.abstraction.action_abs import ActionAbstraction
-from simple_rl.abstraction.state_abs import StateAbstraction
-from simple_rl.abstraction.dev_hierarch.make_abstr_mdp import make_abstr_mdp
+from simple_rl.abstraction.action_abs.ActionAbstractionClass import ActionAbstraction
+from simple_rl.abstraction.state_abs.StateAbstractionClass import StateAbstraction
+from simple_rl.abstraction.make_abstr_mdp import make_abstr_mdp
 from simple_rl.planning.PlannerClass import Planner
 from simple_rl.planning.ValueIterationClass import ValueIteration
 

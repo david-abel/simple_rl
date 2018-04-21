@@ -6,11 +6,13 @@ Functions:
     average_data: Averages data across instances.
     compute_conf_intervals: Confidence interval computation.
     compute_single_conf_interval: Helper function for above.
+    _format_title()
     plot: Creates (and opens) a single plot using matplotlib.pyplot
     make_plots: Puts everything in order to create the plot.
     _get_agent_names: Grabs the agent names from parameters.txt.
     _get_agent_colors: Determines the relevant colors/markers for the plot.
     _is_episodic: Determines if the experiment was episodic from parameters.txt.
+    _is_disc_reward()
     parse_args: Parse command line arguments.
     main: Loads data from a given path and creates plot.
 
@@ -23,7 +25,6 @@ import math
 import sys
 import os
 import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as pyplot
 import numpy as np
 import subprocess
