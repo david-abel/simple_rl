@@ -6,7 +6,6 @@ Dilemmas. '''
 import random
 import numpy as np
 import time
-from matplotlib.pyplot import clf
 
 # Other imports.
 from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
