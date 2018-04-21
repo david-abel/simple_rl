@@ -12,4 +12,4 @@ from simple_rl.abstraction.action_abs.PredicateClass import Predicate
 # Scripts.
 from simple_rl.abstraction.state_abs import sa_helpers, indicator_funcs
 from simple_rl.abstraction.action_abs import aa_helpers
-from simple_rl.abstraction.make_abstr_mdp import make_abstr_mdp
+from simple_rl.abstraction.abstr_mdp import make_abstr_mdp

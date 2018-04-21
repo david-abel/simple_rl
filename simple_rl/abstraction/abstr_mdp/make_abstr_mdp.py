@@ -6,8 +6,8 @@ import numpy as np
 from simple_rl.planning import ValueIteration
 from simple_rl.mdp import MDP
 from simple_rl.mdp import MDPDistribution
-from simple_rl.abstraction.make_abstr_mdp.RewardFuncClass import RewardFunc
-from simple_rl.abstraction.make_abstr_mdp.TransitionFuncClass import TransitionFunc
+from simple_rl.abstraction.abstr_mdp.RewardFuncClass import RewardFunc
+from simple_rl.abstraction.abstr_mdp.TransitionFuncClass import TransitionFunc
 
 # ------------------
 # -- Single Level --
