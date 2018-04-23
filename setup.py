@@ -7,10 +7,11 @@ setup(
   scripts=['simple_rl/run_experiments.py'],
   version=__version__,
   description = 'A simple framework for experimenting with Reinforcement Learning in Python.',
+  long_description = 'A simple framework for experimenting with Reinforcement Learning in Python.',
   author = 'David Abel',
   author_email = 'david_abel@brown.edu',
   url = 'https://github.com/david-abel/simple_rl',
-  download_url = 'https://github.com/david-abel/simple_rl/tarball/v' + __version__,
+  download_url = 'https://github.com/david-abel/simple_rl/tarball/v' + str(__version__),
   keywords = ['Markov Decision Process', 'MDP', 'Reinforcement Learning'],
   classifiers = [],
 )
