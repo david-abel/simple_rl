@@ -29,7 +29,7 @@ simple_rl
 	run_experiments.py
 
 Author and Maintainer: David Abel (cs.brown.edu/~dabel/)
-Last Updated: April 13th, 2018
+Last Updated: April 23rd, 2018
 Contact: dabel@cs.brown.edu
 License: Apache
 '''

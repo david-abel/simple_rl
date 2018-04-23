@@ -18,7 +18,6 @@ from simple_rl.agents.DelayedQAgentClass import DelayedQAgent
 from simple_rl.agents.RandomAgentClass import RandomAgent
 from simple_rl.agents.RMaxAgentClass import RMaxAgent
 from simple_rl.agents.func_approx.LinearQAgentClass import LinearQAgent
-from simple_rl.agents.func_approx.LinearSarsaAgentClass import LinearSarsaAgent
 try:
 	from simple_rl.agents.func_approx.DQNAgentClass import DQNAgent
 except ImportError:
