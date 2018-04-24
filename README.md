@@ -35,9 +35,34 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	agent = QLearningAgent(mdp.get_actions())
 	run_agents_on_mdp([agent], mdp)
 
+Running the above code will run unleash _Q_-learning on a simple GridWorld. When it finishes it will store the results in _cur_dir/results/*_ and open the following plot:
+
+![Grid world results.](https://david-abel.github.io/blog/posts/images/simple_grid.pdf)
+
+Some examples that showcase the basic functionality of the library are found in [examples](https://github.com/david-abel/simple_rl/tree/master/examples). The core code of _simple_example.py_ runs a few agents on the grid world from the Russell-Norvig AI textbook:
+
+	from simple_rl.agents import QLearningAgent, RandomAgent, RMaxAgent
+	from simple_rl.tasks import GridWorldMDP
+	from simple_rl.run_experiments import run_agents_on_mdp
+
+	def main(open_plot=True):
+	    # Setup MDP, Agents.
+	    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2	)], gamma=0.95, walls=[(2, 2)])
+
+	    ql_agent = QLearningAgent(actions=mdp.get_actions())
+	    rmax_agent = RMaxAgent(actions=mdp.get_actions())
+	    rand_agent = RandomAgent(actions=mdp.get_actions())
+
+	    # Run experiment and make plot.
+	    run_agents_on_mdp([ql_agent, rmax_agent, rand_agent], mdp, instances=5, episodes=50, steps=10)
+
+The above code will generate the following plot:
+
+![Russell-Norving Grid Results](https://david-abel.github.io/blog/posts/images/rn_grid.pdf)
+
 ## Overview
 
-* (_agents_): Code for some basic agents (a random actor, _Q_-learner, [[R-Max]](http://www.jmlr.org/papers/volume3/brafman02a/brafman02a.pdf), _Q_-learner with a Linear Approximator, and so on).
+* (_agents_): Code for some basic agents (a random actor, _Q_-learning, [[R-Max]](http://www.jmlr.org/papers/volume3/brafman02a/brafman02a.pdf), _Q_-learning with a Linear Approximator, and so on).
 
 * (_experiments_): Code for an Experiment class to track parameters and reproduce results.
 
