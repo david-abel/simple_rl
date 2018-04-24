@@ -58,7 +58,7 @@ Some examples that showcase the basic functionality of the library are found in 
 
 The above code will generate the following plot:
 
-![Russell-Norving Grid Results](https://david-abel.github.io/blog/posts/images/rn_grid.jpg)
+<img src="https://david-abel.github.io/blog/posts/images/rn_grid.jpg" width="480" align="center">
 
 ## Overview
 
