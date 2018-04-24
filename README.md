@@ -21,7 +21,7 @@ Alternatively, you can download simple_rl [here](https://github.com/david-abel/s
 
 ## Example
 
-Some examples showcasing basic functionality are included in the _examples_ directory.
+Some examples showcasing basic functionality are included in the [examples](https://github.com/david-abel/simple_rl/tree/master/examples) directory.
 
 To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ method from _simple_rl.run_experiments_ and call it with some agents for a given MDP. For example:
 
@@ -39,7 +39,7 @@ Running the above code will run unleash _Q_-learning on a simple GridWorld. When
 
 <img src="https://david-abel.github.io/blog/posts/images/simple_grid.jpg" width="480" align="center">
 
-Some examples that showcase the basic functionality of the library are found in [examples](https://github.com/david-abel/simple_rl/tree/master/examples). The core code of _simple_example.py_ runs a few agents on the grid world from the Russell-Norvig AI textbook:
+For a slightly more complicated example, take a look at the code of _simple_example.py_. Here we run three few agents on the grid world from the Russell-Norvig AI textbook:
 
 	from simple_rl.agents import QLearningAgent, RandomAgent, RMaxAgent
 	from simple_rl.tasks import GridWorldMDP
