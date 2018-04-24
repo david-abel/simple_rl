@@ -45,16 +45,16 @@ For a slightly more complicated example, take a look at the code of _simple_exam
 	from simple_rl.tasks import GridWorldMDP
 	from simple_rl.run_experiments import run_agents_on_mdp
 
-	def main(open_plot=True):
-	    # Setup MDP, Agents.
-	    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2	)], gamma=0.95, walls=[(2, 2)])
+    # Setup MDP.
+    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2	)], gamma=0.95, walls=[(2, 2)])
 
-	    ql_agent = QLearningAgent(actions=mdp.get_actions())
-	    rmax_agent = RMaxAgent(actions=mdp.get_actions())
-	    rand_agent = RandomAgent(actions=mdp.get_actions())
+    # Setup Agents.
+    ql_agent = QLearningAgent(actions=mdp.get_actions())
+    rmax_agent = RMaxAgent(actions=mdp.get_actions())
+    rand_agent = RandomAgent(actions=mdp.get_actions())
 
-	    # Run experiment and make plot.
-	    run_agents_on_mdp([ql_agent, rmax_agent, rand_agent], mdp, instances=5, episodes=50, steps=10)
+    # Run experiment and make plot.
+    run_agents_on_mdp([ql_agent, rmax_agent, rand_agent], mdp, instances=5, episodes=50, steps=10)
 
 The above code will generate the following plot:
 
