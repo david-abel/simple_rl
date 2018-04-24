@@ -46,7 +46,7 @@ For a slightly more complicated example, take a look at the code of _simple_exam
 	from simple_rl.run_experiments import run_agents_on_mdp
 
     # Setup MDP.
-    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2	)], gamma=0.95, walls=[(2, 2)])
+    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2)], gamma=0.95, walls=[(2, 2)])
 
     # Setup Agents.
     ql_agent = QLearningAgent(actions=mdp.get_actions())
