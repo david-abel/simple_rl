@@ -37,7 +37,7 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 
 Running the above code will run unleash _Q_-learning on a simple GridWorld. When it finishes it will store the results in _cur_dir/results/*_ and open the following plot:
 
-![Grid world results.](https://david-abel.github.io/blog/posts/images/simple_grid.pdf)
+![Grid world results.](https://david-abel.github.io/blog/posts/images/simple_grid.jpg)
 
 Some examples that showcase the basic functionality of the library are found in [examples](https://github.com/david-abel/simple_rl/tree/master/examples). The core code of _simple_example.py_ runs a few agents on the grid world from the Russell-Norvig AI textbook:
 
@@ -58,7 +58,7 @@ Some examples that showcase the basic functionality of the library are found in 
 
 The above code will generate the following plot:
 
-![Russell-Norving Grid Results](https://david-abel.github.io/blog/posts/images/rn_grid.pdf)
+![Russell-Norving Grid Results](https://david-abel.github.io/blog/posts/images/rn_grid.jpg)
 
 ## Overview
 
