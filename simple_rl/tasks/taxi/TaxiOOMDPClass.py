@@ -1,5 +1,5 @@
 '''
-TaxiMDPClass.py: Contains the TaxiMDP class. 
+TaxiMDPClass.py: Contains the TaxiMDP class.
 
 From:
     Dietterich, Thomas G. "Hierarchical reinforcement learning with the
@@ -132,7 +132,7 @@ class TaxiOOMDP(OOMDP):
         # Make terminal.
         if taxi_helpers.is_taxi_terminal_state(next_state):
             next_state.set_terminal(True)
-        
+
         # All OOMDP states must be updated.
         next_state.update()
 
@@ -199,7 +199,7 @@ class TaxiOOMDP(OOMDP):
 
         # update = False
         if agent.get_attribute("has_passenger") == 0:
-            
+
             # If the agent does not have a passenger.
             for i, passenger in enumerate(next_state.get_objects_of_class("passenger")):
                 if agent.get_attribute("x") == passenger.get_attribute("x") and agent.get_attribute("y") == passenger.get_attribute("y"):
@@ -208,7 +208,7 @@ class TaxiOOMDP(OOMDP):
                     passenger.set_attribute("in_taxi", 1)
 
         return next_state
-                    
+
     def agent_dropoff(self, state):
         '''
         Args:
