@@ -78,12 +78,23 @@ class NavigationMDP(GridWorldMDP):
             self.cell_rewards[g_r, g_c] = self.goal_reward
         self.goal_locs = goal_locs
 
+        self.feature_cell_dist = None
+
+    def get_cell_distance_features(self):
+
+        if self.feature_cell_dist is not None:
+            return self.feature_cell_dist
+
         self.loc_cells = [np.vstack(np.where(self.cells == cell)).transpose() for cell in range(len(self.cell_types))]
         self.feature_cell_dist = np.zeros(self.cells.shape + (len(self.cell_types),), np.float32)
+
         for row in range(self.height):
             for col in range(self.width):
+
+                # Note: if particular cell type is missing in the grid, this will assign distance -1 to it
                 self.feature_cell_dist[row, col] = [np.linalg.norm([row, col] - loc_cell, axis=1).min() \
-                                                                                        for loc_cell in self.loc_cells]
+                                                    if len(loc_cell) != 0 else -1 for loc_cell in self.loc_cells]
+        return self.feature_cell_dist
 
     def _reward_func(self, state, action):
         '''
@@ -125,7 +136,7 @@ class NavigationMDP(GridWorldMDP):
 
     def visualize_grid(self, values=None, cmap=None,
                                 trajectories=None, subplot_str=None,
-                                new_fig=True, title="Navigation MDP"):
+                                new_fig=True, show_rewards_cbar=False, title="Navigation MDP"):
         """
         Args:
             trajectories ([[state1, state2, ...], [state7, state4, ...], ...]): trajectories to be shown on the grid
@@ -168,9 +179,13 @@ class NavigationMDP(GridWorldMDP):
 
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="3%", pad=0.05)
-        cb = plt.colorbar(im, ticks=range(len(cell_type_rewards)), cax=cax)
-        cb.set_ticklabels(cell_type_rewards)
-        
+
+        if show_rewards_cbar:
+            cb = plt.colorbar(im, ticks=range(len(cell_type_rewards)), cax=cax)
+            cb.set_ticklabels(cell_type_rewards)
+        else:
+            plt.colorbar(im, cax=cax)
+
         if subplot_str is None:
             plt.show()
 
