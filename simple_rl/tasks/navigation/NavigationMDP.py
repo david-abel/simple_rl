@@ -125,7 +125,7 @@ class NavigationMDP(GridWorldMDP):
 
     def visualize_grid(self, values=None, cmap=None,
                                 trajectories=None, subplot_str=None,
-                                new_fig=True, show_rewards_cbar=False, title="Navigation MDP"):
+                                new_fig=True, title="Navigation MDP"):
         """
         Args:
             trajectories ([[state1, state2, ...], [state7, state4, ...], ...]): trajectories to be shown on the grid
@@ -168,13 +168,9 @@ class NavigationMDP(GridWorldMDP):
 
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="3%", pad=0.05)
-
-        if show_rewards_cbar:
-            cb = plt.colorbar(im, ticks=range(len(cell_type_rewards)), cax=cax)
-            cb.set_ticklabels(cell_type_rewards)
-        else:
-            plt.colorbar(im, cax=cax)
-
+        cb = plt.colorbar(im, ticks=range(len(cell_type_rewards)), cax=cax)
+        cb.set_ticklabels(cell_type_rewards)
+        
         if subplot_str is None:
             plt.show()
 
