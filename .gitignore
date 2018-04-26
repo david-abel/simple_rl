@@ -8,3 +8,4 @@ update.py
 *.idea
 .DS_Store
 to_update_instr.txt
+examples/blank_example.py

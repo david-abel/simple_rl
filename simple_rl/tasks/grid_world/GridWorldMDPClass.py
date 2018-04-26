@@ -167,7 +167,7 @@ class GridWorldMDP(MDP):
 
     def visualize_policy(self, policy):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_visualizer import _draw_state
         ["up", "down", "left", "right"]
 
         action_char_dict = {
@@ -182,25 +182,25 @@ class GridWorldMDP(MDP):
 
     def visualize_agent(self, agent):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_agent(self, agent, _draw_state)
         raw_input("Press anything to quit ")
 
     def visualize_value(self):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_value(self, _draw_state)
         raw_input("Press anything to quit ")
 
     def visualize_learning(self, agent, delay=0.0):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_learning(self, agent, _draw_state, delay=delay)
         raw_input("Press anything to quit ")
 
     def visualize_interaction(self):
         from simple_rl.utils import mdp_visualizer as mdpv
-        from grid_visualizer import _draw_state
+        from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_interaction(self, _draw_state)
         raw_input("Press anything to quit ")
 
@@ -244,8 +244,8 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     if name is None:
         name = file_name.split(".")[0]
 
-    grid_path = os.path.dirname(os.path.realpath(__file__))
-    wall_file = open(os.path.join(grid_path, "txt_grids", file_name))
+    # grid_path = os.path.dirname(os.path.realpath(__file__))
+    wall_file = open(os.path.join(os.getcwd(), file_name))
     wall_lines = wall_file.readlines()
 
     # Get walls, agent, goal loc.
@@ -262,6 +262,8 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
                 walls.append((j + 1, num_rows - i))
             elif ch == "g":
                 goal_locs.append((j + 1, num_rows - i))
+            elif ch == "l":
+                lava_locs.append((j + 1, num_rows - i))
             elif ch == "a":
                 agent_x, agent_y = j + 1, num_rows - i
             elif ch == "-":
@@ -289,7 +291,6 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
             self.cur_state = GridWorldState(init_loc[0], init_loc[1])
         else:
             self.cur_state = copy.deepcopy(self.init_state)
-
 
 def main():
     grid_world = GridWorldMDP(5, 10, (1, 1), (6, 7))
