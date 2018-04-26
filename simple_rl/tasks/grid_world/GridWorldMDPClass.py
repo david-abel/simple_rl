@@ -255,6 +255,8 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     agent_x, agent_y = 1, 1
     walls = []
     goal_locs = []
+    lava_locs = []
+
     for i, line in enumerate(wall_lines):
         line = line.strip()
         for j, ch in enumerate(line):
@@ -283,7 +285,7 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     if len(goal_locs) == 0:
         goal_locs = [(num_cols, num_rows)]
 
-    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls, name=name, slip_prob=slip_prob)
+    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, lava_locs=lava_locs, walls=walls, name=name, slip_prob=slip_prob)
 
     def reset(self):
         if self.rand_init:

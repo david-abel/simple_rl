@@ -95,10 +95,6 @@ def _draw_state(screen,
                     val = val_text_dict[i+1][grid_mdp.height - j]
                     color = mdpv.val_to_color(val)
                     pygame.draw.rect(screen, color, top_left_point + (cell_width, cell_height), 0)
-                    # text_center_point = int(top_left_point[0] + cell_width/2.0 - 10), int(top_left_point[1] + cell_height/7.0)
-                    # text = str(round(val,2))
-                    # text_rendered = reg_font.render(text, True, (46, 49, 49))
-                    # screen.blit(text_rendered, text_center_point)
 
                 if grid_mdp.is_wall(i+1, grid_mdp.height - j):
                     # Draw the walls.
@@ -129,9 +125,7 @@ def _draw_state(screen,
         tri_center = int(top_left_point[0] + cell_width/2.0), int(top_left_point[1] + cell_height/2.0)
 
         # Draw new.
-        # if not show_value or policy is not None:
-        agent_shape = _draw_agent(tri_center, screen, base_size=min(cell_width, cell_height)/2.5 - 16)
-
+        agent_shape = _draw_agent(tri_center, screen, base_size=min(cell_width, cell_height)/2.5 - 8)
 
     pygame.display.flip()
 
