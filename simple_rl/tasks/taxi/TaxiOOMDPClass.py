@@ -1,5 +1,5 @@
 '''
-TaxiMDPClass.py: Contains the TaxiMDP class. 
+TaxiMDPClass.py: Contains the TaxiMDP class.
 
 From:
     Dietterich, Thomas G. "Hierarchical reinforcement learning with the
@@ -19,6 +19,7 @@ from simple_rl.mdp.oomdp.OOMDPClass import OOMDP
 from simple_rl.mdp.oomdp.OOMDPObjectClass import OOMDPObject
 from simple_rl.tasks.taxi.TaxiStateClass import TaxiState
 from simple_rl.tasks.taxi import taxi_helpers
+
 
 class TaxiOOMDP(OOMDP):
     ''' Class for a Taxi OO-MDP '''
@@ -131,7 +132,7 @@ class TaxiOOMDP(OOMDP):
         # Make terminal.
         if taxi_helpers.is_taxi_terminal_state(next_state):
             next_state.set_terminal(True)
-        
+
         # All OOMDP states must be updated.
         next_state.update()
 
@@ -144,7 +145,7 @@ class TaxiOOMDP(OOMDP):
         from ...utils.mdp_visualizer import visualize_agent
         from taxi_visualizer import _draw_state
         visualize_agent(self, agent, _draw_state)
-        raw_input("Press anything to quit ")
+        _ = input("Press anything to quit ")
         sys.exit(1)
 
     def visualize_interaction(self):
@@ -198,7 +199,7 @@ class TaxiOOMDP(OOMDP):
 
         # update = False
         if agent.get_attribute("has_passenger") == 0:
-            
+
             # If the agent does not have a passenger.
             for i, passenger in enumerate(next_state.get_objects_of_class("passenger")):
                 if agent.get_attribute("x") == passenger.get_attribute("x") and agent.get_attribute("y") == passenger.get_attribute("y"):
@@ -207,7 +208,7 @@ class TaxiOOMDP(OOMDP):
                     passenger.set_attribute("in_taxi", 1)
 
         return next_state
-                    
+
     def agent_dropoff(self, state):
         '''
         Args:
