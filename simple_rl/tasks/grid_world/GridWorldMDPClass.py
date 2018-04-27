@@ -168,7 +168,6 @@ class GridWorldMDP(MDP):
     def visualize_policy(self, policy):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
-        ["up", "down", "left", "right"]
 
         action_char_dict = {
             "up":u"\u2191",
@@ -240,8 +239,8 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     if name is None:
         name = file_name.split(".")[0]
 
-    grid_path = os.path.dirname(os.path.realpath(__file__))
-    wall_file = open(os.path.join(grid_path, "txt_grids", file_name))
+    # grid_path = os.path.dirname(os.path.realpath(__file__))
+    wall_file = open(os.path.join(os.getcwd(), file_name))
     wall_lines = wall_file.readlines()
 
     # Get walls, agent, goal loc.
@@ -251,6 +250,8 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     agent_x, agent_y = 1, 1
     walls = []
     goal_locs = []
+    lava_locs = []
+
     for i, line in enumerate(wall_lines):
         line = line.strip()
         for j, ch in enumerate(line):
@@ -258,6 +259,8 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
                 walls.append((j + 1, num_rows - i))
             elif ch == "g":
                 goal_locs.append((j + 1, num_rows - i))
+            elif ch == "l":
+                lava_locs.append((j + 1, num_rows - i))
             elif ch == "a":
                 agent_x, agent_y = j + 1, num_rows - i
             elif ch == "-":
@@ -277,7 +280,7 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
     if len(goal_locs) == 0:
         goal_locs = [(num_cols, num_rows)]
 
-    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, walls=walls, name=name, slip_prob=slip_prob)
+    return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, lava_locs=lava_locs, walls=walls, name=name, slip_prob=slip_prob)
 
     def reset(self):
         if self.rand_init:
@@ -285,7 +288,6 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
             self.cur_state = GridWorldState(init_loc[0], init_loc[1])
         else:
             self.cur_state = copy.deepcopy(self.init_state)
-
 
 def main():
     grid_world = GridWorldMDP(5, 10, (1, 1), (6, 7))
