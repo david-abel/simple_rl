@@ -26,7 +26,25 @@ class PuddleMDP(GridWorldMDP):
             goal_locs (list of tuples: [(int, int)...])
         '''
         self.delta = 0.01
-        GridWorldMDP.__init__(self, width=1.0, height=1.0, init_loc=[0.0,0.0], goal_locs=[[1.0,1.0]], gamma=gamma, name=name, is_goal_terminal=is_goal_terminal, rand_init=rand_init)
+        self.puddle_rects = [(0.1,0.8,0.5,0.7), (0.4, 0.7, 0.5, 0.4)]
+        GridWorldMDP.__init__(self, width=1.0, height=1.0, init_loc=[0.25, 0.6], goal_locs=[[1.0, 1.0]], gamma=gamma, name=name, is_goal_terminal=is_goal_terminal, rand_init=rand_init)
+
+    def _reward_func(self, state, action):
+        if self._is_goal_state_action(state, action):
+            return 1.0 - self.step_cost
+        elif self._is_puddle_state_action(state, action):
+            return -1.0
+        else:
+            return 0 - self.step_cost
+
+    def _is_puddle_state_action(self, state, action):
+        for puddle_rect in self.puddle_rects:
+            x_1, y_1, x_2, y_2 = puddle_rect
+            if state.x >= x_1 and state.x <= x_2 and \
+                state.y <= y_1 and state.y >= y_2:
+                return True
+
+        return False
 
 
     def _is_goal_state_action(self, state, action):
@@ -49,7 +67,7 @@ class PuddleMDP(GridWorldMDP):
             return True
         elif action == "down" and self.is_loc_within_radius_to_goal(state.x, state.y - self.delta):
             return True
-        elif action == "up" and (state.x, state.y + self.delta):
+        elif action == "up" and self.is_loc_within_radius_to_goal(state.x, state.y + self.delta):
             return True
         else:
             return False
@@ -62,24 +80,26 @@ class PuddleMDP(GridWorldMDP):
 
     def _transition_func(self, state, action):
 
+        if state.is_terminal():
+            return state
+
         to_move = self.delta + np.random.randn(1)[0] / 100.0
 
         if action == "up":
-            next_state = GridWorldState(state.x, state.y + to_move)
+            next_state = GridWorldState(state.x, min(state.y + to_move, 1))
         elif action == "down":
-            next_state = GridWorldState(state.x, state.y - to_move)
+            next_state = GridWorldState(state.x, max(state.y - to_move, 0))
         elif action == "right":
-            next_state = GridWorldState(state.x + to_move, state.y)
+            next_state = GridWorldState(min(state.x + to_move, 1), state.y)
         elif action == "left":
-            next_state = GridWorldState(state.x - to_move, state.y)
+            next_state = GridWorldState(max(state.x - to_move, 0), state.y)
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if (next_state.x, next_state.y) in self.goal_locs and self.is_goal_terminal:
+        if self._is_goal_state_action(state, action) and self.is_goal_terminal:
             next_state.set_terminal(True)
 
         return next_state
-
 
 
 def _euclidean_distance(ax, ay, bx, by):
