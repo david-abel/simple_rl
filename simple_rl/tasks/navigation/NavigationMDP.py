@@ -4,10 +4,11 @@
 from __future__ import print_function
 import numpy as np
 from simple_rl.tasks import GridWorldMDP
+from simple_rl.planning import ValueIteration
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class NavigationMDP(GridWorldMDP):
-    
+
     '''
         Class for Navigation MDP from:
             MacGlashan, James, and Michael L. Littman. "Between Imitation and Intention Learning." IJCAI. 2015.
@@ -15,20 +16,22 @@ class NavigationMDP(GridWorldMDP):
 
     ACTIONS = ["up", "down", "left", "right"]
 
-    def __init__(self, 
-                 width=30, 
-                 height=30, 
+    def __init__(self,
+                 width=30,
+                 height=30,
                  init_loc=(1,1),
                  rand_init=True,
                  goal_locs=[(21, 21)],
                  cell_types=["empty", "yellow", "red", "green", "purple"],
                  cell_type_rewards=[0, 0, -10, -10, -10],
+                 manual_obstacles=[], # this is for additional experimentation only
                  gamma=0.99,
                  slip_prob=0.00,
                  step_cost=0.0,
                  goal_reward=1.0,
                  is_goal_terminal=True,
                  init_state=None,
+                 vacancy_prob=0.8,
                  name="Navigation MDP"):
         """
         Note: 1. locations and state dimensions start from 1 instead of 0. 
@@ -41,35 +44,43 @@ class NavigationMDP(GridWorldMDP):
             cell_type (list of cell types: [str, str, ...]): non-goal cell types
             cell_rewards (reward mapping for each cell type: [int, int, ...]): reward value for cells in @cell_type
         """
-        
+
         assert height > 0 and isinstance(height, int) and width > 0 and isinstance(width, int), "height and widht must be integers and > 0"
         self.cell_types = cell_types
+        GridWorldMDP.__init__(self,
+
+                              width=width,
+                              height=height,
+                              init_loc=init_loc,
+                              rand_init=rand_init,
+                              goal_locs=goal_locs,
+                              lava_locs=[()],
+                              walls=[],  # no walls in this mdp
+                              is_goal_terminal=is_goal_terminal,
+                              gamma=gamma,
+                              init_state=init_state,
+                              slip_prob=slip_prob,
+                              step_cost=step_cost,
+                              name=name)
 
         # Probability of each cell type
-        vacancy_prob = 0.8
+        vacancy_prob = vacancy_prob
         # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for square lattice).
         # This is just an approximation as the paper isn't concerned about cell probabilities or mention it.
         self.cell_prob = [4.*vacancy_prob/5., vacancy_prob/5.] + [(1-vacancy_prob)/3.] * 3
         # Matrix for identifying cell type and associated reward
         self.cells = np.random.choice(len(self.cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
+
+        self.manual_obstacles = manual_obstacles
+        for obs in self.manual_obstacles:
+            row, col = self._xy_to_rowcol(obs[0], obs[1])
+            self.cells[row, col] = 2
+
         self.cell_type_rewards = cell_type_rewards
         self.cell_rewards = np.asarray([[cell_type_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
         self.goal_reward = goal_reward
 
-        GridWorldMDP.__init__(self, 
-                            width=width, 
-                            height=height,
-                            init_loc=init_loc,
-                            rand_init=rand_init,
-                            goal_locs=goal_locs,
-                            lava_locs=[()],
-                            walls=[], # no walls in this mdp
-                            is_goal_terminal=is_goal_terminal,
-                            gamma=gamma,
-                            init_state=init_state,
-                            slip_prob=slip_prob,
-                            step_cost=step_cost,
-                            name=name)
+
 
         # Set goals and their rewards in the matrix
         for g in goal_locs:
@@ -79,6 +90,7 @@ class NavigationMDP(GridWorldMDP):
         self.goal_locs = goal_locs
 
         self.feature_cell_dist = None
+        self.value_iter = None
 
     def get_cell_distance_features(self):
 
@@ -92,9 +104,69 @@ class NavigationMDP(GridWorldMDP):
             for col in range(self.width):
 
                 # Note: if particular cell type is missing in the grid, this will assign distance -1 to it
-                self.feature_cell_dist[row, col] = [np.linalg.norm([row, col] - loc_cell, axis=1).min() \
+                # Ord=1: Manhattan, Ord=2: Euclidean and so on
+                self.feature_cell_dist[row, col] = [np.linalg.norm([row, col] - loc_cell, ord=1, axis=1).min() \
                                                     if len(loc_cell) != 0 else -1 for loc_cell in self.loc_cells]
         return self.feature_cell_dist
+
+    def sample_data(self, n_trajectory, value_iter_sampling_rate=1):
+        """
+        Args:
+            n_trajectory: number of trajectories to sample
+            value_iter_sampling_rate: value iteration sampling rate
+
+        Returns:
+            (Traj_states, Traj_actions) where
+                Traj_states: [[s1, s2, ..., sT], [s4, s1, ..., sT], ...],
+                Traj_actions: [[a1, a2, ..., aT], [a4, a1, ..., aT], ...]
+        """
+        a_s = []
+        d_mdp_states = []
+
+        action_to_idx = {a: i for i, a in enumerate(self.actions)}
+
+        if not self.value_iter:
+            self.value_iter = ValueIteration(self, sample_rate=value_iter_sampling_rate)
+            _ = self.value_iter.run_vi()
+
+        for _ in range(n_trajectory):
+            action_seq, state_seq = self.value_iter.plan(self.get_random_init_state())
+            d_mdp_states.append(state_seq)
+            a_s.append([action_to_idx[a] for a in action_seq])
+
+        return d_mdp_states, a_s
+
+    def feature_short_at_state(self, mdp_state):
+        return self.feature_short_at_loc(mdp_state.x, mdp_state.y)
+
+    def feature_long_at_state(self, mdp_state):
+        return self.feature_long_at_loc(mdp_state.x, mdp_state.y)
+
+    def feature_short_at_loc(self, x, y):
+        row, col = self._xy_to_rowcol(x, y)
+        if (x, y) in self.goal_locs:
+            return np.zeros(len(self.cell_types), dtype=np.float32)
+        else:
+            return np.eye(len(self.cell_types))[self.cells[row, col]]
+
+    def feature_long_at_loc(self, x, y):
+        row, col = self._xy_to_rowcol(x, y)
+        return np.hstack((self.feature_short_at_loc(x, y), self.get_cell_distance_features()[row, col]))
+
+    def states_to_features(self, states, phi):
+        return np.asarray([phi(s) for s in states], dtype=np.float32)
+
+    def states_to_coord(self, states, phi):
+        return np.asarray([(s.x, s.y) for s in states], dtype=np.float32)
+
+    def compute_cell_rewards(self, weights, phi_at_loc):
+
+        r_map = np.zeros((self.height, self.width), dtype=np.float32)
+        for row in range(self.height):
+            for col in range(self.width):
+                x, y = self._rowcol_to_xy(row, col)
+                r_map[row, col] = phi_at_loc(x, y).dot(weights)[0]
+        return r_map
 
     def _reward_func(self, state, action):
         '''
@@ -108,6 +180,8 @@ class NavigationMDP(GridWorldMDP):
         r, c = self._xy_to_rowcol(state.x, state.y)
         if self._is_goal_state_action(state, action):
             return self.goal_reward + self.cell_rewards[r, c] - self.step_cost
+        elif (state.x, state.y) in self.manual_obstacles: # this is for additional experimentation only
+            return -1.0
         elif self.cell_rewards[r, c] == 0:
             return 0 - self.step_cost
         else:
@@ -174,8 +248,10 @@ class NavigationMDP(GridWorldMDP):
             for state_seq in trajectories:
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
-                plt.plot(path_xs[0], path_ys[0], ".k", markersize=10)
                 plt.plot(path_xs, path_ys, "k", linewidth=0.7)
+                plt.plot(path_xs[0], path_ys[0], ".k", markersize=10)
+                plt.plot(path_xs[-1], path_ys[-1], "*w", markersize=10)
+
 
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="3%", pad=0.05)
