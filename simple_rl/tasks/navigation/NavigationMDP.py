@@ -3,6 +3,7 @@
 # Python imports.
 from __future__ import print_function
 import numpy as np
+from collections import defaultdict
 from simple_rl.tasks import GridWorldMDP
 from simple_rl.planning import ValueIteration
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
@@ -80,8 +81,6 @@ class NavigationMDP(GridWorldMDP):
         self.cell_rewards = np.asarray([[cell_type_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
         self.goal_reward = goal_reward
 
-
-
         # Set goals and their rewards in the matrix
         for g in goal_locs:
             g_r, g_c = self._xy_to_rowcol(g[0], g[1])
@@ -91,6 +90,111 @@ class NavigationMDP(GridWorldMDP):
 
         self.feature_cell_dist = None
         self.value_iter = None
+        self.num_empty_states = np.sum(self.cells == 0)
+        self.empty_rows, self.empty_cols = np.where(self.cells == 0)
+
+    def get_value_iteration_results(self, sample_rate):
+        if self.value_iter is None:
+            self.value_iter = ValueIteration(self, sample_rate=sample_rate)
+            _ = self.value_iter.run_vi()
+        return self.value_iter
+
+    def sample_empty_state(self, idx=None):
+        """
+        Returns a random empty/white state of type GridWorldState()
+        """
+        
+        if idx is None:
+            rand_idx = np.random.randint(len(self.empty_rows))
+        else:
+            assert 0 <= idx < len(self.empty_rows)
+            rand_idx = idx
+
+        x, y = self._rowcol_to_xy(self.empty_rows[rand_idx], self.empty_cols[rand_idx])
+        return GridWorldState(x, y)
+
+    def sample_empty_states(self, n, repetition=False):
+        """
+        Returns a list of random empty/white state of type GridWorldState()
+        Note: if repetition is False, the max no. of states returned = # of empty/white cells in the grid 
+        """
+        assert n > 0
+
+        if repetition is False:
+            return [self.sample_empty_state(rand_idx) for rand_idx in np.random.permutation(len(self.empty_rows))[:n]]
+        else:
+            return [self.sample_empty_state() for i in range(n)]
+
+    def plan(self, state, policy=None, horizon=100):
+        '''
+        Args:
+            state (State)
+            policy (fn): S->A
+            horizon (int)
+
+        Returns:
+            (list): List of actions
+        '''
+        action_seq = []
+        state_seq = [state]
+        steps = 0
+
+        while (not state.is_terminal()) and steps < horizon:
+            next_action = policy(state)
+            action_seq.append(next_action)
+            state = self.transition_func(state, next_action)
+            state_seq.append(state)
+            steps += 1
+
+        return action_seq, state_seq
+
+    def sample_data(self, n_trajectory,
+                    init_states=None,
+                    init_repetition=False,
+                    policy=None,
+                    horizon=100,
+                    pad_to_match_n_trajectory=True,
+                    value_iter_sampling_rate=1):
+        """
+        Args:
+            n_trajectory: number of trajectories to sample
+            init_state: None - to use random init state [GridWorldState(x,y),...] - to use specific init states 
+            init_repetition: When init_state is set to None, this will sample every possible init state 
+                                    and try to not repeat init state unless n_trajectory > n_states
+            policy (fn): S->A
+            horizon (int): planning horizon
+            pad_to_match_n_trajectory: If True, this will always return n_trajectory many trajectories 
+                                        overrides init_repetition if # unique states !=  n_trajectory
+            value_iter_sampling_rate (int): Used for value iteration if policy is set to None
+                                    
+        Returns:
+            (Traj_states, Traj_actions) where
+                Traj_states: [[s1, s2, ..., sT], [s4, s1, ..., sT], ...],
+                Traj_actions: [[a1, a2, ..., aT], [a4, a1, ..., aT], ...]
+        """
+        a_s = []
+        d_mdp_states = []
+        visited_at_init = defaultdict(lambda: False)
+        action_to_idx = {a: i for i, a in enumerate(self.actions)}
+
+        if init_states is None:
+            init_states = self.sample_empty_states(n_trajectory, init_repetition)
+            if len(init_states) < n_trajectory and pad_to_match_n_trajectory:
+                init_states += self.sample_empty_states(n_trajectory - len(init_states), repetition=True)
+        else:
+            if len(init_states) < n_trajectory and pad_to_match_n_trajectory: # i.e., more init states need to be sampled
+                init_states += self.sample_empty_states(n_trajectory-len(init_states), init_repetition)
+            else: # we have sufficient init states pre-specified, ignore the rest as we only need n_trajectory many
+                init_states = init_states[:n_trajectory]
+
+        if policy is None:
+            policy = self.get_value_iteration_results(value_iter_sampling_rate).policy
+
+        for init_state in init_states:
+            action_seq, state_seq = self.plan(init_state, policy=policy, horizon=horizon)
+            d_mdp_states.append(state_seq)
+            a_s.append([action_to_idx[a] for a in action_seq])
+        return d_mdp_states, a_s
 
     def get_cell_distance_features(self):
 
@@ -108,33 +212,6 @@ class NavigationMDP(GridWorldMDP):
                 self.feature_cell_dist[row, col] = [np.linalg.norm([row, col] - loc_cell, ord=1, axis=1).min() \
                                                     if len(loc_cell) != 0 else -1 for loc_cell in self.loc_cells]
         return self.feature_cell_dist
-
-    def sample_data(self, n_trajectory, value_iter_sampling_rate=1):
-        """
-        Args:
-            n_trajectory: number of trajectories to sample
-            value_iter_sampling_rate: value iteration sampling rate
-
-        Returns:
-            (Traj_states, Traj_actions) where
-                Traj_states: [[s1, s2, ..., sT], [s4, s1, ..., sT], ...],
-                Traj_actions: [[a1, a2, ..., aT], [a4, a1, ..., aT], ...]
-        """
-        a_s = []
-        d_mdp_states = []
-
-        action_to_idx = {a: i for i, a in enumerate(self.actions)}
-
-        if not self.value_iter:
-            self.value_iter = ValueIteration(self, sample_rate=value_iter_sampling_rate)
-            _ = self.value_iter.run_vi()
-
-        for _ in range(n_trajectory):
-            action_seq, state_seq = self.value_iter.plan(self.get_random_init_state())
-            d_mdp_states.append(state_seq)
-            a_s.append([action_to_idx[a] for a in action_seq])
-
-        return d_mdp_states, a_s
 
     def feature_short_at_state(self, mdp_state):
         return self.feature_short_at_loc(mdp_state.x, mdp_state.y)
@@ -159,7 +236,7 @@ class NavigationMDP(GridWorldMDP):
     def states_to_coord(self, states, phi):
         return np.asarray([(s.x, s.y) for s in states], dtype=np.float32)
 
-    def compute_cell_rewards(self, weights, phi_at_loc):
+    def _compute_cell_rewards(self, weights, phi_at_loc):
 
         r_map = np.zeros((self.height, self.width), dtype=np.float32)
         for row in range(self.height):
@@ -198,15 +275,6 @@ class NavigationMDP(GridWorldMDP):
         Converts (row,col) to (x,y) 
         """
         return col + 1, self.height - row
-
-    def get_random_init_state(self):
-        """
-        Returns a random empty/white cell 
-        """
-        rows, cols = np.where(self.cells == 0)
-        rand_idx = np.random.randint(len(rows))
-        x, y = self._rowcol_to_xy(rows[rand_idx], cols[rand_idx])
-        return GridWorldState(x, y)
 
     def visualize_grid(self, values=None, cmap=None,
                                 trajectories=None, subplot_str=None,
@@ -250,7 +318,7 @@ class NavigationMDP(GridWorldMDP):
                 path_ys = [self.height - (s.y) for s in state_seq]
                 plt.plot(path_xs, path_ys, "k", linewidth=0.7)
                 plt.plot(path_xs[0], path_ys[0], ".k", markersize=10)
-                plt.plot(path_xs[-1], path_ys[-1], "*w", markersize=10)
+                plt.plot(path_xs[-1], path_ys[-1], "*c", markersize=10)
 
 
         divider = make_axes_locatable(ax)
@@ -264,4 +332,3 @@ class NavigationMDP(GridWorldMDP):
 
         if subplot_str is None:
             plt.show()
-
