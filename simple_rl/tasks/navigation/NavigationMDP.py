@@ -25,7 +25,7 @@ class NavigationMDP(GridWorldMDP):
                  goal_locs=[(21, 21)],
                  cell_types=["empty", "yellow", "red", "green", "purple"],
                  cell_type_rewards=[0, 0, -10, -10, -10],
-                 manual_obstacles=[], # this is for additional experimentation only
+                 additional_obstacles={}, # this is for additional experimentation only
                  gamma=0.99,
                  slip_prob=0.00,
                  step_cost=0.0,
@@ -68,14 +68,15 @@ class NavigationMDP(GridWorldMDP):
         vacancy_prob = vacancy_prob
         # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for square lattice).
         # This is just an approximation as the paper isn't concerned about cell probabilities or mention it.
-        self.cell_prob = [4.*vacancy_prob/5., vacancy_prob/5.] + [(1-vacancy_prob)/3.] * 3
+        self.cell_prob = [8.*vacancy_prob/10., 2*vacancy_prob/10.] + [(1-vacancy_prob)/3.] * 3
         # Matrix for identifying cell type and associated reward
         self.cells = np.random.choice(len(self.cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
 
-        self.manual_obstacles = manual_obstacles
-        for obs in self.manual_obstacles:
-            row, col = self._xy_to_rowcol(obs[0], obs[1])
-            self.cells[row, col] = 2
+        self.additional_obstacles = additional_obstacles
+        for obs_type, obs_locs in self.additional_obstacles.items():
+            for obs_loc in obs_locs:
+                row, col = self._xy_to_rowcol(obs_loc[0], obs_loc[1])
+                self.cells[row, col] = obs_type
 
         self.cell_type_rewards = cell_type_rewards
         self.cell_rewards = np.asarray([[cell_type_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
@@ -93,6 +94,23 @@ class NavigationMDP(GridWorldMDP):
         self.num_empty_states = np.sum(self.cells == 0)
         self.empty_rows, self.empty_cols = np.where(self.cells == 0)
 
+    def _reward_func(self, state, action):
+        '''
+        Args:
+            state (State)
+            action (str)
+
+        Returns
+            (float)
+        '''
+        r, c = self._xy_to_rowcol(state.x, state.y)
+        if self._is_goal_state_action(state, action):
+            return self.goal_reward + self.cell_rewards[r, c] - self.step_cost
+        elif self.cell_rewards[r, c] == 0:
+            return 0 - self.step_cost
+        else:
+            return self.cell_rewards[r, c]
+
     def get_value_iteration_results(self, sample_rate):
         if self.value_iter is None:
             self.value_iter = ValueIteration(self, sample_rate=sample_rate)
@@ -103,7 +121,7 @@ class NavigationMDP(GridWorldMDP):
         """
         Returns a random empty/white state of type GridWorldState()
         """
-        
+
         if idx is None:
             rand_idx = np.random.randint(len(self.empty_rows))
         else:
@@ -196,13 +214,16 @@ class NavigationMDP(GridWorldMDP):
             a_s.append([action_to_idx[a] for a in action_seq])
         return d_mdp_states, a_s
 
-    def get_cell_distance_features(self):
+    def get_cell_distance_features(self, normalize=True):
 
         if self.feature_cell_dist is not None:
             return self.feature_cell_dist
 
-        self.loc_cells = [np.vstack(np.where(self.cells == cell)).transpose() for cell in range(len(self.cell_types))]
-        self.feature_cell_dist = np.zeros(self.cells.shape + (len(self.cell_types),), np.float32)
+        # +1 to include goal and start at 1 to ignore white/empty cell
+        dist_cell_types = range(1, len(self.cell_types)+1)
+
+        self.loc_cells = [np.vstack(np.where(self.cells == cell)).transpose() for cell in dist_cell_types]
+        self.feature_cell_dist = np.zeros(self.cells.shape + (len(dist_cell_types),), np.float32)
 
         for row in range(self.height):
             for col in range(self.width):
@@ -211,58 +232,36 @@ class NavigationMDP(GridWorldMDP):
                 # Ord=1: Manhattan, Ord=2: Euclidean and so on
                 self.feature_cell_dist[row, col] = [np.linalg.norm([row, col] - loc_cell, ord=1, axis=1).min() \
                                                     if len(loc_cell) != 0 else -1 for loc_cell in self.loc_cells]
+
+        # feature scaling
+        if normalize:
+            max_dist = self.width + self.height
+            self.feature_cell_dist /= max_dist
+
         return self.feature_cell_dist
 
-    def feature_short_at_state(self, mdp_state):
+    def feature_short_at_state(self, mdp_state, normalize=True):
         return self.feature_short_at_loc(mdp_state.x, mdp_state.y)
 
-    def feature_long_at_state(self, mdp_state):
-        return self.feature_long_at_loc(mdp_state.x, mdp_state.y)
+    def feature_long_at_state(self, mdp_state, normalize=True):
+        return self.feature_long_at_loc(mdp_state.x, mdp_state.y, normalize)
 
-    def feature_short_at_loc(self, x, y):
+    def feature_short_at_loc(self, x, y, normalize=True):
         row, col = self._xy_to_rowcol(x, y)
         if (x, y) in self.goal_locs:
             return np.zeros(len(self.cell_types), dtype=np.float32)
         else:
             return np.eye(len(self.cell_types))[self.cells[row, col]]
 
-    def feature_long_at_loc(self, x, y):
+    def feature_long_at_loc(self, x, y, normalize=True):
         row, col = self._xy_to_rowcol(x, y)
-        return np.hstack((self.feature_short_at_loc(x, y), self.get_cell_distance_features()[row, col]))
+        return np.hstack((self.feature_short_at_loc(x, y), self.get_cell_distance_features(normalize)[row, col]))
 
     def states_to_features(self, states, phi):
         return np.asarray([phi(s) for s in states], dtype=np.float32)
 
     def states_to_coord(self, states, phi):
         return np.asarray([(s.x, s.y) for s in states], dtype=np.float32)
-
-    def _compute_cell_rewards(self, weights, phi_at_loc):
-
-        r_map = np.zeros((self.height, self.width), dtype=np.float32)
-        for row in range(self.height):
-            for col in range(self.width):
-                x, y = self._rowcol_to_xy(row, col)
-                r_map[row, col] = phi_at_loc(x, y).dot(weights)[0]
-        return r_map
-
-    def _reward_func(self, state, action):
-        '''
-        Args:
-            state (State)
-            action (str)
-
-        Returns
-            (float)
-        '''
-        r, c = self._xy_to_rowcol(state.x, state.y)
-        if self._is_goal_state_action(state, action):
-            return self.goal_reward + self.cell_rewards[r, c] - self.step_cost
-        elif (state.x, state.y) in self.manual_obstacles: # this is for additional experimentation only
-            return -1.0
-        elif self.cell_rewards[r, c] == 0:
-            return 0 - self.step_cost
-        else:
-            return self.cell_rewards[r, c]
 
     def _xy_to_rowcol(self, x, y):
         """
