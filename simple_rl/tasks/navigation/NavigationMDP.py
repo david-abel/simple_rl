@@ -33,6 +33,9 @@ class NavigationMDP(GridWorldMDP):
                  is_goal_terminal=True,
                  init_state=None,
                  vacancy_prob=0.8,
+                 sample_cell_types=[0],
+                 use_goal_dist_feature=True,
+                 goal_color="blue",
                  name="Navigation MDP"):
         """
         Note: 1. locations and state dimensions start from 1 instead of 0. 
@@ -66,9 +69,13 @@ class NavigationMDP(GridWorldMDP):
 
         # Probability of each cell type
         vacancy_prob = vacancy_prob
-        # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for square lattice).
-        # This is just an approximation as the paper isn't concerned about cell probabilities or mention it.
-        self.cell_prob = [8.*vacancy_prob/10., 2*vacancy_prob/10.] + [(1-vacancy_prob)/3.] * 3
+        if len(additional_obstacles) > 0:
+            self.cell_prob = np.zeros(len(self.cell_types))
+            self.cell_prob[0] = 1.
+        else:
+            # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for square lattice).
+            # This is just an approximation as the paper isn't concerned about cell probabilities or mention it.
+            self.cell_prob = [8.*vacancy_prob/10., 2*vacancy_prob/10.] + [(1-vacancy_prob)/3.] * 3
         # Matrix for identifying cell type and associated reward
         self.cells = np.random.choice(len(self.cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
 
@@ -88,11 +95,21 @@ class NavigationMDP(GridWorldMDP):
             self.cells[g_r, g_c] = len(self.cell_types) # allocate the next type to the goal
             self.cell_rewards[g_r, g_c] = self.goal_reward
         self.goal_locs = goal_locs
-
+        self.use_goal_dist_feature = use_goal_dist_feature
+        self.goal_color = goal_color
         self.feature_cell_dist = None
         self.value_iter = None
-        self.num_empty_states = np.sum(self.cells == 0)
-        self.empty_rows, self.empty_cols = np.where(self.cells == 0)
+        self.define_sample_cells(cell_types=sample_cell_types)
+
+    def define_sample_cells(self, cell_types=[0]):
+
+        self.sample_rows, self.sample_cols = [], []
+
+        for cell_type in cell_types:
+            rs, cs= np.where(self.cells == cell_type)
+            self.sample_rows.extend(rs)
+            self.sample_cols.extend(cs)
+        self.num_empty_states = len(self.sample_rows)
 
     def _reward_func(self, state, action):
         '''
@@ -123,12 +140,12 @@ class NavigationMDP(GridWorldMDP):
         """
 
         if idx is None:
-            rand_idx = np.random.randint(len(self.empty_rows))
+            rand_idx = np.random.randint(len(self.sample_rows))
         else:
-            assert 0 <= idx < len(self.empty_rows)
+            assert 0 <= idx < len(self.sample_rows)
             rand_idx = idx
 
-        x, y = self._rowcol_to_xy(self.empty_rows[rand_idx], self.empty_cols[rand_idx])
+        x, y = self._rowcol_to_xy(self.sample_rows[rand_idx], self.sample_cols[rand_idx])
         return GridWorldState(x, y)
 
     def sample_empty_states(self, n, repetition=False):
@@ -139,7 +156,7 @@ class NavigationMDP(GridWorldMDP):
         assert n > 0
 
         if repetition is False:
-            return [self.sample_empty_state(rand_idx) for rand_idx in np.random.permutation(len(self.empty_rows))[:n]]
+            return [self.sample_empty_state(rand_idx) for rand_idx in np.random.permutation(len(self.sample_rows))[:n]]
         else:
             return [self.sample_empty_state() for i in range(n)]
 
@@ -201,7 +218,7 @@ class NavigationMDP(GridWorldMDP):
                 init_states += self.sample_empty_states(n_trajectory - len(init_states), repetition=True)
         else:
             if len(init_states) < n_trajectory and pad_to_match_n_trajectory: # i.e., more init states need to be sampled
-                init_states += self.sample_empty_states(n_trajectory-len(init_states), init_repetition)
+                init_states += self.sample_empty_states(n_trajectory - len(init_states), init_repetition)
             else: # we have sufficient init states pre-specified, ignore the rest as we only need n_trajectory many
                 init_states = init_states[:n_trajectory]
 
@@ -219,8 +236,11 @@ class NavigationMDP(GridWorldMDP):
         if self.feature_cell_dist is not None:
             return self.feature_cell_dist
 
-        # +1 to include goal and start at 1 to ignore white/empty cell
-        dist_cell_types = range(1, len(self.cell_types)+1)
+        if self.use_goal_dist_feature:
+            # +1 to include goal and start at 1 to ignore white/empty cell
+            dist_cell_types = range(0, len(self.cell_types)+1)
+        else:
+            dist_cell_types = range(0, len(self.cell_types))
 
         self.loc_cells = [np.vstack(np.where(self.cells == cell)).transpose() for cell in dist_cell_types]
         self.feature_cell_dist = np.zeros(self.cells.shape + (len(dist_cell_types),), np.float32)
@@ -286,7 +306,7 @@ class NavigationMDP(GridWorldMDP):
         from matplotlib import colors
         from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-        cell_types = ['white', 'yellow', 'red', 'lime', 'magenta', 'blue']
+        cell_types = self.cell_types + [self.goal_color]
         cell_type_rewards = self.cell_type_rewards + [self.goal_reward]
 
         if new_fig == True:
