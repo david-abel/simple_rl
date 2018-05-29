@@ -68,14 +68,15 @@ class NavigationMDP(GridWorldMDP):
                               name=name)
 
         # Probability of each cell type
-        vacancy_prob = vacancy_prob
         if len(additional_obstacles) > 0:
             self.cell_prob = np.zeros(len(self.cell_types))
             self.cell_prob[0] = 1.
         else:
-            # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for square lattice).
-            # This is just an approximation as the paper isn't concerned about cell probabilities or mention it.
+            # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for
+            # square lattice). This is just an approximation (to match cell distribution with that of the paper);
+            # however, it is not the primary concern here.
             self.cell_prob = [8.*vacancy_prob/10., 2*vacancy_prob/10.] + [(1-vacancy_prob)/3.] * 3
+
         # Matrix for identifying cell type and associated reward
         self.cells = np.random.choice(len(self.cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
 
@@ -98,6 +99,7 @@ class NavigationMDP(GridWorldMDP):
         self.use_goal_dist_feature = use_goal_dist_feature
         self.goal_color = goal_color
         self.feature_cell_dist = None
+        self.feature_cell_dist_normalized = None
         self.value_iter = None
         self.define_sample_cells(cell_types=sample_cell_types)
 
@@ -233,7 +235,13 @@ class NavigationMDP(GridWorldMDP):
 
     def get_cell_distance_features(self, normalize=True):
 
-        if self.feature_cell_dist is not None:
+        """
+        Returns 3D array (x,y,z) where (x,y) refers to row and col of cells in the navigation grid and z is a vector of 
+        manhattan distance to each cell type.     
+        """
+        if normalize and self.feature_cell_dist_normalized is not None:
+            return self.feature_cell_dist_normalized
+        elif normalize == False and self.feature_cell_dist is not None:
             return self.feature_cell_dist
 
         if self.use_goal_dist_feature:
@@ -256,12 +264,12 @@ class NavigationMDP(GridWorldMDP):
         # feature scaling
         if normalize:
             max_dist = self.width + self.height
-            self.feature_cell_dist /= max_dist
+            self.feature_cell_dist_normalized = self.feature_cell_dist / max_dist
 
         return self.feature_cell_dist
 
     def feature_short_at_state(self, mdp_state, normalize=True):
-        return self.feature_short_at_loc(mdp_state.x, mdp_state.y)
+        return self.feature_short_at_loc(mdp_state.x, mdp_state.y, normalize)
 
     def feature_long_at_state(self, mdp_state, normalize=True):
         return self.feature_long_at_loc(mdp_state.x, mdp_state.y, normalize)
@@ -275,7 +283,7 @@ class NavigationMDP(GridWorldMDP):
 
     def feature_long_at_loc(self, x, y, normalize=True):
         row, col = self._xy_to_rowcol(x, y)
-        return np.hstack((self.feature_short_at_loc(x, y), self.get_cell_distance_features(normalize)[row, col]))
+        return np.hstack((self.feature_short_at_loc(x, y, normalize), self.get_cell_distance_features(normalize)[row, col]))
 
     def states_to_features(self, states, phi):
         return np.asarray([phi(s) for s in states], dtype=np.float32)
