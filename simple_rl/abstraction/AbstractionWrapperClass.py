@@ -13,7 +13,7 @@ class AbstractionWrapper(Agent):
                     agent_params={},
                     state_abstr=None,
                     action_abstr=None,
-                    name_ext="abstr"):
+                    name_ext="-abstr"):
         '''
         Args:
             SubAgentClass (simple_rl.AgentClass)
@@ -30,7 +30,7 @@ class AbstractionWrapper(Agent):
         self.state_abstr = state_abstr
         all_actions = self.action_abstr.get_actions() if self.action_abstr is not None else self.agent.actions
         
-        Agent.__init__(self, name=self.agent.name + name_ext)
+        Agent.__init__(self, name=self.agent.name + name_ext, actions=all_actions)
 
     def act(self, ground_state, reward):
         '''
