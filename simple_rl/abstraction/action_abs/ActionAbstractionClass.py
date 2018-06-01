@@ -39,7 +39,7 @@ class ActionAbstraction(object):
 
             if len(active_options) == 0:
                 if self.prims_on_failure:
-                    # In a rare failure state, back off to primitives.
+                    # In a failure state, back off to primitives.
                     agent.actions = self._convert_to_options(self.prim_actions)
                 else:
                     # No actions available.
