@@ -98,9 +98,17 @@ Make an Agent subclass, which requires:
 
 ## In Development
 
-A few features are in development, including MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf) and the DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf).
+I'm hoping to add the following features during Summer-Fall 2018:
 
-Let me know if you have any questions or suggestions.
+* __Planning__: MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf) and RTDP [[Barto et al. 1995]](https://pdfs.semanticscholar.org/2838/e01572bf53805c502ec31e3e00a8e1e0afcf.pdf)
+* __Deep RL__: Polish the DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf), others (DDPG).
+* __Efficiency__: Convert most defaultdict/dict uses to numpy.
+* __Docs__: Tutorials, contribution policy, and thorough documentation.
+* __Visuals__: Unify MDP visualization.
+* __POMDP__: Add an abstract POMDPClass and some basic solvers.
+* __Misc__: Additional testing, reproducibility checks (store more in params file, rerun experiment from params file).
+
+If you'd like to help out, I'll be making a mailing list for the library soon -- shoot me an email. Let me know if you have any questions or suggestions.
 
 Cheers,
 
