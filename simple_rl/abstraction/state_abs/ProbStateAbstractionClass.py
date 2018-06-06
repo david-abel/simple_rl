@@ -33,3 +33,12 @@ class ProbStateAbstraction(StateAbstraction):
         # abstr_state.set_terminal(state.is_terminal())
 
         return abstr_state
+
+def convert_prob_sa_to_sa(prob_sa):
+    new_phi = {}
+
+    for s_g in prob_sa.abstr_dist.keys():
+
+        new_phi[s_g] = prob_sa.abstr_dist[s_g].keys()[prob_sa.abstr_dist[s_g].values().index(max(prob_sa.abstr_dist[s_g].values()))]
+
+    return StateAbstraction(new_phi)
