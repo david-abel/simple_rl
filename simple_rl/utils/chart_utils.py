@@ -22,6 +22,7 @@ Author: David Abel (cs.brown.edu/~dabel)
 # Python imports.
 from __future__ import print_function
 import math
+import decimal
 import sys
 import os
 import matplotlib
@@ -40,13 +41,15 @@ color_ls = [[240, 163, 255], [102, 120, 173], [113, 198, 113],\
 # Set font.
 font = {'size':14}
 matplotlib.rc('font', **font)
-matplotlib.rcParams['text.usetex'] = False
+matplotlib.rcParams['pdf.fonttype'] = 42
+# matplotlib.rcParams['text.usetex'] = True
 fig = matplotlib.pyplot.gcf()
 
 CUSTOM_TITLE = None
 X_AXIS_LABEL = None
 Y_AXIS_LABEL = None
 X_AXIS_START_VAL = 0
+X_AXIS_INCREMENT = 1
 Y_AXIS_END_VAL = None
 
 def load_data(experiment_dir, experiment_agents):
@@ -217,15 +220,14 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         series_color = colors[agent_color_index]
         series_marker = markers[agent_color_index]
         y_axis = results[i]
-        x_axis = range(X_AXIS_START_VAL, X_AXIS_START_VAL + len(y_axis))
-
-        # Y_AXIS_END_VAL = y_axis if Y_AXIS_END_VAL is None else Y_AXIS_END_VAL
+        x_axis = list(drange(X_AXIS_START_VAL, X_AXIS_START_VAL + len(y_axis) * X_AXIS_INCREMENT, X_AXIS_INCREMENT))
 
         # Plot Confidence Intervals.
         if conf_intervals != []:
             alg_conf_interv = conf_intervals[i]
             top = np.add(y_axis, alg_conf_interv)
             bot = np.subtract(y_axis, alg_conf_interv)
+            print(len(x_axis), top.shape, bot.shape)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
         print("\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")")
 
@@ -312,6 +314,25 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
                 episodic=episodic,
                 open_plot=open_plot,
                 track_disc_reward=track_disc_reward)
+
+def drange(x_min, x_max, x_increment):
+    '''
+    Args:
+        x_min (float)
+        x_max (float)
+        x_increment (float)
+
+    Returns:
+        (generator): Makes a list.
+
+    Notes:
+        A range function for generating lists of floats. Based on code from stack overflow user Sam Bruns:
+            https://stackoverflow.com/questions/16105485/unsupported-operand-types-for-float-and-decimal
+    '''
+    x_min = decimal.Decimal(x_min)
+    while x_min < x_max:
+        yield float(x_min)
+        x_min += decimal.Decimal(str(x_increment))
 
 def _get_agent_names(data_dir):
     '''

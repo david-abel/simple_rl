@@ -34,7 +34,10 @@ class StateAbstraction(object):
             else:
                 self._phi[state] = 1
 
-        abstr_state = State(self._phi[state])
+        if not isinstance(self._phi[state], State):
+            abstr_state = State(self._phi[state])
+        else:
+            abstr_state = self._phi[state]
         abstr_state.set_terminal(state.is_terminal())
 
         return abstr_state
