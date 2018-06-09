@@ -28,7 +28,7 @@ from collections import defaultdict
 from simple_rl.planning import ValueIteration
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
-from simple_rl.agents import QLearningAgent, FixedPolicyAgent
+from simple_rl.agents import FixedPolicyAgent
 
 def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False, open_plot=True):
     '''
@@ -185,12 +185,12 @@ def run_agents_lifelong(agents,
             mdp = mdp_distr.sample()
 
             # Run the agent.
-            hit_terminal, total_steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal, resample_at_terminal)
+            hit_terminal, total_steps_taken, _ = run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal, resample_at_terminal)
 
             # If we resample at terminal, keep grabbing MDPs until we're done.
             while resample_at_terminal and hit_terminal and total_steps_taken < steps:
                 mdp = mdp_distr.sample()
-                hit_terminal, steps_taken = run_single_agent_on_mdp(agent, mdp, episodes, steps - total_steps_taken, experiment, verbose, track_disc_reward, reset_at_terminal, resample_at_terminal)
+                hit_terminal, steps_taken, _ = run_single_agent_on_mdp(agent, mdp, episodes, steps - total_steps_taken, experiment, verbose, track_disc_reward, reset_at_terminal, resample_at_terminal)
                 total_steps_taken += steps_taken
 
             # Reset the agent.
@@ -292,10 +292,13 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         Main loop of a single MDP experiment.
 
     Returns:
-        (dict): {key=agent, val=time}
+        (tuple): (bool:reached terminal, int: num steps taken, float: cumulative discounted reward)
     '''
     if reset_at_terminal and resample_at_terminal:
         raise ValueError("(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True.")
+
+    value = 0
+    gamma = mdp.get_gamma()
 
     # For each episode.
     for episode in range(1, episodes + 1):
@@ -338,6 +341,9 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             # Execute in MDP.
             reward, next_state = mdp.execute_agent_action(action)
 
+            # Track value.
+            value += reward * gamma ** step
+
             # Record the experience.
             if experiment is not None:
                 reward_to_track = mdp.get_gamma()**(step + 1 + episode*steps) * reward if track_disc_reward else reward
@@ -351,7 +357,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
                     mdp.reset()
                 elif resample_at_terminal and step < steps:
                     mdp.reset()
-                    return True, step
+                    return True, step, value
 
             # Update pointer.
             state = next_state
@@ -374,7 +380,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     if experiment is not None:
         experiment.end_of_instance(agent)
 
-    return False, steps
+    return False, steps, value
 
 def _make_step_progress_bar():
     '''
@@ -393,6 +399,27 @@ def _make_step_progress_bar():
 def _increment_bar():
     sys.stdout.write("-")
     sys.stdout.flush()
+
+def evaluate_agent(agent, mdp, instances=10):
+    '''
+    Args:
+        agent (simple_rl.Agent)
+        mdp (simple_rl.MDP)
+        instances (int)
+
+    Returns:
+        (float)
+    '''
+    total = 0.0
+    steps = int(1 / (1 - mdp.get_gamma()))
+    for i in range(instances):
+        _, _, val = run_single_agent_on_mdp(agent, mdp, episodes=1, steps=steps)
+        total += val
+        # Reset the agent.
+        agent.reset()
+        mdp.end_of_instance()
+
+    return total / instances
 
 def choose_mdp(mdp_name, env_name="Asteroids-v0"):
     '''
