@@ -175,12 +175,13 @@ def _format_title(plot_title):
 
     return plot_title_final
 
-def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False):
+def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
         experiment_dir (str): path to results.
         agents (list): each element is an agent that was run in the experiment.
+        plot_file_name (str)
         conf_intervals (list of floats) [optional]: confidence intervals to display with the chart.
         use_cost (bool) [optional]: If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         cumulative (bool) [optional]: If true, plots are cumulative cost/reward.
@@ -212,7 +213,7 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     # Make the plot.
     print_prefix = "\nAvg. cumulative reward" if cumulative else "Avg. reward"
 
-
+    # For each agent.
     for i, agent_name in enumerate(agents):
 
         # Add figure for this algorithm.
@@ -253,11 +254,12 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
         exp_name = exp_dir_split_list[0]
 
     experiment_dir = experiment_dir + "/" if experiment_dir[-1] != "/" else experiment_dir
-    plot_file_name = experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    plot_file_name = plot_file_name if plot_file_name != "" else experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
     if CUSTOM_TITLE is None:
         plot_title = _format_title(plot_title)
 
+    # Axis labels.
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
 
@@ -279,11 +281,12 @@ def plot(results, experiment_dir, agents, conf_intervals=[], use_cost=False, cum
     pyplot.cla()
     pyplot.close()
 
-def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False):
+def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False):
     '''
     Args:
         experiment_dir (str): path to results.
         experiment_agents (list): agent names (looks for "<agent-name>.csv").
+        plot_file_name (str)
         cumulative (bool): If true, plots show cumulative trr
         use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
@@ -293,8 +296,6 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
         Creates plots for all agents run under the experiment.
         Stores the plot in results/<experiment_name>/<plot_name>.pdf
     '''
-
-    # experiment_agents.sort()
 
     # Load the data.
     data = load_data(experiment_dir, experiment_agents) # [alg][instance][episode]
@@ -306,8 +307,8 @@ def make_plots(experiment_dir, experiment_agents, cumulative=True, use_cost=Fals
     conf_intervals = compute_conf_intervals(data, cumulative=cumulative)
 
     # Create plot.
-    plot(avg_data, experiment_dir,
-                experiment_agents,
+    plot(avg_data, experiment_dir, experiment_agents,
+                plot_file_name=plot_file_name,
                 conf_intervals=conf_intervals,
                 use_cost=use_cost,
                 cumulative=cumulative,
