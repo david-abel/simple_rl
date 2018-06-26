@@ -15,7 +15,7 @@ def main(open_plot=True):
     mdp = GridWorldMDP(width=10, height=10, init_loc=(1, 1), goal_locs=[(10, 10)])
     ql_agent = QLearningAgent(actions=mdp.get_actions())
     rand_agent = RandomAgent(actions=mdp.get_actions())
-    abstr_identity_agent = AbstractionWrapper(QLearningAgent, agent_params={"epsilon":0.9}, actions=mdp.get_actions())
+    abstr_identity_agent = AbstractionWrapper(QLearningAgent, agent_params={"epsilon":0.9, "actions":mdp.get_actions()})
 
     # Run experiment and make plot.
     run_agents_on_mdp([ql_agent, rand_agent, abstr_identity_agent], mdp, instances=5, episodes=100, steps=150, open_plot=open_plot)
