@@ -382,6 +382,26 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
     return False, steps, value
 
+def run_single_belief_agent_on_pomdp(belief_agent, pomdp, episodes, steps, experiment=None, verbose=False,
+                                     track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False):
+    '''
+
+    Args:
+        belief_agent:
+        pomdp:
+        episodes:
+        steps:
+        experiment:
+        verbose:
+        track_disc_reward:
+        reset_at_terminal:
+        resample_at_terminal:
+
+    Returns:
+
+    '''
+    pass
+
 def _make_step_progress_bar():
     '''
     Summary:

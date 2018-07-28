@@ -2,9 +2,9 @@ from math import log
 import numpy as np
 import copy
 from collections import defaultdict
+import random
 
-from simple_rl.tasks.grid_world.GridWorldMDPClass import GridWorldMDP
-from simple_rl.planning.ValueIterationClass import ValueIteration
+from simple_rl.pomdp.BeliefMDPClass import BeliefMDP
 
 
 class BeliefSparseSampling(object):
@@ -18,7 +18,7 @@ class BeliefSparseSampling(object):
     def __init__(self, gen_model, gamma, tol, max_reward, state, name="bss"):
         '''
         Args:
-             gen_model (GridWorldGenerativeModel): Model of our MDP -- we tell it what action we are performing from some state s
+             gen_model (BeliefMDP): Model of our MDP -- we tell it what action we are performing from some state s
              and it will return what our next state is
              gamma (float): MDP discount factor
              tol (float): Most expected difference between optimal and computed value function
@@ -33,7 +33,7 @@ class BeliefSparseSampling(object):
         self.horizon = self._horizon
         self.width = self._width
 
-        print 'Horizon = {} \t Width = {}'.format(self.horizon, self.width)
+        print 'BSS Horizon = {} \t Width = {}'.format(self.horizon, self.width)
 
         self.name = name
         self.root_level_qvals = defaultdict()
@@ -51,10 +51,9 @@ class BeliefSparseSampling(object):
     @property
     def _width(self):
         '''
-
+        The number of times we ask the generative model to give us a next_state sample for each state, action pair.
         Returns:
-             _width (int): The number of times we ask the generative model to give us a next_state sample for each
-             state, action pair
+             _width (int)
         '''
         part1 = (self._vmax ** 2) / (self._lam ** 2)
         part2 = 2 * self._horizon * log(self._horizon * (self._vmax ** 2) / (self._lam ** 2))
@@ -71,19 +70,17 @@ class BeliefSparseSampling(object):
 
     def _get_width_at_height(self, height):
         '''
-
+        The branching factor of the tree is decayed according to this formula as suggested by the BSS paper.
         Args:
             height (int): the current depth in the MDP recursive tree measured from top
         Returns:
             width (int): the decayed branching factor for a state, action pair
-
-        The branching factor of the tree is decayed according to this formula as suggested by the BSS paper
         '''
         c = int(self.width * (self.gamma ** (2 * height)))
         return c if c > 1 else 1
 
     def _estimate_qs(self, state, horizon):
-        qvalues = np.zeros(self.gen_model.num_actions)
+        qvalues = np.zeros(len(self.gen_model.actions))
         for action_idx, action in enumerate(self.gen_model.actions):
             if horizon <= 0:
                 qvalues[action_idx] = 0.0
@@ -101,12 +98,12 @@ class BeliefSparseSampling(object):
         Returns:
             average_reward (float): measure of how good (s, a) would be
         '''
-        sum = 0.0
+        sum_ = 0.0
         width = self._get_width_at_height(self.horizon - horizon)
         for _ in range(width):
-            next_state = self.gen_model.generate(state, action)
-            sum += self.gen_model.get_reward(state, action) + (self.gamma * self._estimate_v(next_state, horizon-1))
-        return sum / float(width)
+            next_state = self.gen_model.transition_func(state, action)
+            sum_ += self.gen_model.reward_func(state, action) + (self.gamma * self._estimate_v(next_state, horizon-1))
+        return sum_ / float(width)
 
     def _estimate_v(self, state, horizon):
         '''
@@ -121,8 +118,8 @@ class BeliefSparseSampling(object):
             if horizon in self.nodes_by_horizon[state]:
                 return self.nodes_by_horizon[state][horizon]
 
-        if (state.x, state.y) in self.gen_model.goal_locs:
-            self.nodes_by_horizon[state][horizon] = self.gen_model.get_reward(state, "up")
+        if self.gen_model.is_in_goal_state():
+            self.nodes_by_horizon[state][horizon] = self.gen_model.reward_func(state, random.choice(self.gen_model.actions))
         else:
             self.nodes_by_horizon[state][horizon] = np.max(self._estimate_qs(state, horizon))
 
@@ -139,108 +136,24 @@ class BeliefSparseSampling(object):
         if state in self.root_level_qvals:
             qvalues = self.root_level_qvals[state]
         else:
-            init_horizon = copy.deepcopy(self._horizon)
+            init_horizon = self.horizon
             qvalues = self._estimate_qs(state, init_horizon)
         action_idx = np.argmax(qvalues)
         self.root_level_qvals[state] = qvalues
-        return self.gen_model.get_action_for_idx(action_idx)
+        return self.gen_model.actions[action_idx]
 
-    def execute_action(self, action):
-        '''
-        Args:
-            action (str): action to take in underlying MDP
-        Returns:
-            reward (float): reward given by MDP for taking action
-            next_state (State): (s, a) --> s'
-        '''
-        return self.gen_model.execute_action(action)
-
-    def run(self, num_episodes=5):
-        final_scores = []
-        for episode in range(num_episodes):
-            discounted_sum_rewards = 0.0
-            num_iter = 0
-            self.gen_model.reset_mdp()
-            state = self.gen_model.init_state
-            print 'Episode {}: '.format(episode)
-            while (state.x, state.y) not in self.gen_model.goal_locs:
-                action = self.plan_from_state(state)
-                reward, next_state = self.execute_action(action)
-                discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
-                print '({}, {}, {}) -> {} | {}'.format(state, action, next_state, reward, discounted_sum_rewards)
-                state = copy.deepcopy(next_state)
-                num_iter += 1
-            final_scores.append(discounted_sum_rewards)
-        return final_scores
-
-
-class GridWorldGenerativeModel(object):
-    '''
-    BSS requires access to a generative model of the underlying MDP. This class is an example generative model for a
-    grid world MDP. Given a state and action, the generative model randomly samples from the distribution over next
-    states and returns it
-    '''
-    def __init__(self, gamma=0.99):
-        '''
-        Args:
-            gamma (float): discount factor of underlying MDP
-        '''
-        self.mdp = GridWorldMDP(gamma=gamma, goal_locs=[(4, 3)], slip_prob=0.0)
-        self.actions = self.mdp.get_actions()
-        self.num_actions = len(self.actions)
-        self.init_state = self.mdp.init_state
-        self.goal_locs = self.mdp.goal_locs
-
-    def generate(self, state, action):
-        '''
-        Args:
-            state (State): current state
-            action (Action): action to take
-        Returns:
-            next_state (State): state randomly sampled the distribution over next states
-        '''
-        return self.mdp.transition_func(state, action)
-
-    def get_reward(self, state, action):
-        return self.mdp.reward_func(state, action)
-
-    def get_action_for_idx(self, action_idx):
-        '''
-        Args:
-            action_idx (int): index corresponding to action
-
-        Returns:
-            action (str): "up", "down" etc
-        '''
-        return self.mdp.ACTIONS[action_idx]
-
-    def execute_action(self, action):
-        return self.mdp.execute_agent_action(action)
-
-    def reset_mdp(self):
-        self.mdp.reset()
-
-def plan_with_vi(gamma=0.99):
-    '''
-    Args:
-        gamma (float): discount factor
-
-    Running value iteration on the problem to test the correctness of the policy returned by BSS
-    '''
-    mdp = GridWorldMDP(gamma=gamma, goal_locs=[(4, 3)], slip_prob=0.0)
-    value_iter = ValueIteration(mdp, sample_rate=5)
-    value_iter.run_vi()
-
-    action_seq, state_seq = value_iter.plan(mdp.get_init_state())
-
-    print "[ValueIteration] Plan for {}".format(mdp)
-    for i in range(len(action_seq)):
-        print 'pi({}) --> {}'.format(state_seq[i], action_seq[i])
-
-
-if __name__ == '__main__':
-    discount_factor = 0.6
-    plan_with_vi(gamma=discount_factor)
-    model = GridWorldGenerativeModel(gamma=discount_factor)
-    bss = BeliefSparseSampling(gen_model=model, gamma=discount_factor, tol=1.0, max_reward=1.0, state=model.mdp.init_state)
-    scores = bss.run(num_episodes=3)
+    def run(self, verbose=True):
+        discounted_sum_rewards = 0.0
+        num_iter = 0
+        self.gen_model.reset()
+        state = self.gen_model.init_state
+        policy = defaultdict()
+        while not self.gen_model.is_in_goal_state():
+            action = self.plan_from_state(state)
+            reward, next_state = self.gen_model.execute_agent_action(action)
+            policy[state] = action
+            discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
+            if verbose: print '({}, {}, {}) -> {} | {}'.format(state, action, next_state, reward, discounted_sum_rewards)
+            state = copy.deepcopy(next_state)
+            num_iter += 1
+        return discounted_sum_rewards, policy
