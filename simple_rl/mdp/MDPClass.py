@@ -40,11 +40,19 @@ class MDP(object):
     def get_num_state_feats(self):
         return self.init_state.get_num_feats()
 
+    # --------------
+    # -- Mutators --
+    # --------------
+
     def set_gamma(self, new_gamma):
         self.gamma = new_gamma
 
     def set_step_cost(self, new_step_cost):
         self.step_cost = new_step_cost
+
+    # ----------
+    # -- Core --
+    # ----------
 
     def execute_agent_action(self, action):
         '''
@@ -66,7 +74,6 @@ class MDP(object):
 
     def reset(self):
         self.cur_state = copy.deepcopy(self.init_state)
-
 
     def end_of_instance(self):
         pass

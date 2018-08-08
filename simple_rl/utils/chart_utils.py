@@ -32,8 +32,7 @@ import numpy as np
 import subprocess
 import argparse
 
-# first_five = [102, 120, 173], [118, 167, 125], [118, 167, 125], [94, 94, 94], [240, 167, 125]
-color_ls = [[240, 163, 255], [102, 120, 173], [113, 198, 113],\
+color_ls = [[102, 120, 173], [240, 163, 255], [113, 198, 113],\
                 [197, 193, 170],[85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
                 [153, 63, 0], [142, 142, 56], [56, 142, 142]]
@@ -193,6 +192,11 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         Makes (and opens) a single reward chart plotting all of the data in @data.
     '''
 
+    # Set x-axis labels to be integers.
+    from matplotlib.ticker import MaxNLocator
+    ax = pyplot.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
     # Some nice markers and colors for plotting.
     markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
 
@@ -228,7 +232,6 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
             alg_conf_interv = conf_intervals[i]
             top = np.add(y_axis, alg_conf_interv)
             bot = np.subtract(y_axis, alg_conf_interv)
-            print(len(x_axis), top.shape, bot.shape)
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
         print("\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")")
 
@@ -252,7 +255,6 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     else:
         exp_name = exp_dir_split_list[0]
-
     experiment_dir = experiment_dir + "/" if experiment_dir[-1] != "/" else experiment_dir
     plot_file_name = plot_file_name if plot_file_name != "" else experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
@@ -268,6 +270,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
+
 
     # Save the plot.
     pyplot.savefig(plot_file_name, format="pdf")

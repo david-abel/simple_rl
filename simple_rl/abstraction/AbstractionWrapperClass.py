@@ -41,10 +41,12 @@ class AbstractionWrapper(Agent):
         Return:
             (str)
         '''
+
         if self.state_abstr is not None:
             abstr_state = self.state_abstr.phi(ground_state)
         else:
             abstr_state = ground_state
+
 
         if self.action_abstr is not None:
             ground_action = self.action_abstr.act(self.agent, abstr_state, ground_state, reward)

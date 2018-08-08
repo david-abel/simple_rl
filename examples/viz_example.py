@@ -8,7 +8,7 @@ import argparse
 import srl_example_setup
 from simple_rl.agents import QLearningAgent, RMaxAgent
 from simple_rl.run_experiments import run_single_agent_on_mdp 
-from simple_rl.tasks import FourRoomMDP
+from simple_rl.tasks import FourRoomMDP, TaxiOOMDP
 from simple_rl.tasks.grid_world.GridWorldMDPClass import make_grid_world_from_file
 from simple_rl.planning import ValueIteration
 
@@ -20,12 +20,13 @@ def parse_args():
     return args.v
 
 def main():
+    
     # Setup MDP, Agents.
-    mdp = FourRoomMDP(5, 5, goal_locs=[(5, 5)], gamma=0.99, step_cost=0.01)
-    # mdp = make_grid_world_from_file("octogrid.txt", num_goals=12, randomize=False)
-    ql_agent = QLearningAgent(mdp.get_actions(), epsilon=0.2, alpha=0.5) 
-    rm_agent = RMaxAgent(mdp.get_actions())
+    mdp = FourRoomMDP(11, 11, goal_locs=[(11, 11)], gamma=0.9, step_cost=0.0)
+    ql_agent = QLearningAgent(mdp.get_actions(), epsilon=0.2, alpha=0.4) 
     viz = parse_args()
+
+    # Choose viz type.
     viz = "learning"
 
     if viz == "value":
@@ -45,6 +46,9 @@ def main():
     elif viz == "learning":
         # Run experiment and make plot.
         mdp.visualize_learning(ql_agent)
+    elif viz == "interactive":
+    	mdp.visualize_interaction()
+
 
 if __name__ == "__main__":
     main()

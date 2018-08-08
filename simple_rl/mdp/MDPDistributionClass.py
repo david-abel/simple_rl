@@ -79,14 +79,14 @@ class MDPDistribution(object):
         return self.horizon
 
     def get_actions(self):
-        return self.mdp_prob_dict.keys()[0].get_actions()
+        return list(self.mdp_prob_dict.keys())[0].get_actions()
 
     def get_gamma(self):
         '''
         Notes:
             Not all MDPs in the distribution are guaranteed to share gamma.
         '''
-        return self.mdp_prob_dict.keys()[0].get_gamma()
+        return list(self.mdp_prob_dict.keys())[0].get_gamma()
 
     def get_reward_func(self, avg=True):
         if avg:
@@ -107,7 +107,7 @@ class MDPDistribution(object):
         Notes:
             Not all MDPs in the distribution are guaranteed to share init states.
         '''
-        return self.mdp_prob_dict.keys()[0].get_init_state()
+        return list(self.mdp_prob_dict.keys())[0].get_init_state()
 
     def get_num_mdps(self):
         return len(self.mdp_prob_dict.keys())
@@ -134,17 +134,17 @@ class MDPDistribution(object):
             (List of MDP): Samples @k mdps without replacement.
         '''
 
-        sampled_mdp_id_list = np.random.multinomial(k, self.mdp_prob_dict.values()).tolist()
+        sampled_mdp_id_list = np.random.multinomial(k, list(self.mdp_prob_dict.values())).tolist()
         indices = [i for i, x in enumerate(sampled_mdp_id_list) if x > 0]
 
         if k == 1:
-            return self.mdp_prob_dict.keys()[indices[0]]
+            return list(self.mdp_prob_dict.keys())[indices[0]]
 
         mdps_to_return = []
 
         for i in indices:
             for copies in range(sampled_mdp_id_list[i]):
-                mdps_to_return.append(self.mdp_prob_dict.keys()[i])
+                mdps_to_return.append(list(self.mdp_prob_dict.keys())[i])
 
         return mdps_to_return
         
@@ -153,7 +153,7 @@ class MDPDistribution(object):
         Notes:
             Not all MDPs are guaranteed to share a name (for instance, might include dimensions).
         '''
-        return "lifelong-" + str(self.mdp_prob_dict.keys()[0])
+        return "lifelong-" + str(list(self.mdp_prob_dict.keys())[0])
 
 def main():
     # Simple test code.

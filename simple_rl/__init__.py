@@ -39,7 +39,7 @@ try:
 except NameError:
     xrange = range
 
-# Fix input
+# Fix input to cooperate with python 2 and 3.
 try:
    input = raw_input
 except NameError:

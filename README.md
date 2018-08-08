@@ -74,6 +74,9 @@ The above code will generate the following plot:
 
 * (_utils_): Code for charting and other utilities.
 
+## Contributing
+
+If you'd like to contribute: that's great! Take a look at some of the needed improvements below, and please see the [contribution guidelines](https://github.com/david-abel/simple_rl/blob/master/CONTRIBUTING.md). Email Dave with any questions.
 
 ## Making a New MDP
 
@@ -98,7 +101,7 @@ Make an Agent subclass, which requires:
 
 ## In Development
 
-I'm hoping to add the following features during Summer-Fall 2018:
+I'm hoping to add the following features:
 
 * __Planning__: MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf) and RTDP [[Barto et al. 1995]](https://pdfs.semanticscholar.org/2838/e01572bf53805c502ec31e3e00a8e1e0afcf.pdf)
 * __Deep RL__: Polish the DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf), others (DDPG).
