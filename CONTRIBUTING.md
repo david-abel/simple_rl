@@ -12,7 +12,7 @@ As of August 2018, the standard pipeline for contributing is as follows:
 # Library Standards
 
 Please ensure:
-  * Your code is compatible with both Python 2 and Python 2.
+  * Your code is compatible with both Python 2 and Python 3.
   * If you add any deep learning, the library will be moving toward [PyTorch](https://pytorch.org/) as its standard.
   * I encourage the use of [https://www.pylint.org/](pylint).
   * Please include a brief log message for all commits.
