@@ -7,7 +7,7 @@ As of August 2018, the standard pipeline for contributing is as follows:
   * If you add something substantive, please do the following:
     * Run the [basic testing script](https://github.com/david-abel/simple_rl/blob/master/tests/basic_test.py) and ensure all tests pass in both Python 2 and Python 3.
     * If you decide your contribution would benefit from a new example/test, please write a quick example file to put in the [examples directory](https://github.com/david-abel/simple_rl/tree/master/examples).
-  * Issue a pull request to the main branch, which I (Dave) will review as quickly as I can. If I haven't approved the request in three days, feel free to email me.
+  * Issue a pull request to the main branch, which I will review as quickly as I can. If I haven't approved the request in three days, feel free to email me.
 
 # Library Standards
 
