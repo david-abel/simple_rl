@@ -19,7 +19,7 @@ def main(open_plot=True):
     # Make goal-based option agent.
     goal_based_options = aa_helpers.make_goal_based_options(mdp_distr)
     goal_based_aa = ActionAbstraction(prim_actions=mdp_distr.get_actions(), options=goal_based_options)
-    option_agent = AbstractionWrapper(QLearningAgent, actions=mdp_distr.get_actions(), action_abstr=goal_based_aa)
+    option_agent = AbstractionWrapper(QLearningAgent, action_abstr=goal_based_aa, agent_params={"actions":mdp_distr.get_actions()})
 
     # Run experiment and make plot.
     run_agents_lifelong([ql_agent, rand_agent, option_agent], mdp_distr, samples=10, episodes=100, steps=150, open_plot=open_plot)

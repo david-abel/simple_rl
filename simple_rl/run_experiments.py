@@ -408,7 +408,7 @@ def evaluate_agent(agent, mdp, instances=10):
         instances (int)
 
     Returns:
-        (float)
+        (float): Avg. cumulative discounted reward.
     '''
     total = 0.0
     steps = int(1 / (1 - mdp.get_gamma()))
