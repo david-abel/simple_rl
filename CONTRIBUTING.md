@@ -15,7 +15,7 @@ Please ensure:
   * Your code is compatible with both Python 2 and Python 3.
   * If you add any deep learning, the library will be moving toward [PyTorch](https://pytorch.org/) as its standard.
   * I encourage the use of [https://www.pylint.org/](pylint).
-  * Please include a brief log message for all commits.
+  * Please include a brief log message for all commits (ex: use -m "message").
   * Files are all named lower case with underscores between words *unless* that file contains a Class.
   * Class files are named with PascalCase (so all words are capitalized) with the last word being "Class" (ex: QLearningAgentClass.py).
 
@@ -25,9 +25,7 @@ Please:
   * Indent with spaces.
   * Spaces after all list items and algebraic operators (ex: ["a", "b", 5 + 6]).
   * Doc-strings follow the (now deprecated, sadly) [Google doc-string format](https://google.github.io/styleguide/pyguide.html#Comments). Please use this until this contribution guide says otherwise.
-  * Separate standard python imports from non-python imports, with python imports appearing first.
-
-I'll add on as I think of more!
+  * Separate standard python imports from non-python imports at the top of each file, with python imports appearing first.
 
 Best,
 Dave Abel (david_abel@brown.edu)
