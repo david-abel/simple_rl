@@ -76,7 +76,7 @@ The above code will generate the following plot:
 
 ## Contributing
 
-If you'd like to contribute: that's great! Take a look at some of the needed improvements below, and please see the [contribution guidelines](https://github.com/david-abel/simple_rl/blob/master/CONTRIBUTING.md). Email Dave with any questions.
+If you'd like to contribute: that's great! Take a look at some of the needed improvements below: I'd love for folks to work on those pieces. Please see the [contribution guidelines](https://github.com/david-abel/simple_rl/blob/master/CONTRIBUTING.md). Email me with any questions.
 
 ## Making a New MDP
 
@@ -103,15 +103,12 @@ Make an Agent subclass, which requires:
 
 I'm hoping to add the following features:
 
-* __Planning__: MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf) and RTDP [[Barto et al. 1995]](https://pdfs.semanticscholar.org/2838/e01572bf53805c502ec31e3e00a8e1e0afcf.pdf)
-* __Deep RL__: Polish the DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf), others (DDPG).
+* __Planning__: Finish MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf), implement RTDP [[Barto et al. 1995]](https://pdfs.semanticscholar.org/2838/e01572bf53805c502ec31e3e00a8e1e0afcf.pdf)
+* __Deep RL__: Write a DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf) in PyTorch, possibly others (some kind of policy gradient).
 * __Efficiency__: Convert most defaultdict/dict uses to numpy.
 * __Docs__: Tutorials, contribution policy, and thorough documentation.
 * __Visuals__: Unify MDP visualization.
-* __POMDP__: Add an abstract POMDPClass and some basic solvers.
 * __Misc__: Additional testing, reproducibility checks (store more in params file, rerun experiment from params file).
-
-If you'd like to help out, I'll be making a mailing list for the library soon -- shoot me an email. Let me know if you have any questions or suggestions.
 
 Cheers,
 

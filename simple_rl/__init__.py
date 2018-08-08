@@ -3,6 +3,7 @@ simple_rl
 	abstraction/
 		action_abs/
 		state_abs/
+		...
 	agents/
 		AgentClass.py
 		QLearningAgentClass.py
@@ -15,6 +16,16 @@ simple_rl
 	mdp/
 		MDPClass.py
 		StateClass.py
+	planning/
+		BeliefSparseSamplingClass.py
+		MCTSClass.py
+		PlannerClass.py
+		ValueIterationClass.py
+	pomdp/
+		BeliefMDPClass.py
+		BeliefStateClass.py
+		BeliefUpdaterClass.py
+		POMDPClass.py
 	tasks/
 		chain/
 			ChainMDPClass.py
