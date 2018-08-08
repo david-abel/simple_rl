@@ -3,7 +3,7 @@ import random
 
 from simple_rl.mdp.StateClass import State
 
-from simple_rl.tasks.cleanup.cleanup_mdp import CleanUpMDP
+from simple_rl.tasks.cleanup.CleanUpMDPClass import CleanUpMDP
 
 
 class CleanUpState(State):

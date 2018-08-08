@@ -78,8 +78,6 @@ class Experiment(object):
             for agent in self.agents:
                 if os.path.exists(os.path.join(self.exp_directory, str(agent)) + ".csv"):
                     os.remove(os.path.join(self.exp_directory, str(agent)) + ".csv")
-            if os.path.exists(os.path.join(self.exp_directory, "optimal") + ".csv"):
-                os.remove(os.path.join(self.exp_directory, "optimal") + ".csv")
         self.write_exp_info_to_file()
 
     def make_plots(self, open_plot=True):

@@ -27,17 +27,15 @@ class StateAbstraction(object):
             state (State)
         '''
 
-        # Setup phi for new states.
+        # Check types.
         if state not in self._phi.keys():
-            if len(self._phi.values()) > 0:
-                self._phi[state] = max(self._phi.values()) + 1
-            else:
-                self._phi[state] = 1
+            raise KeyError
 
         if not isinstance(self._phi[state], State):
-            abstr_state = State(self._phi[state])
-        else:
-            abstr_state = self._phi[state]
+            raise TypeError
+
+        # Get abstract state.
+        abstr_state = self._phi[state]
         abstr_state.set_terminal(state.is_terminal())
 
         return abstr_state
@@ -116,7 +114,10 @@ class StateAbstraction(object):
         for k, v in other_abs._phi.iteritems():
             other_cluster_dict[v].append(k)
 
+
         for ground_state in self._phi.keys():
+            
+
             # Get the two clusters associated with a state.
             states_cluster = self._phi[ground_state]
             if ground_state in other_abs._phi.keys():

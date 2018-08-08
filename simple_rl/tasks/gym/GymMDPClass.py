@@ -3,7 +3,6 @@ GymMDPClass.py: Contains implementation for MDPs of the Gym Environments.
 '''
 
 # Python imports.
-import numpy
 import random
 import sys
 import os

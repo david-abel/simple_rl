@@ -1,8 +1,10 @@
-from simple_rl.pomdp.POMDPClass import POMDP
-from simple_rl.tasks.maze_1d.Maze1DStateClass import Maze1DState
-
+# Python imports.
 from collections import defaultdict
 import random
+
+# Other imports.
+from simple_rl.pomdp.POMDPClass import POMDP
+from simple_rl.tasks.maze_1d.Maze1DStateClass import Maze1DState
 
 class Maze1DPOMDP(POMDP):
     ''' Class for a 1D Maze POMDP '''

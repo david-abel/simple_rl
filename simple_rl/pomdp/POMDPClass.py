@@ -1,7 +1,9 @@
+# Python imports.
+from collections import defaultdict
+
+# Other imports.
 from simple_rl.pomdp.BeliefUpdaterClass import BeliefUpdater
 from simple_rl.mdp.MDPClass import MDP
-
-from collections import defaultdict
 
 class POMDP(MDP):
     ''' Abstract class for a Partially Observable Markov Decision Process. '''

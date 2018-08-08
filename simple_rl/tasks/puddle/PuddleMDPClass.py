@@ -17,16 +17,18 @@ from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 class PuddleMDP(GridWorldMDP):
     ''' Class for a Puddle MDP '''
 
-    def __init__(self, gamma=0.99, slip_prob=0.00, name="puddle", is_goal_terminal=True, rand_init=False):
+    def __init__(self, gamma=0.99, slip_prob=0.00, name="puddle", puddle_rects=[(0.1, 0.8, 0.5, 0.7), (0.4, 0.7, 0.5, 0.4)], is_goal_terminal=True, rand_init=False):
         '''
         Args:
-            height (int)
-            width (int)
-            init_loc (tuple: (int, int))
-            goal_locs (list of tuples: [(int, int)...])
+            gamma (float)
+            slip_prob (float)
+            name (str)
+            puddle_rects (list): [(top_left_x, top_left_y), (bot_right_x, bot_right_y)]
+            is_goal_terminal (bool)
+            rand_init (bool)
         '''
-        self.delta = 0.01
-        self.puddle_rects = [(0.1,0.8,0.5,0.7), (0.4, 0.7, 0.5, 0.4)]
+        self.delta = 0.05
+        self.puddle_rects = puddle_rects
         GridWorldMDP.__init__(self, width=1.0, height=1.0, init_loc=[0.25, 0.6], goal_locs=[[1.0, 1.0]], gamma=gamma, name=name, is_goal_terminal=is_goal_terminal, rand_init=rand_init)
 
     def _reward_func(self, state, action):
@@ -38,6 +40,14 @@ class PuddleMDP(GridWorldMDP):
             return 0 - self.step_cost
 
     def _is_puddle_state_action(self, state, action):
+        '''
+        Args:
+            state (simple_rl.State)
+            action (str)
+
+        Returns:
+            (bool)
+        '''
         for puddle_rect in self.puddle_rects:
             x_1, y_1, x_2, y_2 = puddle_rect
             if state.x >= x_1 and state.x <= x_2 and \
@@ -45,7 +55,6 @@ class PuddleMDP(GridWorldMDP):
                 return True
 
         return False
-
 
     def _is_goal_state_action(self, state, action):
         '''
@@ -73,17 +82,33 @@ class PuddleMDP(GridWorldMDP):
             return False
 
     def is_loc_within_radius_to_goal(self, state_x, state_y):
+        '''
+        Args:
+            state_x (float)
+            state_y (float)
+
+        Returns:
+            (bool)
+        '''
         for g in self.goal_locs:
             if _euclidean_distance(state_x, state_y, g[0], g[1]) <= self.delta * 2:
                 return True
         return False
 
     def _transition_func(self, state, action):
+        '''
+        Args:
+            state (simple_rl.State)
+            action (str)
 
+        Returns:
+            state (simple_rl.State)
+        '''
         if state.is_terminal():
             return state
 
-        to_move = self.delta + np.random.randn(1)[0] / 100.0
+        noise = np.random.randn(1)[0] / 100.0
+        to_move = self.delta + noise
 
         if action == "up":
             next_state = GridWorldState(state.x, min(state.y + to_move, 1))
@@ -103,4 +128,14 @@ class PuddleMDP(GridWorldMDP):
 
 
 def _euclidean_distance(ax, ay, bx, by):
+    '''
+    Args:
+        ax (float)
+        ay (float)
+        bx (float)
+        by (float)
+
+    Returns:
+        (float)
+    '''
     return np.linalg.norm(np.array([ax, ay]) - np.array([bx, by]))

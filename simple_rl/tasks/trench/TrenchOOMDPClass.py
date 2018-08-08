@@ -11,7 +11,7 @@ from simple_rl.tasks.trench.TrenchOOMDPState import TrenchOOMDPState
 
 
 class TrenchOOMDP(OOMDP):
-    ''' Class for a Taxi OO-MDP '''
+    ''' Class for a Trench OO-MDP '''
 
     # Static constants.
     ACTIONS = ["forward", "rotate_right", "rotate_left", "pickup", "place"]

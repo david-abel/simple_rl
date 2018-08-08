@@ -2,6 +2,7 @@
 from __future__ import print_function
 from collections import defaultdict
 import sys
+import random
 
 # Other imports.
 from simple_rl.planning.ValueIterationClass import ValueIteration
@@ -181,9 +182,10 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
         state_dict[s.x][s.y] = s
 
     # Grab colors.
-    from simple_rl.utils.chart_utils import color_ls
-    while state_abstr.get_num_abstr_states() > len(color_ls):
-        color_ls.append((random.randint(0,255), random.randint(0,255), random.randint(0,255)))
+    from simple_rl.utils.chart_utils import first_five, color_ls
+    sa_colors = first_five + color_ls
+    while state_abstr.get_num_abstr_states() > len(sa_colors):
+        sa_colors.append((random.randint(0,255), random.randint(0,255), random.randint(0,255)))
 
     # For each row:
     for i in range(grid_mdp.width):
@@ -199,7 +201,7 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
             s = state_dict[i+1][grid_mdp.height - j]
             abs_state = state_abstr.phi(s)
             cluster_num = abs_state.data #state_abstr.get_abs_cluster_num(abs_state)
-            abstr_state_color = color_ls[cluster_num % len(color_ls)]
+            abstr_state_color = sa_colors[cluster_num % len(sa_colors)]
             r = pygame.draw.rect(screen, abstr_state_color, (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width-10, cell_height-10), 0)
             r = pygame.draw.rect(screen, (46, 49, 49), top_left_point + (cell_width, cell_height), 3)
 
@@ -210,7 +212,7 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
                 text = reg_font.render("(wall)", True, (46, 49, 49))
                 screen.blit(text, (top_left_point[0] + 10, top_left_point[1] + 20))
 
-            if (i+1,grid_mdp.height - j) in goal_locs:
+            if (i + 1, grid_mdp.height - j) in goal_locs:
                 # Draw goal.
                 circle_center = int(top_left_point[0] + cell_width/2.0), int(top_left_point[1] + cell_height/2.0)
                 circler_color = (154, 195, 157)

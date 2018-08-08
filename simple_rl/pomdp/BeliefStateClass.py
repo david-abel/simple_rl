@@ -1,6 +1,8 @@
-from simple_rl.mdp.StateClass import State
-
+# Python imports.
 from collections import defaultdict
+
+# Other imports.
+from simple_rl.mdp.StateClass import State
 
 class BeliefState(State):
     '''

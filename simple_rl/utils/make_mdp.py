@@ -29,7 +29,7 @@ def make_mdp(mdp_class="grid", grid_dim=7):
     hall_goal_locs = [(i, width) for i in range(1, height+1)]
 
     four_room_goal_locs = [(width, height), (width, 1), (1, height), (1, height - 2), (width - 2, height - 2), (width - 2, 1)]
-    four_room_goal_loc = four_room_goal_locs[5]
+    # four_room_goal_loc = four_room_goal_locs[5]
 
     # Taxi stuff.
     agent = {"x":1, "y":1, "has_passenger":0}
@@ -80,7 +80,7 @@ def make_mdp_distr(mdp_class="grid", grid_dim=9, horizon=0, step_cost=0, gamma=0
     hall_goal_locs = [(i, height) for i in range(1, 30)]
 
     # Four room.
-    four_room_goal_locs = [(width, height), (width, 1), (1, height), (1, height - 2), (width - 2, height - 2)]#, (width - 2, 1)]
+    four_room_goal_locs = [(width, height), (width, 1), (1, height), (4,4)]
 
     # Taxi.
     agent = {"x":1, "y":1, "has_passenger":0}

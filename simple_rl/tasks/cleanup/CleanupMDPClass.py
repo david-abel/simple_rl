@@ -1,8 +1,9 @@
+# Python import.
 import copy
 import random
 
+# Other imports.
 from simple_rl.mdp.MDPClass import MDP
-
 from simple_rl.tasks.cleanup.cleanup_task import CleanUpTask
 
 

@@ -11,6 +11,12 @@ import numpy as np
 from simple_rl.mdp.MDPClass import MDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
+# Fix input to cooperate with python 2 and 3.
+try:
+   input = raw_input
+except NameError:
+   pass
+
 class GridWorldMDP(MDP):
     ''' Class for a Grid World MDP '''
 
@@ -30,6 +36,7 @@ class GridWorldMDP(MDP):
                 init_state=None,
                 slip_prob=0.0,
                 step_cost=0.0,
+                lava_cost=0.01,
                 name="gridworld"):
         '''
         Args:
@@ -54,6 +61,7 @@ class GridWorldMDP(MDP):
         if type(goal_locs) is not list:
             raise ValueError("(simple_rl) GridWorld Error: argument @goal_locs needs to be a list of locations. For example: [(3,3), (4,3)].")
         self.step_cost = step_cost
+        self.lava_cost = lava_cost
         self.walls = walls
         self.width = width
         self.height = height
@@ -76,7 +84,7 @@ class GridWorldMDP(MDP):
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
         elif (int(state.x), int(state.y)) in self.lava_locs:
-            return -1.0
+            return -self.lava_cost
         else:
             return 0 - self.step_cost
 
@@ -170,35 +178,38 @@ class GridWorldMDP(MDP):
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
 
         action_char_dict = {
-            "up":u"\u2191",
-            "down":u"\u2193",
-            "left":u"\u2190",
-            "right":u"\u2192"
+            "up":"^",       #u"\u2191",
+            "down":"v",     #u"\u2193",
+            "left":"<",     #u"\u2190",
+            "right":">",    #u"\u2192"
         }
 
         mdpv.visualize_policy(self, policy, _draw_state, action_char_dict)
+        input("Press anything to quit")
 
     def visualize_agent(self, agent):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_agent(self, agent, _draw_state)
+        input("Press anything to quit")
 
     def visualize_value(self):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_value(self, _draw_state)
+        input("Press anything to quit")
 
     def visualize_learning(self, agent, delay=0.0):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_learning(self, agent, _draw_state, delay=delay)
-        raw_input("Press anything to quit ")
+        input("Press anything to quit")
 
     def visualize_interaction(self):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_interaction(self, _draw_state)
-        raw_input("Press anything to quit ")
+        input("Press anything to quit")
 
 def _error_check(state, action):
     '''
@@ -215,7 +226,6 @@ def _error_check(state, action):
 
     if not isinstance(state, GridWorldState):
         raise ValueError("(simple_rl) GridWorldError: the given state (" + str(state) + ") was not of the correct class.")
-
 
 def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None, goal_num=None, slip_prob=0.0):
     '''

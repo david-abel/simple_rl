@@ -1,3 +1,4 @@
+# Other imports.
 from simple_rl.agents.AgentClass import Agent
 from simple_rl.pomdp.BeliefStateClass import BeliefState
 
@@ -5,9 +6,9 @@ class BeliefAgent(Agent):
     def __init__(self, name, actions, gamma=0.99):
         '''
         Args:
-            name:
-            actions:
-            gamma:
+            name (str)
+            actions (list)
+            gamma (float
         '''
         Agent.__init__(self, name, actions, gamma)
 

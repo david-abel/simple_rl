@@ -8,12 +8,12 @@ from simple_rl.mdp import MDP
 from simple_rl.mdp import MDPDistribution
 from simple_rl.abstraction.abstr_mdp.RewardFuncClass import RewardFunc
 from simple_rl.abstraction.abstr_mdp.TransitionFuncClass import TransitionFunc
-
+from simple_rl.abstraction.action_abs.ActionAbstractionClass import ActionAbstraction
 # ------------------
 # -- Single Level --
 # ------------------
 
-def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=5):
+def make_abstr_mdp(mdp, state_abstr, action_abstr=None, step_cost=0.0, sample_rate=5):
 	'''
 	Args:
 		mdp (MDP)
@@ -26,8 +26,14 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=5)
 		(MDP)
 	'''
 
+	if action_abstr is None:
+		action_abstr = ActionAbstraction(prim_actions=mdp.get_actions())
+
 	# Make abstract reward and transition functions.
 	def abstr_reward_lambda(abstr_state, abstr_action):
+		if abstr_state.is_terminal():
+			return 0
+
 		# Get relevant MDP components from the lower MDP.
 		lower_states = state_abstr.get_lower_states_in_abs_state(abstr_state)
 		lower_reward_func = mdp.get_reward_func()
@@ -43,10 +49,20 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=5)
 		return total_reward
 
 	def abstr_transition_lambda(abstr_state, abstr_action):
+		is_ground_terminal = False
+		for s_g in state_abstr.get_lower_states_in_abs_state(abstr_state):
+			if s_g.is_terminal():
+				is_ground_terminal = True
+				break
+
 		# Get relevant MDP components from the lower MDP.
+		if abstr_state.is_terminal():
+			return abstr_state
+
 		lower_states = state_abstr.get_lower_states_in_abs_state(abstr_state)
 		lower_reward_func = mdp.get_reward_func()
 		lower_trans_func = mdp.get_transition_func()
+
 
 		# Compute next state distribution.
 		s_prime_prob_dict = defaultdict(int)
@@ -66,7 +82,6 @@ def make_abstr_mdp(mdp, state_abstr, action_abstr, step_cost=0.0, sample_rate=5)
 	# Make the components of the Abstract MDP.
 	abstr_init_state = state_abstr.phi(mdp.get_init_state())
 	abstr_action_space = action_abstr.get_actions()
-	
 	abstr_state_space = state_abstr.get_abs_states()
 	abstr_reward_func = RewardFunc(abstr_reward_lambda, abstr_state_space, abstr_action_space)
 	abstr_transition_func = TransitionFunc(abstr_transition_lambda, abstr_state_space, abstr_action_space, sample_rate=sample_rate)

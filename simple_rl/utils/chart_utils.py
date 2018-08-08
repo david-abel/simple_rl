@@ -32,6 +32,7 @@ import numpy as np
 import subprocess
 import argparse
 
+first_five = [[118, 167, 125], [102, 120, 173], [118, 167, 125], [240, 167, 125], [94, 94, 94]]
 color_ls = [[102, 120, 173], [240, 163, 255], [113, 198, 113],\
                 [197, 193, 170],[85, 85, 85], [198, 113, 113],\
                 [142, 56, 142], [125, 158, 192],[184, 221, 255],\
@@ -50,6 +51,7 @@ Y_AXIS_LABEL = None
 X_AXIS_START_VAL = 0
 X_AXIS_INCREMENT = 1
 Y_AXIS_END_VAL = None
+
 
 def load_data(experiment_dir, experiment_agents):
     '''

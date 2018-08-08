@@ -98,12 +98,12 @@ class BeliefSparseSampling(object):
         Returns:
             average_reward (float): measure of how good (s, a) would be
         '''
-        sum_ = 0.0
+        total = 0.0
         width = self._get_width_at_height(self.horizon - horizon)
         for _ in range(width):
             next_state = self.gen_model.transition_func(state, action)
-            sum_ += self.gen_model.reward_func(state, action) + (self.gamma * self._estimate_v(next_state, horizon-1))
-        return sum_ / float(width)
+            total += self.gen_model.reward_func(state, action) + (self.gamma * self._estimate_v(next_state, horizon-1))
+        return total / float(width)
 
     def _estimate_v(self, state, horizon):
         '''

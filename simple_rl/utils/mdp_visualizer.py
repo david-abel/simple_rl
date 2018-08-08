@@ -52,15 +52,8 @@ def _draw_title_text(mdp, screen):
         Draws the name of the MDP to the top of the screen.
     '''
     scr_width, scr_height = screen.get_width(), screen.get_height()
-    title_split = str(mdp).split("_")
-    title = title_split[0]
-    param_text = " ("
-    for param in title_split[1:-1]:
-        param_text += param + ", "
-    param_text += title_split[-1] + ")"
-    formatted_title_text = title[0].upper() + title[1:] + param_text
-    title_text = title_font.render(formatted_title_text, True, (46, 49, 49))
-    screen.blit(title_text, (scr_width / 2.0 - len(formatted_title_text)*6, scr_width / 20.0))
+    title_text = title_font.render(str(mdp), True, (46, 49, 49))
+    screen.blit(title_text, (scr_width / 2.0 - len(str(mdp))*6, scr_width / 20.0))
 
 def _draw_agent_text(agent, screen):
     '''
@@ -204,7 +197,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
         score += int(reward)
 
         pygame.display.update()
-
 
         time.sleep(delay)
 
