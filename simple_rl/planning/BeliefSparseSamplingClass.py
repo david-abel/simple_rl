@@ -33,7 +33,7 @@ class BeliefSparseSampling(object):
         self.horizon = self._horizon
         self.width = self._width
 
-        print 'BSS Horizon = {} \t Width = {}'.format(self.horizon, self.width)
+        print('BSS Horizon = {} \t Width = {}'.format(self.horizon, self.width))
 
         self.name = name
         self.root_level_qvals = defaultdict()
@@ -153,7 +153,7 @@ class BeliefSparseSampling(object):
             reward, next_state = self.gen_model.execute_agent_action(action)
             policy[state] = action
             discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
-            if verbose: print '({}, {}, {}) -> {} | {}'.format(state, action, next_state, reward, discounted_sum_rewards)
+            if verbose: print('({}, {}, {}) -> {} | {}'.format(state, action, next_state, reward, discounted_sum_rewards))
             state = copy.deepcopy(next_state)
             num_iter += 1
         return discounted_sum_rewards, policy
