@@ -190,17 +190,17 @@ class NavigationMDP(GridWorldMDP):
                     init_repetition=False,
                     policy=None,
                     horizon=100,
-                    pad_to_match_n_trajectory=True,
+                    pad_extra_trajectories=True,
                     value_iter_sampling_rate=1):
         """
         Args:
             n_trajectory: number of trajectories to sample
-            init_state: None - to use random init state [GridWorldState(x,y),...] - to use specific init states 
+            init_states: None - to use random init state [GridWorldState(x,y),...] - to use specific init states 
             init_repetition: When init_state is set to None, this will sample every possible init state 
                                     and try to not repeat init state unless n_trajectory > n_states
             policy (fn): S->A
             horizon (int): planning horizon
-            pad_to_match_n_trajectory: If True, this will always return n_trajectory many trajectories 
+            pad_extra_trajectories: If True, this will always return n_trajectory many trajectories 
                                         overrides init_repetition if # unique states !=  n_trajectory
             value_iter_sampling_rate (int): Used for value iteration if policy is set to None
                                     
@@ -216,10 +216,10 @@ class NavigationMDP(GridWorldMDP):
 
         if init_states is None:
             init_states = self.sample_empty_states(n_trajectory, init_repetition)
-            if len(init_states) < n_trajectory and pad_to_match_n_trajectory:
+            if len(init_states) < n_trajectory and pad_extra_trajectories:
                 init_states += self.sample_empty_states(n_trajectory - len(init_states), repetition=True)
         else:
-            if len(init_states) < n_trajectory and pad_to_match_n_trajectory: # i.e., more init states need to be sampled
+            if len(init_states) < n_trajectory and pad_extra_trajectories: # i.e., more init states need to be sampled
                 init_states += self.sample_empty_states(n_trajectory - len(init_states), init_repetition)
             else: # we have sufficient init states pre-specified, ignore the rest as we only need n_trajectory many
                 init_states = init_states[:n_trajectory]
@@ -308,7 +308,13 @@ class NavigationMDP(GridWorldMDP):
                                 new_fig=True, show_rewards_cbar=False, title="Navigation MDP"):
         """
         Args:
-            trajectories ([[state1, state2, ...], [state7, state4, ...], ...]): trajectories to be shown on the grid
+            values (2d ndarray): Values to be visualized in the grid, defaults to cell types.
+            cmap (Matplotlib Colormap): Colormap corresponding to values, 
+                defaults to ListedColormap with colors specified in "cell_types" during construction.
+            trajectories ([[state1, state2, ...], [state7, state4, ...], ...]): trajectories to be shown on the grid.
+            new_fig (Bool): Whether to use existing figure context. For predefined subplots, set this to False.
+            show_rewards_cbar (Bool): Whether to show colorbar with cell reward values.
+            title (str): Title of the plot.
         """
         import matplotlib.pyplot as plt
         from matplotlib import colors
