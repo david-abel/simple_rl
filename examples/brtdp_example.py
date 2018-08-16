@@ -50,7 +50,7 @@ def main():
     upper_value_function = MonotoneUpperBound(test_mdp).upper_values
     bounded_rtdp = BoundedRTDP(test_mdp, lower_values_init=lower_value_function, upper_values_init=upper_value_function)
     test_policy = bounded_rtdp.plan()
-    print 'Derived policy:\n{}'.format(test_policy)
+    print('Derived policy:\n{}'.format(test_policy))
 
 if __name__ == '__main__':
     main()

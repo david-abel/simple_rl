@@ -93,9 +93,9 @@ class BoundedRTDP(Planner):
             self.lower_values[state] = self._qvalue(state, action, self.lower_values)
             expected_gap_distribution = self._expected_gap_distribution(state, action)
             expected_gap = sum(expected_gap_distribution.values())
-            if verbose: print '{}\tAction: {}\tGap: {}\tMaxDiff: {}'.format(state, action, expected_gap, self.max_diff)
+            if verbose: print('{}\tAction: {}\tGap: {}\tMaxDiff: {}'.format(state, action, expected_gap, self.max_diff))
             if expected_gap < self.max_diff:
-                if verbose: print 'Ending rollouts with gap {} and max_diff {}'.format(expected_gap, self.max_diff)
+                if verbose: print('Ending rollouts with gap {} and max_diff {}'.format(expected_gap, self.max_diff))
                 break
             state = BoundedRTDP._pick_next_state(expected_gap_distribution, expected_gap)
         while not trajectory.is_empty():
