@@ -17,5 +17,8 @@ class GridWorldState(State):
     def __str__(self):
         return "s: (" + str(self.x) + "," + str(self.y) + ")"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, other):
         return isinstance(other, GridWorldState) and self.x == other.x and self.y == other.y

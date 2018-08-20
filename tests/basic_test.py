@@ -31,7 +31,7 @@ def main():
     example_files = [f for f in os.listdir(example_dir) if os.path.isfile(os.path.join(example_dir, f)) and f.split(".")[-1] == "py"]
 
     # Remove non-tests.
-    non_tests = ["init", "viz_exam", "blank", "gym", "srl_example", "grid_from_file", "belief"]
+    non_tests = ["init", "viz_exam", "blank", "gym", "srl_example", "grid_from_file", "belief", "brtdp"]
     for phrase in non_tests:
         for test_file in example_files:
             if phrase in test_file:
