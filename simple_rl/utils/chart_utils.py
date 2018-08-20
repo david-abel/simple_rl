@@ -32,11 +32,10 @@ import numpy as np
 import subprocess
 import argparse
 
-first_five = [[118, 167, 125], [102, 120, 173], [118, 167, 125], [240, 167, 125], [94, 94, 94]]
-color_ls = [[102, 120, 173], [240, 163, 255], [113, 198, 113],\
-                [197, 193, 170],[85, 85, 85], [198, 113, 113],\
-                [142, 56, 142], [125, 158, 192],[184, 221, 255],\
-                [153, 63, 0], [142, 142, 56], [56, 142, 142]]
+color_ls = [[118, 167, 125], [102, 120, 173],\
+            [210, 180, 226], [230, 169, 132],\
+            [94, 94, 94], [184, 221, 255],\
+            [198, 113, 113], [192, 197, 182]]
 
 # Set font.
 font = {'size':14}
@@ -51,7 +50,6 @@ Y_AXIS_LABEL = None
 X_AXIS_START_VAL = 0
 X_AXIS_INCREMENT = 1
 Y_AXIS_END_VAL = None
-
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -200,7 +198,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     # Some nice markers and colors for plotting.
-    markers = ['o', 's', 'D', '^', '*', '+', 'p', 'x', 'v','|']
+    markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v','|']
 
     x_axis_unit = "episode" if episodic else "step"
 
@@ -218,7 +216,6 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
     # Make the plot.
     print_prefix = "\nAvg. cumulative reward" if cumulative else "Avg. reward"
-
     # For each agent.
     for i, agent_name in enumerate(agents):
 
@@ -272,7 +269,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
-
+    pyplot.tight_layout() # Keeps the spacing nice.
 
     # Save the plot.
     pyplot.savefig(plot_file_name, format="pdf")
