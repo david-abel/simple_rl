@@ -221,8 +221,16 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
         # Add figure for this algorithm.
         agent_color_index = i if agent_name not in agent_colors else agent_colors[agent_name]
+        agent_marker_index = agent_color_index
+        
+        # Grab new color/marker if we've gone over.
+        if agent_color_index >= len(colors):
+            agent_color_index = agent_color_index % len(colors)
+        if agent_marker_index >= len(markers):
+            agent_marker_index = agent_marker_index % len(markers)
+        
         series_color = colors[agent_color_index]
-        series_marker = markers[agent_color_index]
+        series_marker = markers[agent_marker_index]
         y_axis = results[i]
         x_axis = list(drange(X_AXIS_START_VAL, X_AXIS_START_VAL + len(y_axis) * X_AXIS_INCREMENT, X_AXIS_INCREMENT))
 
