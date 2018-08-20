@@ -8,6 +8,8 @@ from simple_rl.tasks import GridWorldMDP
 from simple_rl.planning import ValueIteration
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
+from collections import defaultdict
+
 class NavigationMDP(GridWorldMDP):
 
     '''
@@ -34,11 +36,11 @@ class NavigationMDP(GridWorldMDP):
                  init_state=None,
                  vacancy_prob=0.8,
                  sample_cell_types=[0],
-                 use_goal_dist_feature=True,
                  goal_color="blue",
+                 all_goals_state_features_entangled=True,
                  name="Navigation MDP"):
         """
-        Note: 1. locations and state dimensions start from 1 instead of 0. 
+        Note: 1. locations and state dimensions start from 1 instead of 0.
               2. 2d locations are interpreted in (x,y) format.
         Args:
             height (int)
@@ -91,12 +93,16 @@ class NavigationMDP(GridWorldMDP):
         self.goal_reward = goal_reward
 
         # Set goals and their rewards in the matrix
-        for g in goal_locs:
-            g_r, g_c = self._xy_to_rowcol(g[0], g[1])
-            self.cells[g_r, g_c] = len(self.cell_types) # allocate the next type to the goal
-            self.cell_rewards[g_r, g_c] = self.goal_reward
+        self.all_goals_state_features_entangled = all_goals_state_features_entangled
+        for goal_idx, goal_loc in enumerate(goal_locs):
+            goal_r, goal_c = self._xy_to_rowcol(goal_loc[0], goal_loc[1])
+            if self.all_goals_state_features_entangled:
+                 # allocate the next type to the goal (assumes all goals are same)
+                self.cells[goal_r, goal_c] = len(self.cell_types)
+            else:
+                self.cells[goal_r, goal_c] = len(self.cell_types) + goal_idx
+            self.cell_rewards[goal_r, goal_c] = self.goal_reward
         self.goal_locs = goal_locs
-        self.use_goal_dist_feature = use_goal_dist_feature
         self.goal_color = goal_color
         self.feature_cell_dist = None
         self.feature_cell_dist_normalized = None
@@ -153,7 +159,7 @@ class NavigationMDP(GridWorldMDP):
     def sample_empty_states(self, n, repetition=False):
         """
         Returns a list of random empty/white state of type GridWorldState()
-        Note: if repetition is False, the max no. of states returned = # of empty/white cells in the grid 
+        Note: if repetition is False, the max no. of states returned = # of empty/white cells in the grid
         """
         assert n > 0
 
@@ -191,19 +197,20 @@ class NavigationMDP(GridWorldMDP):
                     policy=None,
                     horizon=100,
                     pad_extra_trajectories=True,
-                    value_iter_sampling_rate=1):
+                    value_iter_sampling_rate=1,
+                    map_actions_to_index=True):
         """
         Args:
             n_trajectory: number of trajectories to sample
-            init_states: None - to use random init state [GridWorldState(x,y),...] - to use specific init states 
-            init_repetition: When init_state is set to None, this will sample every possible init state 
+            init_states: None - to use random init state [GridWorldState(x,y),...] - to use specific init states
+            init_repetition: When init_state is set to None, this will sample every possible init state
                                     and try to not repeat init state unless n_trajectory > n_states
             policy (fn): S->A
             horizon (int): planning horizon
-            pad_extra_trajectories: If True, this will always return n_trajectory many trajectories 
+            pad_extra_trajectories: If True, this will always return n_trajectory many trajectories
                                         overrides init_repetition if # unique states !=  n_trajectory
             value_iter_sampling_rate (int): Used for value iteration if policy is set to None
-                                    
+
         Returns:
             (Traj_states, Traj_actions) where
                 Traj_states: [[s1, s2, ..., sT], [s4, s1, ..., sT], ...],
@@ -230,23 +237,32 @@ class NavigationMDP(GridWorldMDP):
         for init_state in init_states:
             action_seq, state_seq = self.plan(init_state, policy=policy, horizon=horizon)
             d_mdp_states.append(state_seq)
-            a_s.append([action_to_idx[a] for a in action_seq])
+            if map_actions_to_index:
+                a_s.append(action_seq)
+            else:
+                a_s.append([action_to_idx[a] for a in action_seq])
         return d_mdp_states, a_s
 
-    def get_cell_distance_features(self, normalize=True):
+    def get_cell_distance_features(self,
+                                   incl_goal_dist_feature=False,
+                                   normalize=False):
 
         """
-        Returns 3D array (x,y,z) where (x,y) refers to row and col of cells in the navigation grid and z is a vector of 
-        manhattan distance to each cell type.     
+        Returns 3D array (x,y,z) where (x,y) refers to row and col of cells in the navigation grid and z is a vector of
+        manhattan distance to each cell type.
         """
         if normalize and self.feature_cell_dist_normalized is not None:
             return self.feature_cell_dist_normalized
         elif normalize == False and self.feature_cell_dist is not None:
             return self.feature_cell_dist
 
-        if self.use_goal_dist_feature:
-            # +1 to include goal and start at 1 to ignore white/empty cell
-            dist_cell_types = range(0, len(self.cell_types)+1)
+        if incl_goal_dist_feature:
+            # Include distance to goal
+            if self.all_goals_state_features_entangled:
+                dist_cell_types = range(0, len(self.cell_types)+1)
+            else:
+                dist_cell_types = range(0,
+                                    len(self.cell_types)+len(self.goal_locs))
         else:
             dist_cell_types = range(0, len(self.cell_types))
 
@@ -268,22 +284,87 @@ class NavigationMDP(GridWorldMDP):
 
         return self.feature_cell_dist
 
-    def feature_short_at_state(self, mdp_state, normalize=True):
-        return self.feature_short_at_loc(mdp_state.x, mdp_state.y, normalize)
-
-    def feature_long_at_state(self, mdp_state, normalize=True):
-        return self.feature_long_at_loc(mdp_state.x, mdp_state.y, normalize)
-
-    def feature_short_at_loc(self, x, y, normalize=True):
+    def feature_at_loc(self,
+                       x, y,
+                       feature_type="indicator",
+                       incl_distance_features=False,
+                       incl_goal_ind_feature=False,
+                       incl_goal_dist_feature=False,
+                       normalize_distance=False,
+                       dtype=np.float32):
+        """
+        Returns feature vector at a state corresponding to (x,y) location
+        Args:
+            x, y (int, int): cartesian coordinates in 2d state space
+            feature_type (str): "indicator" to use one-hot encoding of cell type
+                "cartesian" to use (x,y) and "rowcol" to use (row, col) as feature
+            incl_distance_features (bool): True - appends feature vector with
+                distance to each type of cell.
+            incl_goal_ind_feature: True - adds goal indicator feature
+                (only applicable for "indicator" feature type).
+            normalize_distance (bool): Whether to normalize cell type distances
+                 to 0-1 range (only used when "incl_distance_features" is True).
+            dtype (numpy datatype): cast feature vector to dtype
+        """
         row, col = self._xy_to_rowcol(x, y)
-        if (x, y) in self.goal_locs:
-            return np.zeros(len(self.cell_types), dtype=np.float32)
+        assert feature_type in ["indicator", "cartesian", "rowcol"]
+
+        if feature_type == "indicator":
+            if incl_goal_ind_feature:
+                if self.all_goals_state_features_entangled:
+                    # i.e., all goals have same cell type (feature), so total no. of diff cel types = cell_types + 1
+                    feature = np.eye(len(self.cell_types)+1)[self.cells[row, col]]
+                else:
+                    # Total no. of diff cel types = cell_types + no. of goals
+                    feature = np.eye(len(self.cell_types) +
+                                     len(self.goal_locs))[self.cells[row, col]]
+            else:
+                if (x, y) in self.goal_locs:
+                    feature = np.zeros(len(self.cell_types))
+                else:
+                    feature = np.eye(len(self.cell_types))[self.cells[row, col]]
+        elif feature_type == "cartesian":
+            feature = np.array([x, y])
+        elif feature_type == "rowcol":
+            feature = np.array([row, col])
+
+        if incl_distance_features:
+            return np.hstack(
+                    (feature,
+                     self.get_cell_distance_features(
+                             incl_goal_dist_feature, normalize_distance)[row, col])).astype(dtype)
         else:
-            return np.eye(len(self.cell_types))[self.cells[row, col]]
+            return feature.astype(dtype)
 
-    def feature_long_at_loc(self, x, y, normalize=True):
-        row, col = self._xy_to_rowcol(x, y)
-        return np.hstack((self.feature_short_at_loc(x, y, normalize), self.get_cell_distance_features(normalize)[row, col]))
+    def feature_at_state(self,
+                         mdp_state,
+                         feature_type="indicator",
+                         incl_distance_features=False,
+                         incl_goal_ind_feature=False,
+                         incl_goal_dist_feature=False,
+                         normalize_distance=False,
+                         dtype=np.float32):
+        """
+        Returns feature vector at a state corresponding to MdP State
+        Args:
+            mdp_state (int, int): GridWorldState object
+            feature_type (str): "indicator" to use one-hot encoding of cell type
+                "cartesian" to use (x,y) and "rowcol" to use (row, col) as feature
+            incl_distance_features (bool): True - appends feature vector with
+                distance to each type of cell.
+            incl_goal_ind_feature: True - adds goal indicator feature
+                (only applicable for "indicator" feature type).
+            normalize_distance (bool): Whether to normalize cell type distances
+                to 0-1 range (only used when "incl_distance_features" is True).
+            dtype (numpy datatype): cast feature vector to dtype
+        """
+        return self.feature_at_loc(mdp_state.x, mdp_state.y,
+                                   feature_type,
+                                   incl_distance_features,
+                                   incl_goal_ind_feature,
+                                   incl_goal_dist_feature,
+                                   normalize_distance,
+                                   dtype)
 
     def states_to_features(self, states, phi):
         return np.asarray([phi(s) for s in states], dtype=np.float32)
@@ -293,26 +374,28 @@ class NavigationMDP(GridWorldMDP):
 
     def _xy_to_rowcol(self, x, y):
         """
-        Converts (x,y) to (row,col) 
+        Converts (x,y) to (row,col)
         """
         return self.height - y, x - 1
 
     def _rowcol_to_xy(self, row, col):
         """
-        Converts (row,col) to (x,y) 
+        Converts (row,col) to (x,y)
         """
         return col + 1, self.height - row
 
     def visualize_grid(self, values=None, cmap=None,
-                                trajectories=None, subplot_str=None,
-                                new_fig=True, show_rewards_cbar=False, title="Navigation MDP"):
+                            trajectories=None, subplot_str=None,
+                            new_fig=True, show_rewards_cbar=False,
+                            title="Navigation MDP"):
         """
         Args:
             values (2d ndarray): Values to be visualized in the grid, defaults to cell types.
-            cmap (Matplotlib Colormap): Colormap corresponding to values, 
+            cmap (Matplotlib Colormap): Colormap corresponding to values,
                 defaults to ListedColormap with colors specified in "cell_types" during construction.
             trajectories ([[state1, state2, ...], [state7, state4, ...], ...]): trajectories to be shown on the grid.
-            new_fig (Bool): Whether to use existing figure context. For predefined subplots, set this to False.
+            subplot_str (str): subplot number (e.g., "411", "412", etc.). Defaults to None.
+            new_fig (Bool): Whether to use existing figure context. To show in subplot, set this to False.
             show_rewards_cbar (Bool): Whether to show colorbar with cell reward values.
             title (str): Title of the plot.
         """
