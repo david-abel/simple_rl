@@ -3,6 +3,7 @@ from __future__ import print_function
 from collections import defaultdict
 import sys
 import random
+import itertools
 
 # Other imports.
 from simple_rl.planning.ValueIterationClass import ValueIteration
@@ -11,20 +12,51 @@ from simple_rl.mdp import MDPDistribution
 from simple_rl.abstraction.state_abs import indicator_funcs as ind_funcs
 from simple_rl.abstraction.state_abs.StateAbstractionClass import StateAbstraction
 
-def merge_state_abs(list_of_sa, track_act_opt_pr=False):
+def merge_state_abstr(list_of_state_abstr, states):
     '''
     Args:
-        list_of_sa (list of StateAbstraction)
+        list_of_state_abstr (list)
+        states (list)
 
     Returns:
-        (StateAbstraction)
+        (simple_rl.StateAbstraction)
+
+    Summary:
+        Merges all state abstractions in @list_of_state_abstr by taking the
+        intersection over safe clusterability.
     '''
-    merged = list_of_sa[0]
 
-    for sa in list_of_sa[1:]:
-        merged = merged + sa
+    safe_state_pairings = defaultdict(list)
+    # For each state pair...
+    for s_1, s_2 in itertools.product(states, repeat=2):
+        safely_clustered_pair = True
+        for state_abstr in list_of_state_abstr:
+            if state_abstr.phi(s_1) != state_abstr.phi(s_2):
+                safely_clustered_pair = False
+                break
 
-    return merged
+        if safely_clustered_pair:
+            safe_state_pairings[s_1] += [s_2]
+            safe_state_pairings[s_2] += [s_1]
+
+    # Now we have a dict of safe state pairs, merge them.
+    phi = defaultdict(list)
+    cluster_counter = 0
+    for state in safe_state_pairings.keys():
+        for safe_other_state in safe_state_pairings[state]:
+            if state not in phi.keys() and safe_other_state not in phi.keys():
+                phi[state] = State(cluster_counter)
+                phi[safe_other_state] = State(cluster_counter)
+            elif state in phi.keys():
+                phi[safe_other_state] = phi[state]
+            elif safe_other_state in phi.keys():
+                phi[state] = phi[safe_other_state]
+
+            # Increment counter
+            cluster_counter += 1
+
+    return StateAbstraction(phi, states)
+
 
 def make_sa(mdp, indic_func=ind_funcs._q_eps_approx_indicator, state_class=State, epsilon=0.0, save=False, track_act_opt_pr=False):
     '''
@@ -65,7 +97,10 @@ def make_multitask_sa(mdp_distr, state_class=State, indic_func=ind_funcs._q_eps_
         sa = make_singletask_sa(mdp, indic_func, state_class, epsilon, aa_single_act=aa_single_act, prob_of_mdp=mdp_distr.get_prob_of_mdp(mdp), track_act_opt_pr=track_act_opt_pr)
         sa_list += [sa]
 
-    multitask_sa = merge_state_abs(sa_list, track_act_opt_pr=track_act_opt_pr)
+    mdp = mdp_distr.get_all_mdps()[0]
+    vi = ValueIteration(mdp)
+    ground_states = vi.get_states()
+    multitask_sa = merge_state_abstr(sa_list, ground_states)
 
     return multitask_sa
 
@@ -186,6 +221,8 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
     sa_colors = first_five + color_ls
     while state_abstr.get_num_abstr_states() > len(sa_colors):
         sa_colors.append((random.randint(0,255), random.randint(0,255), random.randint(0,255)))
+    color_index = 0
+    abstr_state_color_dict = {}
 
     # For each row:
     for i in range(grid_mdp.width):
@@ -200,8 +237,14 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
             top_left_point = width_buffer + cell_width*i, height_buffer + cell_height*j
             s = state_dict[i+1][grid_mdp.height - j]
             abs_state = state_abstr.phi(s)
-            cluster_num = abs_state.data #state_abstr.get_abs_cluster_num(abs_state)
-            abstr_state_color = sa_colors[cluster_num % len(sa_colors)]
+            cluster_num = abs_state.data
+
+            # Grab next color if we haven't assigned a color yet.
+            if abs_state.data not in abstr_state_color_dict.keys():
+                abstr_state_color_dict[abs_state.data] = color_index
+                color_index += 1
+
+            abstr_state_color = sa_colors[abstr_state_color_dict[abs_state.data] % len(sa_colors)]
             r = pygame.draw.rect(screen, abstr_state_color, (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width-10, cell_height-10), 0)
             r = pygame.draw.rect(screen, (46, 49, 49), top_left_point + (cell_width, cell_height), 3)
 
