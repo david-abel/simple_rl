@@ -22,39 +22,53 @@ class NavigationMDP(GridWorldMDP):
     def __init__(self,
                  width=30,
                  height=30,
-                 init_loc=(1,1),
-                 rand_init=True,
                  goal_locs=[(21, 21)],
                  cell_types=["empty", "yellow", "red", "green", "purple"],
                  cell_type_rewards=[0, 0, -10, -10, -10],
-                 additional_obstacles={}, # this is for additional experimentation only
+                 cell_distribution="probability",
+                 cell_type_probs=[0.68, 0.17, 0.05, 0.05, 0.05],
+                 cell_type_forced_locations=[np.inf, np.inf, [(1,1),(5,5)], [(2,2)], [4,4]], # this is for additional experimentation only
                  gamma=0.99,
                  slip_prob=0.00,
                  step_cost=0.0,
                  goal_reward=1.0,
                  is_goal_terminal=True,
-                 init_state=None,
-                 vacancy_prob=0.8,
-                 sample_cell_types=[0],
+                 navigable_cell_types=[0],
                  goal_color="blue",
                  all_goals_state_features_entangled=True,
+                 init_loc=(1,1),
+                 rand_init=True,
+                 init_state=None,
                  name="Navigation MDP"):
         """
         Note: 1. locations and state dimensions start from 1 instead of 0.
               2. 2d locations are interpreted in (x,y) format.
         Args:
-            height (int)
-            width (int)
-            init_loc (tuple: (int, int))
+            height (int): Height of navigation grid in no. of cells
+            width (int): Width of navigation grid in no. of cells
             goal_locs (list of tuples: [(int, int)...])
             cell_type (list of cell types: [str, str, ...]): non-goal cell types
-            cell_rewards (reward mapping for each cell type: [int, int, ...]): reward value for cells in @cell_type
-        """
+            cell_rewards (list of ints): Reward for each @cell_type
+            cell_distribution (str): "probability" will read assing cells
+                according to @cell_type_probs over the state space. "manual" will use @cell_type_forced_locations to assign cells to locations.
+            cell_type_probs (list of floats): Only applicable when
+                @cell_distribution is set to "probability". Specifies probability corresponding to each @cell_type. The sum of values must be = 1. Each value signifies the probability of occurence of particular cell type in the grid.
+                (Default is chosen arbitrarily larger than percolation threshold for square lattice, which is just an approximation to match cell distribution with that of the paper).
+                Note: the actual probabilities would be slightly off because this doesn't factor in number of goals.
+            cell_type_forced_locations (list of list of tuples [[(x1,y1), (x2,y2)], [(x3,y3), ...], np.inf, ...}):
+                Only applicable when @cell_distribution is set to "Manual". Used to specify additional cells and their locations. Custom grid can be defined using this and setting @cell_distribution to "Manual".
+            navigable_cell_types (list of ints): To specify which cell types
+                are navigable. This is used in sampling empty/drivable states while generating trajectories.
+
+        Not used but are properties of superclass GridWorldMDP:
+            init_loc (tuple: (int, int)): (x,y) initial location
+            rand_init (bool): Whether to use random initial location
+            init_state (GridWorldState): Initial GridWorldState
+            """
 
         assert height > 0 and isinstance(height, int) and width > 0 and isinstance(width, int), "height and widht must be integers and > 0"
         self.cell_types = cell_types
         GridWorldMDP.__init__(self,
-
                               width=width,
                               height=height,
                               init_loc=init_loc,
@@ -69,24 +83,34 @@ class NavigationMDP(GridWorldMDP):
                               step_cost=step_cost,
                               name=name)
 
-        # Probability of each cell type
-        if len(additional_obstacles) > 0:
-            self.cell_prob = np.zeros(len(self.cell_types))
-            self.cell_prob[0] = 1.
+        assert cell_distribution in ["probability", "manual"]
+
+        # Assign cell type over state space
+        if cell_distribution == "probability":
+            self.cell_type_probs = cell_type_probs
+
+            self.cells = np.random.choice(
+                                    len(self.cell_type_probs),
+                                    p=cell_type_probs,
+                                    replace=True,
+                                    size=(height,width))
         else:
-            # Can't say more about these numbers (chose arbitrarily larger than percolation threshold for
-            # square lattice). This is just an approximation (to match cell distribution with that of the paper);
-            # however, it is not the primary concern here.
-            self.cell_prob = [8.*vacancy_prob/10., 2*vacancy_prob/10.] + [(1-vacancy_prob)/3.] * 3
+            inf_cells = [idx for idx, elem in enumerate(cell_type_forced_locations) if elem == np.inf]
+            if len(inf_cells) == 0:
+                self.cells = -1 * np.ones((height,width), dtype=np.int)
+            else:
+                self.cells = np.random.choice(inf_cells,
+                                              p=[1./len(inf_cells)]*len(inf_cells),
+                                              replace=True,
+                                              size=(height,width))
+            for cell_type, cell_locs in enumerate(cell_type_forced_locations):
+                if cell_type not in inf_cells:
+                    for cell_loc in cell_locs:
+                        row, col = self._xy_to_rowcol(cell_loc[0], cell_loc[1])
+                        self.cells[row, col] = cell_type
 
-        # Matrix for identifying cell type and associated reward
-        self.cells = np.random.choice(len(self.cell_types), p=self.cell_prob, size=height*width).reshape(height,width)
-
-        self.additional_obstacles = additional_obstacles
-        for obs_type, obs_locs in self.additional_obstacles.items():
-            for obs_loc in obs_locs:
-                row, col = self._xy_to_rowcol(obs_loc[0], obs_loc[1])
-                self.cells[row, col] = obs_type
+        # Additional check to ensure all states have corresponding cell type
+        assert np.any(self.cells == -1) == False, "Some grid cells have unassigned cell type! When you use manual distribution, make sure each state of the MPD is covered by a cell type. Check usage of np.inf in @cell_type_forced_locations."
 
         self.cell_type_rewards = cell_type_rewards
         self.cell_rewards = np.asarray([[cell_type_rewards[item] for item in row] for row in self.cells]).reshape(height,width)
@@ -107,7 +131,7 @@ class NavigationMDP(GridWorldMDP):
         self.feature_cell_dist = None
         self.feature_cell_dist_normalized = None
         self.value_iter = None
-        self.define_sample_cells(cell_types=sample_cell_types)
+        self.define_sample_cells(cell_types=navigable_cell_types)
 
     def define_sample_cells(self, cell_types=[0]):
 
