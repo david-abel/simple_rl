@@ -8,13 +8,18 @@ from simple_rl.tasks import GridWorldMDP
 from simple_rl.planning import ValueIteration
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
-from collections import defaultdict
+# Plotting
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from matplotlib import colors
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 class NavigationMDP(GridWorldMDP):
 
     '''
         Class for Navigation MDP from:
-            MacGlashan, James, and Michael L. Littman. "Between Imitation and Intention Learning." IJCAI. 2015.
+            MacGlashan, James, and Michael L. Littman. "Between Imitation and 
+            Intention Learning." IJCAI. 2015.
     '''
 
     ACTIONS = ["up", "down", "left", "right"]
@@ -26,9 +31,10 @@ class NavigationMDP(GridWorldMDP):
                  cell_types=["empty", "yellow", "red", "green", "purple"],
                  cell_type_rewards=[0, 0, -10, -10, -10],
                  cell_distribution="probability",
-                 # cell_type_probs: default is chosen arbitrarily larger than percolation threshold
-                 # for square lattice, which is just an approximation to match cell
-                 # distribution with that of the paper.
+                 # cell_type_probs: default is chosen arbitrarily larger than
+                 # percolation threshold for square lattice, which is just an
+                 # approximation to match cell distribution with that of the
+                 # paper.
                  cell_type_probs=[0.68, 0.17, 0.05, 0.05, 0.05],
                  cell_type_forced_locations=[np.inf, np.inf,
                                              [(1,1),(5,5)], [(2,2)], [4,4]],
@@ -37,7 +43,7 @@ class NavigationMDP(GridWorldMDP):
                  step_cost=0.0,
                  goal_rewards=[1.0],
                  is_goal_terminal=True,
-                 navigable_cell_types=[0],
+                 traj_init_cell_types=[0],
                  goal_colors=["blue"],
                  init_loc=(1,1),
                  rand_init=True,
@@ -67,10 +73,10 @@ class NavigationMDP(GridWorldMDP):
                 Only applicable when @cell_distribution is set to "Manual". Used 
                 to specify additional cells and their locations. If elements are 
                 set to np.inf, all of them will be sampled uniformly at random.
-            goal_colors (list of str): Color of goal corresponding to @goal_locs.
+            goal_colors (list of str/int): Color of goal corresponding to @goal_locs.
                 If colors are different, each goal will be represented with 
                 a unique feature, otherwise all goals are mapped to same feature.
-            navigable_cell_types (list of ints): To specify which cell types
+            traj_init_cell_types (list of ints): To specify which cell types
                 are navigable. This is used in sampling empty/drivable states 
                 while generating trajectories.
         Not used but are properties of superclass GridWorldMDP:
@@ -86,6 +92,8 @@ class NavigationMDP(GridWorldMDP):
         assert cell_distribution == "manual" or len(cell_types) == len(cell_type_probs)
         assert cell_distribution == "probability" or len(cell_types) == len(cell_type_forced_locations)
 
+        self.value_iter = None
+        self._policy_invalidated = True
         self.cell_types = cell_types
         GridWorldMDP.__init__(self,
                               width=width,
@@ -103,26 +111,34 @@ class NavigationMDP(GridWorldMDP):
                               name=name)
 
         # Cell Types
-        self.cells = self.__assign_cell_types(height, width,
-                                              cell_distribution,
-                                              cell_type_probs,
-                                              cell_type_forced_locations)
+        self.cells = self.__generate_cell_type_grid(
+                                            height, width,
+                                            cell_distribution, cell_type_probs,
+                                            cell_type_forced_locations)
+        # Preserve a copy without goals
+        self.cells_wo_goals = self.cells.copy()
+
         # Cell Rewards
         self.cell_type_rewards = cell_type_rewards
-        self.cell_rewards = np.asarray([[cell_type_rewards[item] for item in row]
-                                        for row in self.cells]).reshape(height,width)
+        self.cell_rewards = np.asarray(
+                        [[self.cell_type_rewards[item] for item in row]
+                            for row in self.cells]
+                        ).reshape(height,width)
+        # Preserve a copy without goals
+        self.cell_rewards_wo_goals = self.cell_rewards.copy()
 
         # Update cells and cell_rewards with goal and its rewards
-        self.cells, self.cell_rewards, self.goal_xy_to_idx = self.__assign_goals(
-                                                self.cells,
-                                                self.cell_rewards, goal_locs,
-                                                goal_rewards, goal_colors)
+        self.reset_goals(goal_locs, goal_rewards, goal_colors)
+
+        # Find set of Empty/Navigable cells for sampling trajectory init state
+        self.set_traj_init_cell_types(cell_types=traj_init_cell_types)
+
+        # Additional book-keeping
         self.feature_cell_dist = None
         self.feature_cell_dist_normalized = None
-        self.value_iter = None
-        self.define_sample_cells(cell_types=navigable_cell_types)
 
-    def __assign_cell_types(self, height, width, cell_distribution,
+
+    def __generate_cell_type_grid(self, height, width, cell_distribution,
                             cell_type_probs, cell_type_forced_locations):
 
         assert cell_distribution in ["probability", "manual"]
@@ -160,41 +176,38 @@ class NavigationMDP(GridWorldMDP):
 
         return cells
 
-    def __assign_goals(self, cells, cell_rewards, goal_locs,
-                       goal_rewards, goal_colors):
+    def reset_goals(self, goal_locs, goal_rewards, goal_colors):
+        """
+        Resets the goals. Updates cell type grid and cell reward grid as per 
+        new goal configuration.
+        """
 
+        # Maintain a copy in object
         self.goal_rewards = goal_rewards
         self.goal_locs = goal_locs
         self.goal_colors = goal_colors
-        goal_xy_to_idx = {}
-        # Set goals and their rewards in the matrix
+        # Reset goal xy to idx dict
+        self.goal_xy_to_idx = {}
+
+        # Reset cell type and cell reward grid with no goals
+        self.cells = self.cells_wo_goals.copy()
+        self.cell_rewards = self.cell_rewards_wo_goals.copy()
+
+        # Update goals and their rewards
         self.all_goals_state_features_entangled = len(np.unique(goal_colors)) == 1
         for goal_idx, goal_loc in enumerate(self.goal_locs):
-
             goal_r, goal_c = self._xy_to_rowcol(goal_loc[0], goal_loc[1])
             if self.all_goals_state_features_entangled:
-                # Allocate the next type to the goal (assumes all goals are same)
-                cells[goal_r, goal_c] = len(self.cell_types)
-                # Update each goal with same reward
-                cell_rewards[goal_r, goal_c] = self.goal_rewards[0]
+                # Assume all goals are same
+                self.cells[goal_r, goal_c] = len(self.cell_types)
+                self.cell_rewards[goal_r, goal_c] = self.goal_rewards[0]
+                self.goal_xy_to_idx[(goal_loc[0], goal_loc[1])] = 0
             else:
-                # Increment the type for each goal the goal
-                cells[goal_r, goal_c] = len(self.cell_types) + goal_idx
-                # Update corresponding goal reward
-                cell_rewards[goal_r, goal_c] = self.goal_rewards[goal_idx]
-
-            goal_xy_to_idx[(goal_loc[0], goal_loc[1])] = goal_idx
-        return cells, cell_rewards, goal_xy_to_idx
-
-    def define_sample_cells(self, cell_types=[0]):
-
-        self.sample_rows, self.sample_cols = [], []
-
-        for cell_type in cell_types:
-            rs, cs= np.where(self.cells == cell_type)
-            self.sample_rows.extend(rs)
-            self.sample_cols.extend(cs)
-        self.num_empty_states = len(self.sample_rows)
+                # Each goal is different in type and rewards
+                self.cells[goal_r, goal_c] = len(self.cell_types) + goal_idx
+                self.cell_rewards[goal_r, goal_c] = self.goal_rewards[goal_idx]
+                self.goal_xy_to_idx[(goal_loc[0], goal_loc[1])] = goal_idx
+        self._policy_invalidated = True
 
     def _reward_func(self, state, action):
         '''
@@ -209,22 +222,22 @@ class NavigationMDP(GridWorldMDP):
         r, c = self._xy_to_rowcol(state.x, state.y)
         if self._is_goal_state_action(state, action):
             next_state = self._transition_func(state, action)
-            if self.all_goals_state_features_entangled:
-                return self.goal_rewards[0] + self.cell_rewards[r, c] - self.step_cost
-            else:
-                return self.goal_rewards[
-                           self.goal_xy_to_idx[(next_state.x, next_state.y)]] \
+            return self.goal_rewards[self.goal_xy_to_idx[
+                                    (next_state.x, next_state.y)]] \
                        + self.cell_rewards[r, c] - self.step_cost
         elif self.cell_rewards[r, c] == 0:
             return 0 - self.step_cost
         else:
             return self.cell_rewards[r, c] - self.step_cost
 
-    def get_value_iteration_results(self, sample_rate):
-        if self.value_iter is None:
-            self.value_iter = ValueIteration(self, sample_rate=sample_rate)
-            _ = self.value_iter.run_vi()
-        return self.value_iter
+    def set_traj_init_cell_types(self, cell_types=[0]):
+
+        self.traj_init_cell_row_idxs, self.traj_init_cell_col_idxs = [], []
+        for cell_type in cell_types:
+            rs, cs = np.where(self.cells == cell_type)
+            self.traj_init_cell_row_idxs.extend(rs)
+            self.traj_init_cell_col_idxs.extend(cs)
+        self.num_traj_init_states = len(self.traj_init_cell_row_idxs)
 
     def sample_empty_state(self, idx=None):
         """
@@ -232,12 +245,13 @@ class NavigationMDP(GridWorldMDP):
         """
 
         if idx is None:
-            rand_idx = np.random.randint(len(self.sample_rows))
+            rand_idx = np.random.randint(len(self.traj_init_cell_row_idxs))
         else:
-            assert 0 <= idx < len(self.sample_rows)
+            assert 0 <= idx < len(self.traj_init_cell_row_idxs)
             rand_idx = idx
 
-        x, y = self._rowcol_to_xy(self.sample_rows[rand_idx], self.sample_cols[rand_idx])
+        x, y = self._rowcol_to_xy(self.traj_init_cell_row_idxs[rand_idx],
+                                  self.traj_init_cell_col_idxs[rand_idx])
         return GridWorldState(x, y)
 
     def sample_empty_states(self, n, repetition=False):
@@ -248,7 +262,7 @@ class NavigationMDP(GridWorldMDP):
         assert n > 0
 
         if repetition is False:
-            return [self.sample_empty_state(rand_idx) for rand_idx in np.random.permutation(len(self.sample_rows))[:n]]
+            return [self.sample_empty_state(rand_idx) for rand_idx in np.random.permutation(len(self.traj_init_cell_row_idxs))[:n]]
         else:
             return [self.sample_empty_state() for i in range(n)]
 
@@ -275,6 +289,15 @@ class NavigationMDP(GridWorldMDP):
 
         return action_seq, state_seq
 
+    def compute_value_iteration_results(self, sample_rate):
+
+        # If value iteration was run previously, don't re-run it
+        if self.value_iter is None or self._policy_invalidated == True:
+            self.value_iter = ValueIteration(self, sample_rate=sample_rate)
+            _ = self.value_iter.run_vi()
+            self._policy_invalidated = False
+        return self.value_iter
+
     def sample_data(self, n_trajectory,
                     init_states=None,
                     init_repetition=False,
@@ -286,15 +309,21 @@ class NavigationMDP(GridWorldMDP):
         """
         Args:
             n_trajectory: number of trajectories to sample
-            init_states: None - to use random init state [GridWorldState(x,y),...] - to use specific init states
-            init_repetition: When init_state is set to None, this will sample every possible init state
-                                    and try to not repeat init state unless n_trajectory > n_states
+            init_states: 
+                None - to use random init state 
+                [GridWorldState(x,y),...] - to use specific init states
+            init_repetition: When init_state is set to None, this will sample 
+                every possible init state and try to not repeat init state 
+                unless @n_trajectory > @self.num_traj_init_states
             policy (fn): S->A
             horizon (int): planning horizon
-            pad_extra_trajectories: If True, this will always return n_trajectory many trajectories
-                                        overrides init_repetition if # unique states !=  n_trajectory
-            value_iter_sampling_rate (int): Used for value iteration if policy is set to None
-
+            pad_extra_trajectories: If True, this will always return 
+                @n_trajectory many trajectories, overrides @init_repetition 
+                if # unique states !=  @n_trajectory
+            value_iter_sampling_rate (int): Used for value iteration if policy 
+                is set to None
+            map_actions_to_index (bool): Set True to get action indices in 
+                trajectory
         Returns:
             (Traj_states, Traj_actions) where
                 Traj_states: [[s1, s2, ..., sT], [s4, s1, ..., sT], ...],
@@ -310,13 +339,16 @@ class NavigationMDP(GridWorldMDP):
             if len(init_states) < n_trajectory and pad_extra_trajectories:
                 init_states += self.sample_empty_states(n_trajectory - len(init_states), repetition=True)
         else:
-            if len(init_states) < n_trajectory and pad_extra_trajectories: # i.e., more init states need to be sampled
+            if len(init_states) < n_trajectory and pad_extra_trajectories:
+                # More init states need to be sampled
                 init_states += self.sample_empty_states(n_trajectory - len(init_states), init_repetition)
-            else: # we have sufficient init states pre-specified, ignore the rest as we only need n_trajectory many
+            else:
+                # We have sufficient init states pre-specified, ignore the rest
+                # as we only need n_trajectory many
                 init_states = init_states[:n_trajectory]
 
         if policy is None:
-            policy = self.get_value_iteration_results(value_iter_sampling_rate).policy
+            policy = self.compute_value_iteration_results(value_iter_sampling_rate).policy
 
         for init_state in init_states:
             action_seq, state_seq = self.plan(init_state, policy=policy, horizon=horizon)
@@ -355,12 +387,10 @@ class NavigationMDP(GridWorldMDP):
 
         for row in range(self.height):
             for col in range(self.width):
-
                 # Note: if particular cell type is missing in the grid, this will assign distance -1 to it
                 # Ord=1: Manhattan, Ord=2: Euclidean and so on
                 self.feature_cell_dist[row, col] = [np.linalg.norm([row, col] - loc_cell, ord=1, axis=1).min() \
                                                     if len(loc_cell) != 0 else -1 for loc_cell in self.loc_cells]
-
         # feature scaling
         if normalize:
             max_dist = self.width + self.height
@@ -471,6 +501,7 @@ class NavigationMDP(GridWorldMDP):
     def visualize_grid(self, values=None, cmap=None,
                             trajectories=None, subplot_str=None,
                             new_fig=True, show_rewards_cbar=False,
+                            int_cells_cmap=cm.viridis,
                             title="Navigation MDP"):
         """
         Args:
@@ -483,9 +514,6 @@ class NavigationMDP(GridWorldMDP):
             show_rewards_cbar (Bool): Whether to show colorbar with cell reward values.
             title (str): Title of the plot.
         """
-        import matplotlib.pyplot as plt
-        from matplotlib import colors
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
 
         if self.all_goals_state_features_entangled:
             # If all goals are mapped to same feature, they'll all be shown with the same color
@@ -502,7 +530,13 @@ class NavigationMDP(GridWorldMDP):
             plt.subplot(subplot_str)
 
         if cmap is None:
-            cmap = colors.ListedColormap(cell_types)
+            norm = colors.Normalize(vmin=0, vmax=len(self.goal_colors)-1)
+            # Leave string colors as it is, convert int colors to normalized rgba
+            cell_colors = [int_cells_cmap(norm(cell))
+                                if isinstance(cell, int)
+                                    else cell
+                                for cell in cell_types]
+            cmap = colors.ListedColormap(cell_colors)
 
         if values is None:
             values = self.cells.copy()
