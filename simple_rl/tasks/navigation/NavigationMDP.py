@@ -18,7 +18,7 @@ class NavigationMDP(GridWorldMDP):
 
     '''
         Class for Navigation MDP from:
-            MacGlashan, James, and Michael L. Littman. "Between Imitation and 
+            MacGlashan, James, and Michael L. Littman. "Between Imitation and
             Intention Learning." IJCAI. 2015.
     '''
 
@@ -58,26 +58,26 @@ class NavigationMDP(GridWorldMDP):
             goal_locs (list of tuples: [(int, int)...]): Goal locations.
             cell_type (list of cell types: [str, str, ...]): Non-goal cell types.
             cell_rewards (list of ints): Reward for each @cell_type.
-            cell_distribution (str): 
-                "probability" - will assign cells according 
-                to @cell_type_probs over the state space. 
+            cell_distribution (str):
+                "probability" - will assign cells according
+                to @cell_type_probs over the state space.
                 "manual" - will  use @cell_type_forced_locations to assign cells to locations.
             cell_type_probs (list of floats): Only applicable when
-                @cell_distribution is set to "probability". Specifies probability 
-                corresponding to each @cell_type. Values must sum to 1. Each value 
+                @cell_distribution is set to "probability". Specifies probability
+                corresponding to each @cell_type. Values must sum to 1. Each value
                 signifies the probability of occurence of particular cell type in the grid.
-                Note: the actual probabilities would be slightly off because 
+                Note: the actual probabilities would be slightly off because
                 this doesn't factor in number of goals.
-            cell_type_forced_locations (list of list of tuples 
+            cell_type_forced_locations (list of list of tuples
             [[(x1,y1), (x2,y2)], [(x3,y3), ...], np.inf, ...}):
-                Only applicable when @cell_distribution is set to "Manual". Used 
-                to specify additional cells and their locations. If elements are 
+                Only applicable when @cell_distribution is set to "Manual". Used
+                to specify additional cells and their locations. If elements are
                 set to np.inf, all of them will be sampled uniformly at random.
             goal_colors (list of str/int): Color of goal corresponding to @goal_locs.
-                If colors are different, each goal will be represented with 
+                If colors are different, each goal will be represented with
                 a unique feature, otherwise all goals are mapped to same feature.
             traj_init_cell_types (list of ints): To specify which cell types
-                are navigable. This is used in sampling empty/drivable states 
+                are navigable. This is used in sampling empty/drivable states
                 while generating trajectories.
         Not used but are properties of superclass GridWorldMDP:
             init_loc (tuple: (int, int)): (x,y) initial location
@@ -178,7 +178,7 @@ class NavigationMDP(GridWorldMDP):
 
     def reset_goals(self, goal_locs, goal_rewards, goal_colors):
         """
-        Resets the goals. Updates cell type grid and cell reward grid as per 
+        Resets the goals. Updates cell type grid and cell reward grid as per
         new goal configuration.
         """
 
@@ -309,20 +309,20 @@ class NavigationMDP(GridWorldMDP):
         """
         Args:
             n_trajectory: number of trajectories to sample
-            init_states: 
-                None - to use random init state 
+            init_states:
+                None - to use random init state
                 [GridWorldState(x,y),...] - to use specific init states
-            init_repetition: When init_state is set to None, this will sample 
-                every possible init state and try to not repeat init state 
+            init_repetition: When init_state is set to None, this will sample
+                every possible init state and try to not repeat init state
                 unless @n_trajectory > @self.num_traj_init_states
             policy (fn): S->A
             horizon (int): planning horizon
-            pad_extra_trajectories: If True, this will always return 
-                @n_trajectory many trajectories, overrides @init_repetition 
+            pad_extra_trajectories: If True, this will always return
+                @n_trajectory many trajectories, overrides @init_repetition
                 if # unique states !=  @n_trajectory
-            value_iter_sampling_rate (int): Used for value iteration if policy 
+            value_iter_sampling_rate (int): Used for value iteration if policy
                 is set to None
-            map_actions_to_index (bool): Set True to get action indices in 
+            map_actions_to_index (bool): Set True to get action indices in
                 trajectory
         Returns:
             (Traj_states, Traj_actions) where
@@ -415,6 +415,9 @@ class NavigationMDP(GridWorldMDP):
             incl_distance_features (bool): True - appends feature vector with
                 distance to each type of cell.
             incl_goal_ind_feature: True - adds goal indicator feature
+                If all goals have same color, it'll add single indicator variable 
+                for all goals, otherwise it'll use different indicator variables 
+                for each goal.
                 (only applicable for "indicator" feature type).
             normalize_distance (bool): Whether to normalize cell type distances
                  to 0-1 range (only used when "incl_distance_features" is True).
@@ -498,10 +501,15 @@ class NavigationMDP(GridWorldMDP):
         """
         return col + 1, self.height - row
 
-    def visualize_grid(self, values=None, cmap=None,
-                            trajectories=None, subplot_str=None,
-                            new_fig=True, show_rewards_cbar=False,
+    def visualize_grid(self, values=None,
+                            cmap=None,
+                            trajectories=None,
+                            subplot_str=None,
+                            new_fig=True,
+                            show_rewards_cbar=False,
                             int_cells_cmap=cm.viridis,
+                            mark_goals=True,
+                            mark_traj_ends=True,
                             title="Navigation MDP"):
         """
         Args:
@@ -557,8 +565,11 @@ class NavigationMDP(GridWorldMDP):
                 path_ys = [self.height - (s.y) for s in state_seq]
                 plt.plot(path_xs, path_ys, "k", linewidth=0.7)
                 plt.plot(path_xs[0], path_ys[0], ".k", markersize=10)
-                plt.plot(path_xs[-1], path_ys[-1], "*c", markersize=10)
-
+                if mark_traj_ends:
+                    plt.plot(path_xs[-1], path_ys[-1], "or", markersize=18)
+        if mark_goals:
+            for goal_x, goal_y in self.goal_locs:
+                plt.plot(goal_x-1, self.height - goal_y, "*c", markersize=10)
 
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="3%", pad=0.05)
