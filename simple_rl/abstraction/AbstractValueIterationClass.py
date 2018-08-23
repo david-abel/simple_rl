@@ -6,7 +6,7 @@ from collections import defaultdict
 from simple_rl.utils import make_mdp
 from simple_rl.abstraction.action_abs.ActionAbstractionClass import ActionAbstraction
 from simple_rl.abstraction.state_abs.StateAbstractionClass import StateAbstraction
-from simple_rl.abstraction.abstr_mdp import abstr_mdp_funcs
+from simple_rl.abstraction.state_action_abstr_mdp import abstr_mdp_funcs
 from simple_rl.planning.PlannerClass import Planner
 from simple_rl.planning.ValueIterationClass import ValueIteration
 

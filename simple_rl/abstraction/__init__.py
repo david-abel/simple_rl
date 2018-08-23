@@ -13,4 +13,4 @@ from simple_rl.abstraction.action_abs.PredicateClass import Predicate
 # Scripts.
 from simple_rl.abstraction.state_abs import sa_helpers, indicator_funcs
 from simple_rl.abstraction.action_abs import aa_helpers
-from simple_rl.abstraction.abstr_mdp import abstr_mdp_funcs
+from simple_rl.abstraction.state_action_abstr_mdp import abstr_mdp_funcs
