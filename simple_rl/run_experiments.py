@@ -431,12 +431,14 @@ def evaluate_agent(agent, mdp, instances=10):
         (float): Avg. cumulative discounted reward.
     '''
     total = 0.0
-    steps = int(1 / (1 - mdp.get_gamma()))
+    steps = int(1 / (1 - mdp.get_gamma())) * 10
     for i in range(instances):
         _, _, val = run_single_agent_on_mdp(agent, mdp, episodes=1, steps=steps)
         total += val
+
         # Reset the agent.
         agent.reset()
+        mdp.reset()
         mdp.end_of_instance()
 
     return total / instances

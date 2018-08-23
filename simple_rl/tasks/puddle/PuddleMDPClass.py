@@ -32,6 +32,8 @@ class PuddleMDP(GridWorldMDP):
         GridWorldMDP.__init__(self, width=1.0, height=1.0, init_loc=[0.25, 0.6], goal_locs=[[1.0, 1.0]], gamma=gamma, name=name, is_goal_terminal=is_goal_terminal, rand_init=rand_init)
 
     def _reward_func(self, state, action):
+        if state.is_terminal():
+            return 0
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
         elif self._is_puddle_state_action(state, action):

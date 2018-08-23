@@ -103,7 +103,7 @@ class ActionAbstraction(object):
         return self.cur_option.act(ground_state)
 
     def get_actions(self):
-        return self.options
+        return list(self.options)
 
     def abs_to_ground(self, ground_state, abstr_action):
         return abstr_action.act(ground_state)

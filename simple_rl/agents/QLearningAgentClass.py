@@ -52,7 +52,7 @@ class QLearningAgent(Agent):
             reward (float)
 
         Returns:
-        	(str)
+            (str)
 
         Summary:
             The central method called during each time step.
@@ -213,8 +213,7 @@ class QLearningAgent(Agent):
             mass associated with the i-th action (indexing into self.actions)
         '''
         all_q_vals = []
-        for i in range(len(self.actions)):
-            action = self.actions[i]
+        for i, action in enumerate(self.actions):
             all_q_vals.append(self.get_q_value(state, action))
 
         # Softmax distribution.

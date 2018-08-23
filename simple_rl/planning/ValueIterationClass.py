@@ -123,6 +123,10 @@ class ValueIteration(Planner):
 
     def run_vi(self):
         '''
+        Returns:
+            (tuple):
+                1. (int): num iterations taken.
+                2. (float): value.
         Summary:
             Runs ValueIteration and fills in the self.value_func.           
         '''
