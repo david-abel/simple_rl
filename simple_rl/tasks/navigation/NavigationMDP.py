@@ -123,11 +123,17 @@ class NavigationMDP(GridWorldMDP):
 
         # Run value iteration
         self.value_iter = ValueIteration(self, sample_rate=1)
-        self.value_iter._compute_matrix_from_trans_func()
 
         # Additional book-keeping
         self.feature_cell_dist = None
         self.feature_cell_dist_kind = 0
+
+    def get_states(self):
+        return self.value_iter.get_states()
+
+    def get_trans_dict(self):
+        self.value_iter._compute_matrix_from_trans_func()
+        return self.value_iter.trans_dict
 
     def __generate_state_space(self, height, width,
                                living_cell_distribution, living_cell_type_probs,
@@ -484,7 +490,7 @@ class NavigationMDP(GridWorldMDP):
                                   endpoint=False)
         for y_index, y in enumerate(y_positions):
             for x_index, x in enumerate(x_positions):
-                label = round(values[y_index, x_index], 2)
+                label = values[y_index, x_index]
                 ax.text(x, y, label, color='black', ha='center',
                         va='center', fontsize=fontsize)
 
@@ -492,7 +498,7 @@ class NavigationMDP(GridWorldMDP):
                        subplot_str=None, new_fig=True, show_colorbar=False,
                        show_rewards_colorbar=False, int_cells_cmap=cm.viridis,
                        init_marker=".k", traj_marker="-k",
-                       text_values=None, text_size=12,
+                       text_values=None, text_size=10,
                        traj_linewidth=0.7, init_marker_sz=10,
                        goal_marker="*c", goal_marker_sz=10,
                        end_marker="", end_marker_sz=10,
@@ -518,7 +524,7 @@ class NavigationMDP(GridWorldMDP):
             plt.subplot(subplot_str)
         # Colormap
         if cmap is None:
-            norm = colors.Normalize(vmin=0, vmax=len(self.goal_cell_types)-1)
+            norm = colors.Normalize(vmin=0, vmax=len(self.cell_types)-1)
             # Leave string colors as it is, convert int colors to normalized rgba
             cell_colors = [
                 int_cells_cmap(norm(cell)) if isinstance(cell, int) else cell
@@ -540,8 +546,10 @@ class NavigationMDP(GridWorldMDP):
         ax.set_yticklabels(1 + np.arange(self.height)[::-1], minor=True,
                            fontsize=axis_tick_font_sz)
         # Plot Trajectories
-        if trajectories is not None and trajectories:
+        if trajectories is not None and len(trajectories) > 0:
             for state_seq in trajectories:
+                if len(state_seq) == 0:
+                    continue
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
                 plt.plot(path_xs, path_ys, traj_marker, linewidth=traj_linewidth)
