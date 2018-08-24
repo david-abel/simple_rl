@@ -1,19 +1,18 @@
 ''' NavigationMDP.py: Contains the NavigationMDP class. '''
-
 # Python imports.
 from __future__ import print_function
 import copy
 import numpy as np
 from collections import defaultdict
-from simple_rl.tasks import GridWorldMDP
-from simple_rl.planning import ValueIteration
-from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
-
-# Plotting
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib import colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+# Other imports.
+from simple_rl.tasks import GridWorldMDP
+from simple_rl.planning import ValueIteration
+from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class NavigationMDP(GridWorldMDP):
 
@@ -45,15 +44,15 @@ class NavigationMDP(GridWorldMDP):
                  living_cell_distribution="probability",
                  living_cell_type_probs=[0.68, 0.17, 0.05, 0.05, 0.05],
                  living_cell_locs=[np.inf, np.inf, [(1,1),(5,5)], [(2,2)], [4,4]],
-                 goal_cell_locs=[(21, 21)],
-                 goal_cell_rewards=[1.0],
-                 goal_cell_types=["blue"],
+                 goal_cell_locs=[],
+                 goal_cell_rewards=[],
+                 goal_cell_types=[],
                  gamma=0.99, slip_prob=0.00, step_cost=0.0,
                  is_goal_terminal=True, traj_init_cell_types=[0],
                  planning_init_loc=(1,1), planning_rand_init=True, name="Navigation MDP"):
         """
-        Note: 1. locations and state dimensions start from 1 instead of 0.
-              2. 2d locations are interpreted in (x,y) format.
+        Note: Locations are specified in (x,y) format, but (row, col) convention 
+            is used while storing in memory. 
         Args:
             height (int): Height of navigation grid in no. of cells.
             width (int): Width of navigation grid in no. of cells.
@@ -80,13 +79,13 @@ class NavigationMDP(GridWorldMDP):
         assert height > 0 and isinstance(height, int) and width > 0 \
                and isinstance(width,
                               int), "height and widht must be integers and > 0"
-        assert len(goal_cell_types) == len(goal_cell_locs) == len(
-            goal_cell_rewards)
         assert len(living_cell_types) == len(living_cell_rewards)
         assert living_cell_distribution == "manual" or len(living_cell_types) == len(
             living_cell_type_probs)
         assert living_cell_distribution == "probability" or len(
             living_cell_types) == len(living_cell_locs)
+        assert len(goal_cell_types) == len(goal_cell_locs) == len(
+            goal_cell_rewards)
 
         GridWorldMDP.__init__(self, width=width, height=height,
                               init_loc=planning_init_loc,
@@ -123,13 +122,18 @@ class NavigationMDP(GridWorldMDP):
         self.set_traj_init_cell_types(cell_types=traj_init_cell_types)
 
         # Run value iteration
-        self.value_iter = None
-        self.get_value_iteration_results()
-        self._policy_invalidated = False
+        self.value_iter = ValueIteration(self, sample_rate=1)
 
         # Additional book-keeping
         self.feature_cell_dist = None
         self.feature_cell_dist_kind = 0
+
+    def get_states(self):
+        return self.value_iter.get_states()
+
+    def get_trans_dict(self):
+        self.value_iter._compute_matrix_from_trans_func()
+        return self.value_iter.trans_dict
 
     def __generate_state_space(self, height, width,
                                living_cell_distribution, living_cell_type_probs,
@@ -226,7 +230,9 @@ class NavigationMDP(GridWorldMDP):
         self.cell_ids = self.living_cell_ids + self.goal_cell_ids
         self.cell_types = self.living_cell_types + self.goal_cell_types
         self.cell_type_rewards = self.living_cell_rewards + self.goal_cell_rewards
-        self._policy_invalidated = True
+
+        if len(self.goal_cell_locs) != 0:
+            self._policy_invalidated = True
 
     def set_traj_init_cell_types(self, cell_types=[0]):
         """
@@ -257,12 +263,14 @@ class NavigationMDP(GridWorldMDP):
     def sample_init_states(self, n, repetition=False):
         """
         Returns a list of random empty/white state of type GridWorldState()
-        Note: if repetition is False, the max no. of states returned = # of empty/white cells in the grid
+        Note: if repetition is False, the max no. of states returned = # of empty cells in the grid
         """
         assert n > 0
 
         if repetition is False:
-            return [self.sample_empty_state(rand_idx) for rand_idx in np.random.permutation(len(self.traj_init_cell_row_idxs))[:n]]
+            return [self.sample_empty_state(rand_idx) for rand_idx in
+                    np.random.permutation(len(self.traj_init_cell_row_idxs))[
+                    :n]]
         else:
             return [self.sample_empty_state() for i in range(n)]
 
@@ -289,13 +297,12 @@ class NavigationMDP(GridWorldMDP):
 
         return action_seq, state_seq
 
-    def get_value_iteration_results(self, sample_rate=1):
+    def run_value_iteration(self):
         """
         Runs value iteration (if needed) and returns ValueIteration object.
         """
         # If value iteration was run previously, don't re-run it
-        if self.value_iter is None or self._policy_invalidated == True:
-            self.value_iter = ValueIteration(self, sample_rate=sample_rate)
+        if self._policy_invalidated == True:
             _ = self.value_iter.run_vi()
             self._policy_invalidated = False
         return self.value_iter
@@ -345,7 +352,9 @@ class NavigationMDP(GridWorldMDP):
                 init_states = init_states[:n_trajectory]
 
         if policy is None:
-            policy = self.get_value_iteration_results().policy
+            if len(self.goal_cell_locs) == 0:
+                raise ValueError("Cannot determine policy, no goals assigned!")
+            policy = self.run_value_iteration().policy
 
         for init_state in init_states:
             action_seq, state_seq = self.plan(init_state, policy=policy, horizon=horizon)
@@ -468,13 +477,32 @@ class NavigationMDP(GridWorldMDP):
                                    incl_goal_distances, normalize_distance,
                                    dtype)
 
+    def __display_text(self, ax, x_start, x_end, y_start, y_end, values,
+                       fontsize=12):
+        """
+        Ref: https://stackoverflow.com/questions/33828780/matplotlib-display-array-values-with-imshow
+        """
+        x_size = x_end - x_start
+        y_size = y_end - y_start
+        x_positions = np.linspace(start=x_start, stop=x_end, num=x_size,
+                                  endpoint=False)
+        y_positions = np.linspace(start=y_start, stop=y_end, num=y_size,
+                                  endpoint=False)
+        for y_index, y in enumerate(y_positions):
+            for x_index, x in enumerate(x_positions):
+                label = values[y_index, x_index]
+                ax.text(x, y, label, color='black', ha='center',
+                        va='center', fontsize=fontsize)
+
     def visualize_grid(self, values=None, cmap=None, trajectories=None,
                        subplot_str=None, new_fig=True, show_colorbar=False,
-                       show_rewards_colorbar=False,  int_cells_cmap=cm.viridis,
-                       init_marker=".k", traj_marker="-k", traj_linewidth=0.7,
-                       init_marker_sz=10, goal_marker="*c",
-                       goal_marker_sz=10, end_marker="",
-                       end_marker_sz=10, title="Navigation MDP"):
+                       show_rewards_colorbar=False, int_cells_cmap=cm.viridis,
+                       init_marker=".k", traj_marker="-k",
+                       text_values=None, text_size=10,
+                       traj_linewidth=0.7, init_marker_sz=10,
+                       goal_marker="*c", goal_marker_sz=10,
+                       end_marker="", end_marker_sz=10,
+                       axis_tick_font_sz=8, title="Navigation MDP"):
         """
         Args:
             values (2d ndarray): Values to be visualized in the grid, 
@@ -496,7 +524,7 @@ class NavigationMDP(GridWorldMDP):
             plt.subplot(subplot_str)
         # Colormap
         if cmap is None:
-            norm = colors.Normalize(vmin=0, vmax=len(self.goal_cell_types)-1)
+            norm = colors.Normalize(vmin=0, vmax=len(self.cell_types)-1)
             # Leave string colors as it is, convert int colors to normalized rgba
             cell_colors = [
                 int_cells_cmap(norm(cell)) if isinstance(cell, int) else cell
@@ -505,21 +533,23 @@ class NavigationMDP(GridWorldMDP):
 
         if values is None:
             values = self.state_space.copy()
-
         # Plot values
-        im = plt.imshow(values, cmap=cmap)
+        im = plt.imshow(values, interpolation='None', cmap=cmap)
         plt.title(title)
         ax = plt.gca()
         ax.set_xticklabels('')
         ax.set_yticklabels('')
         ax.set_xticks(np.arange(self.width), minor=True)
         ax.set_yticks(np.arange(self.height), minor=True)
-        ax.set_xticklabels(1 + np.arange(self.width), minor=True, fontsize=8)
-        ax.set_yticklabels(1 + np.arange(self.height)[::-1], minor=True, fontsize=8)
-
+        ax.set_xticklabels(1 + np.arange(self.width), minor=True,
+                           fontsize=axis_tick_font_sz)
+        ax.set_yticklabels(1 + np.arange(self.height)[::-1], minor=True,
+                           fontsize=axis_tick_font_sz)
         # Plot Trajectories
-        if trajectories is not None and trajectories:
+        if trajectories is not None and len(trajectories) > 0:
             for state_seq in trajectories:
+                if len(state_seq) == 0:
+                    continue
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
                 plt.plot(path_xs, path_ys, traj_marker, linewidth=traj_linewidth)
@@ -528,9 +558,14 @@ class NavigationMDP(GridWorldMDP):
                 plt.plot(path_xs[-1], path_ys[-1], end_marker,
                          markersize=end_marker_sz) # Mark end state
         # Mark goals
-        for goal_x, goal_y in self.goal_cell_locs:
-            plt.plot(goal_x - 1, self.height - goal_y, goal_marker,
-                     markersize=goal_marker_sz)
+        if len(self.goal_cell_locs) != 0:
+            for goal_x, goal_y in self.goal_cell_locs:
+                plt.plot(goal_x - 1, self.height - goal_y, goal_marker,
+                         markersize=goal_marker_sz)
+        # Text values on cell
+        if text_values is not None:
+            self.__display_text(ax, 0, self.width, 0, self.height, text_values,
+                                fontsize=text_size)
         # Colorbar
         if show_colorbar:
             divider = make_axes_locatable(ax)
