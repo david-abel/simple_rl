@@ -41,6 +41,21 @@ class QLearningAgent(Agent):
             #   Val: q-value
 
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        
+        param_dict["alpha"] = self.alpha
+        param_dict["gamma"] = self.gamma
+        param_dict["epsilon"] = self.epsilon_init
+        param_dict["anneal"] = self.anneal
+        param_dict["explore"] = self.explore
+
+        return param_dict
+
     # --------------------------------
     # ---- CENTRAL ACTION METHODS ----
     # --------------------------------

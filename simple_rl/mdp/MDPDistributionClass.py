@@ -29,6 +29,17 @@ class MDPDistribution(object):
         self.horizon = horizon
         self.mdp_prob_dict = mdp_prob_dict
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = {}
+        param_dict["mdp_prob_dict"] = self.mdp_prob_dict
+        param_dict["horizon"] = self.horizon
+
+        return param_dict
+
     def remove_mdps(self, mdp_list):
         '''
         Args:

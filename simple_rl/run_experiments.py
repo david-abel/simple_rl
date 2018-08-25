@@ -28,7 +28,10 @@ from collections import defaultdict
 from simple_rl.planning import ValueIteration
 from simple_rl.experiments import Experiment
 from simple_rl.mdp import MarkovGameMDP
-from simple_rl.agents import FixedPolicyAgent
+from simple_rl.utils import chart_utils
+from simple_rl.agents import *
+from simple_rl.tasks import *
+
 
 def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, steps=30, verbose=False, open_plot=True):
     '''
@@ -48,7 +51,7 @@ def play_markov_game(agent_ls, markov_game_mdp, instances=10, episodes=100, step
         agent_dict[a.name] = a
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"instances":instances} #, "episodes":episodes, "steps":steps}
+    exp_params = {"instances":instances, "episodes":episodes, "steps":steps}
     experiment = Experiment(agents=agent_dict, mdp=markov_game_mdp, params=exp_params, is_episodic=episodes > 1, is_markov_game=True)
 
     # Record how long each agent spends learning.
@@ -127,7 +130,8 @@ def run_agents_lifelong(agents,
                             track_disc_reward=False,
                             reset_at_terminal=False,
                             resample_at_terminal=False,
-                            cumulative_plot=True):
+                            cumulative_plot=True,
+                            experiment_name_extension=""):
     '''
     Args:
         agents (list)
@@ -148,22 +152,17 @@ def run_agents_lifelong(agents,
         Runs each agent on the MDP distribution according to the given parameters.
         If @mdp_distr has a non-zero horizon, then gamma is set to 1 and @steps is ignored.
     '''
-
-    # Set number of steps if the horizon is given.
-    # if mdp_distr.get_horizon() > 0:
-    #     mdp_distr.set_gamma(1.0)
-    #     steps = mdp_distr.get_horizon()
-
     # Experiment (for reproducibility, plotting).
-    exp_params = {"samples":samples, "episodes":episodes, "steps":steps, "gamma":mdp_distr.get_gamma()}
+    exp_params = {"samples":samples, "episodes":episodes, "steps":steps}
     experiment = Experiment(agents=agents,
-                mdp=mdp_distr,
-                params=exp_params,
-                is_episodic=episodes > 1,
-                is_lifelong=True,
-                clear_old_results=clear_old_results,
-                track_disc_reward=track_disc_reward,
-                cumulative_plot=cumulative_plot)
+                    mdp=mdp_distr,
+                    params=exp_params,
+                    is_episodic=episodes > 1,
+                    is_lifelong=True,
+                    clear_old_results=clear_old_results,
+                    track_disc_reward=track_disc_reward,
+                    cumulative_plot=cumulative_plot,
+                    experiment_name_extension=experiment_name_extension)
 
     # Record how long each agent spends learning.
     print("Running experiment: \n" + str(experiment))
@@ -175,7 +174,6 @@ def run_agents_lifelong(agents,
     for agent in agents:
         print(str(agent) + " is learning.")
         start = time.clock()
-
 
         # --- SAMPLE NEW MDP ---
         for new_task in range(samples):
@@ -220,7 +218,8 @@ def run_agents_on_mdp(agents,
                         open_plot=True,
                         verbose=False,
                         reset_at_terminal=False,
-                        cumulative_plot=True):
+                        cumulative_plot=True,
+                        experiment_name_extension=""):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -235,6 +234,7 @@ def run_agents_on_mdp(agents,
         verbose (bool): If true, prints status bars per episode/instance.
         reset_at_terminal (bool): If true sends the agent to the start state after terminal.
         cumulative_plot (bool): If true makes a cumulative plot, otherwise plots avg. reward per timestep.
+        experiment_name_extension (str): Adds this to the end of the usual experiment name.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
@@ -243,7 +243,7 @@ def run_agents_on_mdp(agents,
     '''
 
     # Experiment (for reproducibility, plotting).
-    exp_params = {"instances":instances, "episodes":episodes, "steps":steps, "gamma":mdp.get_gamma()}
+    exp_params = {"instances":instances, "episodes":episodes, "steps":steps}
     experiment = Experiment(agents=agents,
                             mdp=mdp,
                             params=exp_params,
@@ -251,7 +251,8 @@ def run_agents_on_mdp(agents,
                             clear_old_results=clear_old_results,
                             track_disc_reward=track_disc_reward,
                             count_r_per_n_timestep=rew_step_count,
-                            cumulative_plot=cumulative_plot)
+                            cumulative_plot=cumulative_plot,
+                            experiment_name_extension=experiment_name_extension)
 
     # Record how long each agent spends learning.
     print("Running experiment: \n" + str(experiment))
@@ -442,6 +443,141 @@ def evaluate_agent(agent, mdp, instances=10):
         mdp.end_of_instance()
 
     return total / instances
+
+def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=False):
+    '''
+    Args:
+        exp_name (str)
+        results_dir_name (str)
+        open_plot (bool)
+
+    Summary:
+        Extracts the agents, MDP, and parameters from the file and runs the experiment.
+        Stores data in "results_dir_name/exp_name/reproduce_i/*", where "i" is determined
+        based on the existence of earlier "reproduce" files.
+    '''
+
+    # Get dir and file.
+    exp_dir = os.path.join(results_dir_name, exp_name)
+    exp_file = Experiment.FULL_EXP_FILE_NAME
+    full_exp_file = os.path.join(exp_dir, exp_file)
+
+    # Check to make sure the file exists.
+    if not os.path.exists(full_exp_file):
+        raise ImportError("(simple_rl): no such experiment: " + str(full_exp_file) + ".")
+
+    # Open the file.
+    exp_file = open(full_exp_file, "r")
+
+    # Placeholders.
+    agents = []
+    mdp = None
+    experiment_param_dict = {}
+    actions = []
+    experiment_func = None
+
+    # Read the file in.
+    lines = exp_file.readlines()
+    for i, line in enumerate(lines):
+
+        if "OOMDP" in line or "POMDP" in line:
+            raise TypeError("(simple_rl): reproduction not yet implemented for OOMDPs and POMDPs.")
+            sys.exit(0)
+
+        elif "MDP:" in line:
+            mdp_class_str = line[line.find("'") + 1 : line.rfind("'")].split(".")[-1]
+            mdp_param_dict = _get_params_from_lines(lines, start_index=i + 1)
+            MDPClass = eval(mdp_class_str)
+            mdp = MDPClass(**mdp_param_dict)
+
+        elif "AGENT:" in line:
+            # Get class and make agent.
+            agent_class_str = line[line.find("'") + 1 : line.rfind("'")].split(".")[-1]
+            agent_param_dict = _get_params_from_lines(lines, start_index=i + 1)
+            AgentClass = eval(agent_class_str)
+
+            agent_param_dict["actions"] = mdp.get_actions()
+            agent = AgentClass(**agent_param_dict)
+            agents.append(agent)
+
+        elif "MISC" in line:
+            experiment_param_dict = _get_params_from_lines(lines, start_index=i + 1)
+
+        elif "FUNC" in line:
+            i += 1
+            func_name = lines[i].strip()
+            experiment_func = eval(func_name)
+
+    # Prints.
+    print("\n" + "%"*17)
+    print("%"*2, "Reproducing", "%"*2)
+    print("%"*17, "\n")
+    print("MDP:", "\n  " + str(mdp) + "\n")
+    print("Agents:")
+    for a in agents:
+        print("  ", a)
+    print("\n" + "%"*17)
+    print("%"*17, "\n")
+
+    # Reproduce.
+    chart_utils.CUSTOM_TITLE = "Reproduce: " + str(mdp)
+    experiment_func(agents, mdp, experiment_name_extension="-rep", open_plot=open_plot, **experiment_param_dict)
+
+    print("\n" + "%"*22)
+    print("%"*2, "Done Reproducing", "%"*2)
+    print("%"*22, "\n")
+
+    exp_file.close()
+
+def _get_params_from_lines(lines, start_index):
+    '''
+    Args:
+        lines (list)
+        start_index (int)
+
+    Returns:
+        (dict)
+
+    Summary:
+
+    '''
+    from ast import literal_eval as make_tuple
+    import ast
+    agent_param_dict = {}
+
+    # Get the class.
+
+    hit_next_agent = False
+    i = start_index
+    while not hit_next_agent:
+        if len(lines[i]) <= 1:
+            break
+
+        # Grab param name, value, and type.
+        next_line = [item.strip() for item in lines[i].split("=")]
+        param_name, param_val, param_type = next_line[0], next_line[1], next_line[2][next_line[2].find("'") + 1 : next_line[2].rfind("'")]
+        
+        if param_type == "bool":
+            param_val = bool(param_val == "True")
+        elif param_type == "tuple":
+            param_val = make_tuple(param_val)
+        elif param_type == "list":
+            param_val = ast.literal_eval(param_val)
+        else:         
+            param_val = eval(param_type)(param_val)
+        agent_param_dict[param_name] = param_val
+
+        i += 1
+
+    return agent_param_dict
+
+def _parse_tuple_string(tup_str):
+    '''
+    Args:
+        tup (tuple)
+
+    '''
+
 
 def choose_mdp(mdp_name, env_name="Asteroids-v0"):
     '''

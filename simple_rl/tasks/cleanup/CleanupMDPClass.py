@@ -45,6 +45,13 @@ class CleanUpMDP(MDP):
         self.height = max(self.legal_states, key=lambda tup: tup[1])[1] + 1
         # TODO CREATE A DICTIONARY FROM ROOMS TO LEGAL STATES IN ROOMS WITHOUT DOORS
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        raise TypeError("(simple_rl): Reproduction of results not implemented for CleanUpMDP".)
+
     def _transition_func(self, state, action):
         '''
         :param state: The state

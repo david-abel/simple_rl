@@ -21,6 +21,17 @@ class ChainMDP(MDP):
         self.num_states = num_states
         self.reset_val = reset_val
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["num_states"] = self.num_states
+        param_dict["reset_val"] = self.reset_val
+   
+        return param_dict
+
     def _reward_func(self, state, action):
         '''
         Args:

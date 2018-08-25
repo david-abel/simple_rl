@@ -19,6 +19,17 @@ class MDP(object):
     # -- Accessors --
     # ---------------
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = {}
+        param_dict["gamma"] = self.gamma
+        param_dict["step_cost"] = self.step_cost
+
+        return param_dict
+
     def get_init_state(self):
         return self.init_state
 

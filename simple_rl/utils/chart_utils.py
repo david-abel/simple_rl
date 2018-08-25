@@ -9,9 +9,9 @@ Functions:
     _format_title()
     plot: Creates (and opens) a single plot using matplotlib.pyplot
     make_plots: Puts everything in order to create the plot.
-    _get_agent_names: Grabs the agent names from parameters.txt.
+    _get_agent_names: Grabs the agent names the experiment parameter file, named @Experiment.EXP_PARAM_FILE_NAME
     _get_agent_colors: Determines the relevant colors/markers for the plot.
-    _is_episodic: Determines if the experiment was episodic from parameters.txt.
+    _is_episodic: Determines if the experiment was episodic from the experiment parameter file, named @Experiment.EXP_PARAM_FILE_NAME
     _is_disc_reward()
     parse_args: Parse command line arguments.
     main: Loads data from a given path and creates plot.
@@ -35,7 +35,7 @@ import argparse
 color_ls = [[118, 167, 125], [102, 120, 173],\
             [198, 113, 113], [94, 94, 94],\
             [169, 193, 213], [230, 169, 132],\
-            [192, 197, 182], [210, 180, 226], ]
+            [192, 197, 182], [210, 180, 226]]
 
 # Set font.
 font = {'size':14}
@@ -353,8 +353,10 @@ def _get_agent_names(data_dir):
     Returns:
         (list)
     '''
+    from simple_rl.experiments import Experiment
+
     try:
-        params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+        params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
     except IOError:
         # No param file.
         return [agent_file.replace(".csv", "") for agent_file in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, agent_file)) and ".csv" in agent_file]
@@ -382,8 +384,10 @@ def _get_agent_colors(data_dir, agents):
     Returns:
         (list)
     '''
+    from simple_rl.experiments import Experiment
+
     try:
-        params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+        params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
     except IOError:
         # No param file.
         return {agent : i for i, agent in enumerate(agents)}
@@ -403,13 +407,14 @@ def _is_episodic(data_dir):
     Returns:
         (bool) True iff the experiment was episodic.
     '''
+    from simple_rl.experiments import Experiment
 
     # Open param file for the experiment.
-    if not os.path.exists(data_dir + "parameters.txt"):
-        print("Warning: no parameters file found for experiment. Assuming non-episodic.")
+    if not os.path.exists(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
+        print("Warning: no experiment parameters file found for experiment. Assuming non-episodic.")
         return False
 
-    params_file = open(data_dir + "parameters.txt", "r")
+    params_file = open(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
 
     # Check if episodes > 1.
     for line in params_file.readlines():
@@ -422,13 +427,14 @@ def _is_disc_reward(data_dir):
     Returns:
         (bool) True iff the experiment recorded discounted reward.
     '''
+    from simple_rl.experiments import Experiment
 
     # Open param file for the experiment.
-    if not os.path.exists(data_dir + "parameters.txt"):
-        print("Warning: no parameters file found for experiment. Assuming non-episodic.")
+    if not os.path.exists(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
+        print("Warning: no experiment parameters file found for experiment. Assuming non-episodic.")
         return False
 
-    params_file = open(data_dir + "parameters.txt", "r")
+    params_file = open(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
 
     # Check if episodes > 1.
     for line in params_file.readlines():

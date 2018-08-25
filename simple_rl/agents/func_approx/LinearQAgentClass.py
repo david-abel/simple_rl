@@ -28,6 +28,24 @@ class LinearQAgent(QLearningAgent):
 
         self.rbf = rbf
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        
+        param_dict["num_features"] = self.num_features
+        param_dict["rand_init"] = self.rand_init
+        param_dict["alpha"] = self.alpha
+        param_dict["gamma"] = self.gamma
+        param_dict["epsilon"] = self.epsilon
+        param_dict["rbf"] = self.rbf
+        param_dict["anneal"] = self.anneal
+        param_dict["explore"] = self.explore
+
+        return param_dict
+
     def update(self, state, action, reward, next_state):
         '''
         Args:

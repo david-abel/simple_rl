@@ -44,7 +44,6 @@ class PrisonersDilemmaMDP(MarkovGameMDP):
         return reward_dict
 
 
-
     def _transition_func(self, state, action):
         '''
         Args:

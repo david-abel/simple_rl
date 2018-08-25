@@ -26,6 +26,16 @@ class GymMDP(MDP):
         self.render = render
         MDP.__init__(self, range(self.env.action_space.n), self._transition_func, self._reward_func, init_state=GymState(self.env.reset()))
     
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["env_name"] = self.env_name
+   
+        return param_dict
+
     def _reward_func(self, state, action):
         '''
         Args:

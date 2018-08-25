@@ -32,6 +32,19 @@ class RandomMDP(MDP):
         self._reward_s_a = (random.choice(range(self.num_states)), random.choice(RandomMDP.ACTIONS))
         self._transitions = defaultdict(lambda: defaultdict(str))
 
+
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["num_states"] = self.num_states
+        param_dict["num_rand_trans"] = self.num_rand_trans
+        param_dict["num_actions"] = self.num_actions
+   
+        return param_dict
+
     def _reward_func(self, state, action):
         '''
         Args:

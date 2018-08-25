@@ -34,7 +34,6 @@ class DoubleQAgent(QLearningAgent):
         self.q_funcs = {"A":defaultdict(lambda : defaultdict(lambda: self.default_q)), \
                         "B":defaultdict(lambda : defaultdict(lambda: self.default_q))}
 
-
     def act(self, state, reward):
         '''
         Args:

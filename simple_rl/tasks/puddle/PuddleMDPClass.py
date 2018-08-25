@@ -31,6 +31,19 @@ class PuddleMDP(GridWorldMDP):
         self.puddle_rects = puddle_rects
         GridWorldMDP.__init__(self, width=1.0, height=1.0, init_loc=[0.25, 0.6], goal_locs=[[1.0, 1.0]], gamma=gamma, name=name, is_goal_terminal=is_goal_terminal, rand_init=rand_init)
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["slip_prob"] = self.slip_prob
+        param_dict["is_goal_terminal"] = self.is_goal_terminal
+        param_dict["rand_init"] = self.rand_init
+        param_dict["puddle_rects"] = self.puddle_rects
+   
+        return param_dict
+
     def _reward_func(self, state, action):
         if state.is_terminal():
             return 0

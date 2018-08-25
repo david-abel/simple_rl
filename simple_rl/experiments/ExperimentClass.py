@@ -17,6 +17,10 @@ from simple_rl.utils import chart_utils
 from simple_rl.experiments.ExperimentParametersClass import ExperimentParameters
 
 class Experiment(object):
+
+    FULL_EXP_FILE_NAME = "full_experiment.txt"
+    EXP_PARAM_FILE_NAME = "exp_info.txt"
+
     ''' Experiment Class for RL Experiments '''
 
     # Dumps the results in a directory called "results" in the current working dir.
@@ -33,7 +37,9 @@ class Experiment(object):
                     track_disc_reward=False,
                     clear_old_results=True,
                     count_r_per_n_timestep=1,
-                    cumulative_plot=True):
+                    cumulative_plot=True,
+                    exp_function="run_agents_on_mdp",
+                    experiment_name_extension=""):
         '''
         Args:
             agents (list)
@@ -46,12 +52,15 @@ class Experiment(object):
             clear_old_results (bool)
             count_r_per_n_timestep (int)
             cumulative_plot (bool)
+            exp_function (lambda): tracks with run_experiments.py function was called.
+            experiment_name_extension (str)
         '''
         # Store all relevant bools.
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
         params["track_disc_reward"] = track_disc_reward
-        params["is_lifelong"] = is_lifelong
+        # params["is_lifelong"] = is_lifelong
+        # params["agent_colors"] = agent_colors
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.track_disc_reward = track_disc_reward
@@ -62,10 +71,65 @@ class Experiment(object):
         self.name = str(self.mdp)
         self.rewards = defaultdict(list)
         self.times = defaultdict(list)
-        self.exp_directory = Experiment.RESULTS_DIR + self.name
+        self.exp_directory = os.path.join(Experiment.RESULTS_DIR, self.name + experiment_name_extension)
         self.is_episodic = is_episodic
         self.is_markov_game = is_markov_game
         self._setup_files(clear_old_results)
+
+        # Write experiment reproduction file.
+        self._make_and_write_agent_and_mdp_params(agents, mdp, self.parameters.params, exp_function)
+
+    def _make_and_write_agent_and_mdp_params(self, agents, mdp, parameters, exp_function):
+        '''
+        Args:
+            agents
+            mdp
+            parameters
+
+        Summary:
+            Writes enough detail about @agents, @mdp, and @parameters to the file results/<exp_name>/params.txt 
+            so that the function simple_rl.run_experiments.reproduce_from_exp_file can rerun the experiment.
+        '''
+        out_file = open(os.path.join(self.exp_directory, Experiment.FULL_EXP_FILE_NAME), "w")
+
+        from simple_rl.mdp import OOMDP
+        from simple_rl.pomdp.POMDPClass import POMDP
+        from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+        if isinstance(mdp, OOMDP) or isinstance(mdp, POMDP) or isinstance(mdp, MarkovGameMDP):
+            # We don't do markov games.
+            return
+
+        # MDP.
+        mdp_class = str(type(mdp))
+        mdp_params = mdp.get_parameters()
+        out_file.write("MDP:" + mdp_class + "\n")
+        for param in mdp_params:
+            out_file.write("\t\t" + param + "=" + str(mdp_params[param]) + "=" + str(type(mdp_params[param])) + "\n")
+
+        out_file.write("\n")
+
+        # Get agents and their parameters.
+        for i, agent in enumerate(agents):
+            agent_params = agent.get_parameters()
+            agent_class = str(i) + "-" + str(type(agent))
+
+            out_file.write("AGENT:" + agent_class + "\n")
+            for param in agent_params:
+                out_file.write("\t\t" + param + "=" + str(agent_params[param]) + "=" + str(type(agent_params[param])) + "\n")
+            out_file.write("\n")
+
+        out_file.write("\n")
+
+        # Misc. Params.
+        out_file.write("MISC\n")
+        for param in parameters:
+            out_file.write("\t\t" + param + "=" + str(parameters[param]) + "=" + str(type(parameters[param])) + "\n")
+
+        # Track the function called.
+        out_file.write("\n\nFUNC\n\t" + exp_function + "\n")
+
+        # Close.
+        out_file.close()
 
     def _setup_files(self, clear_old_results=True):
         '''
@@ -90,9 +154,15 @@ class Experiment(object):
         else:
             agent_name_ls = [a.get_name() for a in self.agents]
             
+        if self.exp_directory[-4:] == "-rep":
+            plot_file_name = "reproduce_" + str(self.mdp)
+        else:
+            plot_file_name = ""
+
         chart_utils.make_plots(self.exp_directory,
                                 agent_name_ls,
                                 episodic=self.is_episodic,
+                                plot_file_name=plot_file_name,
                                 cumulative=self.cumulative_plot,
                                 track_disc_reward=self.track_disc_reward,
                                 open_plot=open_plot)
@@ -192,7 +262,7 @@ class Experiment(object):
         Summary:
             Writes relevant experiment information to a file for reproducibility.
         '''
-        out_file = open(self.exp_directory + "/parameters.txt", "w+")
+        out_file = open(os.path.join(self.exp_directory, Experiment.EXP_PARAM_FILE_NAME), "w+")
         to_write_to_file = self._get_exp_file_string()
         out_file.write(to_write_to_file)
         out_file.close()
