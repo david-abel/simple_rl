@@ -49,11 +49,10 @@ For a slightly more complicated example, take a look at the code of _simple_exam
 	from simple_rl.run_experiments import run_agents_on_mdp
 
     # Setup MDP.
-    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2)], gamma=0.95, walls=[(2, 2)])
+    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2)], gamma=0.95, walls=[(2, 2)], slip_prob=0.05)
 
     # Setup Agents.
     ql_agent = QLearningAgent(actions=mdp.get_actions())
-    rmax_agent = RMaxAgent(actions=mdp.get_actions())
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
@@ -62,6 +61,18 @@ For a slightly more complicated example, take a look at the code of _simple_exam
 The above code will generate the following plot:
 
 <img src="https://david-abel.github.io/blog/posts/images/rn_grid.jpg" width="480" align="center">
+
+To showcase the new reproducibility feature, suppose we now wanted to reproduce the above experiment. We just do the following:
+
+	from simple_rl.run_experiments import reproduce_from_exp_file
+
+	reproduce_from_exp_file("gridworld_h-3_w-4")
+
+Which will rerun the entire experiment, based on a file created and populated behind the scenes. Then, we should get the following plot:
+
+<img src="https://david-abel.github.io/blog/posts/images/rn_grid_reproduce.jpg" width="480" align="center">
+
+Easy! This is a new feature, so there may be bugs -- just let me know as things come up. It's only supposed to work for MDPs, not POMDPs/OOMDPs/MarkovGameMDPs (so far).
 
 ## Overview
 
