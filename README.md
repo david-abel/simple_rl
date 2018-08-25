@@ -18,7 +18,7 @@ The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just
 
 Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.76).
 
-## New Feature
+## New Feature: Easy Reproduction of Experiments
 
 I just added a new feature I'm quite excited about: *easy reproduction of experiments*. Every experiment you run now outputs a file "full_exp_info.txt" in the _results/exp_name/_ directory. The new function _reproduce_from_exp_file(file_name)_, when pointed at an experiment directory, will reassemble and rerun an entire experiment based on this file. The goal here is to encourage simple tracking of experiments and enable quick result-reproduction. It only works with MDPs though -- it does not yet work with OOMDPs, POMDPs, or MarkovGames (I'd be delighted if someone wants to make it work, though!).
 
