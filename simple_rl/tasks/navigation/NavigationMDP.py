@@ -32,7 +32,7 @@ class NavigationMDP(GridWorldMDP):
         return np.asarray([phi(s) for s in states], dtype=np.float32)
 
     @staticmethod
-    def states_to_coord(states, phi):
+    def states_to_coord(states, phi=None):
         """
         Returns phi(states)    
         """
@@ -96,54 +96,78 @@ class NavigationMDP(GridWorldMDP):
                               slip_prob=slip_prob, step_cost=step_cost,
                               name=name)
 
-        # Living (navigation) cell types (str) and ids
-        self.living_cell_types = living_cell_types
-        self.living_cell_ids = list(range(len(living_cell_types)))
-        # State space (2d grid where each element holds a cell id)
-        self.state_space = self.__generate_state_space(
-            height, width, living_cell_distribution, living_cell_type_probs,
-            living_cell_locs)
-        # Preserve a copy without goals
-        self.state_space_wo_goals = self.state_space.copy()
-
-        # Rewards
-        self.living_cell_rewards = living_cell_rewards
-        self.state_rewards = np.asarray(
-            [[self.living_cell_rewards[item] for item in row]
-             for row in self.state_space]
-        ).reshape(height, width)
-        # Preserve a copy without goals
-        self.state_rewards_wo_goals = self.state_rewards.copy()
-
-        # Update cells and cell_rewards with goal and its rewards
-        self.reset_goals(goal_cell_locs, goal_cell_rewards, goal_cell_types)
+        # Sets up state space (2d grid where each element holds a cell id)
+        self.__setup_state_space(height, width, living_cell_types,
+                                    living_cell_distribution,
+                                    living_cell_type_probs, living_cell_locs,
+                                    goal_cell_types, goal_cell_locs)
+        # Sets up rewards over state space
+        self._reset_rewards(living_cell_rewards, goal_cell_rewards)
 
         # Find set of Empty/Navigable cells for sampling trajectory init state
         self.set_traj_init_cell_types(cell_types=traj_init_cell_types)
 
-        # Run value iteration
+        # Initialize value iteration object (computes reachable states)
         self.value_iter = ValueIteration(self, sample_rate=1)
 
         # Additional book-keeping
         self.feature_cell_dist = None
         self.feature_cell_dist_kind = 0
 
-    def get_states(self):
-        return self.value_iter.get_states()
+    def __setup_state_space(self, height, width, living_cell_types,
+                            living_cell_distribution,
+                            living_cell_type_probs, living_cell_locs,
+                            goal_cell_types, goal_cell_locs):
 
-    def get_trans_dict(self):
-        self.value_iter._compute_matrix_from_trans_func()
-        return self.value_iter.trans_dict
+        # Enumerate living and goal cell type ids
+        self.living_cell_types = living_cell_types
+        self.goal_cell_types = goal_cell_types
+        self.living_cell_ids = list(range(len(living_cell_types)))
+        self.goal_cell_ids = list(range(self.living_cell_ids[-1] + 1,
+                                        self.living_cell_ids[-1] + 1 + len(
+                                            goal_cell_locs)))
+        # Combined types and ids
+        self.cell_types = self.living_cell_types + self.goal_cell_types
+        self.cell_ids = self.living_cell_ids + self.goal_cell_ids
 
-    def __generate_state_space(self, height, width,
-                               living_cell_distribution, living_cell_type_probs,
-                               living_cell_locs):
+        # Initialize state space with living cells
+        self.state_space = self.__get_living_cells_to_state_space(height, width,
+                                                                  living_cell_types,
+                                                                  living_cell_distribution,
+                                                                  living_cell_type_probs,
+                                                                  living_cell_locs)
+        # Preserve a copy without goals
+        self.state_space_wo_goals = self.state_space.copy()
+
+        # Add goals to state space
+        self.goal_cell_locs = goal_cell_locs
+        self.state_space, self.goal_xy_to_idx = self.__add_goal_cells_to_state_space(
+            self.state_space, goal_cell_locs, self.goal_cell_ids)
+
+    def __add_goal_cells_to_state_space(self, state_space, goal_cell_locs,
+                                        goal_cell_ids):
+
+        # Goal xy to idx dict
+        goal_xy_to_idx = {}
+
+        # Add goal cells
+        for idx, goal_loc in enumerate(goal_cell_locs):
+            goal_r, goal_c = self._xy_to_rowcol(goal_loc[0], goal_loc[1])
+            state_space[goal_r, goal_c] = goal_cell_ids[idx]
+            goal_xy_to_idx[(goal_loc[0], goal_loc[1])] = idx
+        return state_space, goal_xy_to_idx
+
+    def __get_living_cells_to_state_space(self, height, width,
+                                          living_cell_types,
+                                          living_cell_distribution,
+                                          living_cell_type_probs,
+                                          living_cell_locs):
 
         assert living_cell_distribution in ["probability", "manual"]
         # Assign cell type over state space
         if living_cell_distribution == "probability":
 
-            cells = np.random.choice(len(living_cell_type_probs),
+            cells = np.random.choice(len(living_cell_types),
                                      p=living_cell_type_probs,
                                      replace=True, size=(height, width))
         else:
@@ -169,8 +193,66 @@ class NavigationMDP(GridWorldMDP):
             "Some grid cells have unassigned cell type! When you use manual " \
             "distribution, make sure each state of the MPD is covered by a " \
             "cell type. Check usage of np.inf in @living_cell_locs."
-
         return cells
+
+    def _reset_rewards(self, living_cell_rewards, goal_cell_rewards):
+        """
+        Sets up rewards grid corresponding to @self.state_space
+        """
+        self.living_cell_rewards = living_cell_rewards
+        self.goal_cell_rewards = goal_cell_rewards
+        self.cell_type_rewards = self.living_cell_rewards + self.goal_cell_rewards
+
+        # State rewards with no goals (preserve a copy without goals)
+        self.state_rewards_wo_goals = np.asarray(
+            [[living_cell_rewards[item] for item in row] for row in
+             self.state_space_wo_goals]).reshape(self.height, self.width)
+        # State rewards
+        self.state_rewards = np.asarray(
+            [[self.cell_type_rewards[item] for item in row] for row in
+             self.state_space]).reshape(self.height, self.width)
+
+        # Mark flag for invalidating previous value iteration results
+        self._policy_invalidated = True
+
+    def _reset_goals(self, goal_cell_locs, goal_cell_rewards, goal_cell_types):
+        """
+        Resets the goals. Updates cell type grid and cell reward grid as per
+        new goal configuration.
+        """
+        # Reset goal cell type ids
+        self.goal_cell_types = goal_cell_types
+        self.goal_cell_ids = list(range(self.living_cell_ids[-1] + 1,
+                                        self.living_cell_ids[-1] + 1 + len(
+                                            goal_cell_locs)))
+        self.cell_types = self.living_cell_types + self.goal_cell_types
+        self.cell_ids = self.living_cell_ids + self.goal_cell_ids
+
+        # Retrieve state space copy without goals
+        self.state_space = self.state_space_wo_goals.copy()
+        # Add goals to state space
+        self.goal_cell_locs = goal_cell_locs
+        self.state_space, self.goal_xy_to_idx = self.__add_goal_cells_to_state_space(
+            self.state_space, goal_cell_locs, self.goal_cell_ids)
+
+        # Redefine rewards over state space
+        self._reset_rewards(self.living_cell_rewards, goal_cell_rewards)
+
+        # Mark flag for invalidating previous value iteration results
+        self._policy_invalidated = True
+
+    def get_states(self):
+        """
+        Returns all reachable states 
+        """
+        return self.value_iter.get_states()
+
+    def get_trans_dict(self):
+        """
+        Returns transition dynamics matrix 
+        """
+        self.value_iter._compute_matrix_from_trans_func()
+        return self.value_iter.trans_dict
 
     def _xy_to_rowcol(self, x, y):
         """
@@ -203,36 +285,6 @@ class NavigationMDP(GridWorldMDP):
             return 0 - self.step_cost
         else:
             return self.state_rewards[r, c] - self.step_cost
-
-    def reset_goals(self, goal_cell_locs, goal_cell_rewards, goal_types):
-        """
-        Resets the goals. Updates cell type grid and cell reward grid as per
-        new goal configuration.
-        """
-        self.goal_cell_locs = goal_cell_locs
-        self.goal_cell_rewards = goal_cell_rewards
-        self.goal_cell_types = goal_types
-        self.goal_cell_ids = list(range(self.living_cell_ids[-1] + 1,
-                                        self.living_cell_ids[-1] + 1 + len(
-                                            self.goal_cell_locs)))
-        # Reset goal xy to idx dict
-        self.goal_xy_to_idx = {}
-        # Reset cell type and cell reward grid with no goals
-        self.state_space = self.state_space_wo_goals.copy()
-        self.state_rewards = self.state_rewards_wo_goals.copy()
-
-        # Update goals and their rewards
-        for idx, goal_loc in enumerate(self.goal_cell_locs):
-            goal_r, goal_c = self._xy_to_rowcol(goal_loc[0], goal_loc[1])
-            self.state_space[goal_r, goal_c] = self.goal_cell_ids[idx]
-            self.state_rewards[goal_r, goal_c] = self.goal_cell_rewards[idx]
-            self.goal_xy_to_idx[(goal_loc[0], goal_loc[1])] = idx
-        self.cell_ids = self.living_cell_ids + self.goal_cell_ids
-        self.cell_types = self.living_cell_types + self.goal_cell_types
-        self.cell_type_rewards = self.living_cell_rewards + self.goal_cell_rewards
-
-        if len(self.goal_cell_locs) != 0:
-            self._policy_invalidated = True
 
     def set_traj_init_cell_types(self, cell_types=[0]):
         """
@@ -307,6 +359,18 @@ class NavigationMDP(GridWorldMDP):
             self._policy_invalidated = False
         return self.value_iter
 
+    def get_value_grid(self):
+        """
+        Returns value over states space grid
+        """
+        value_iter = self.run_value_iteration()
+        V = np.zeros((self.height, self.width), dtype=np.float32)
+        for row in range(self.height):
+            for col in range(self.width):
+                x, y = self._rowcol_to_xy(row, col)
+                V[row, col] = value_iter.value_func[GridWorldState(x, y)]
+        return V
+
     def sample_data(self, n_trajectory, init_states=None,
                     init_repetition=False, policy=None, horizon=100,
                     pad_extra_trajectories=True, map_actions_to_index=True):
@@ -353,7 +417,7 @@ class NavigationMDP(GridWorldMDP):
 
         if policy is None:
             if len(self.goal_cell_locs) == 0:
-                raise ValueError("Cannot determine policy, no goals assigned!")
+                print("Running value iteration with no goals assigned..")
             policy = self.run_value_iteration().policy
 
         for init_state in init_states:
@@ -494,9 +558,9 @@ class NavigationMDP(GridWorldMDP):
                 ax.text(x, y, label, color='black', ha='center',
                         va='center', fontsize=fontsize)
 
-    def visualize_grid(self, values=None, cmap=None, trajectories=None,
+    def visualize_grid(self, values=None, cmap=cm.viridis, trajectories=None,
                        subplot_str=None, new_fig=True, show_colorbar=False,
-                       show_rewards_colorbar=False, int_cells_cmap=cm.viridis,
+                       show_rewards_colorbar=False, state_space_cmap=True,
                        init_marker=".k", traj_marker="-k",
                        text_values=None, text_size=10,
                        traj_linewidth=0.7, init_marker_sz=10,
@@ -522,17 +586,20 @@ class NavigationMDP(GridWorldMDP):
         # Subplot if needed
         if subplot_str is not None:
             plt.subplot(subplot_str)
+
+        # Use state space (cell types) if values is None
+        if values is None:
+            values = self.state_space.copy()
+
         # Colormap
-        if cmap is None:
+        if cmap is not None and state_space_cmap:
             norm = colors.Normalize(vmin=0, vmax=len(self.cell_types)-1)
             # Leave string colors as it is, convert int colors to normalized rgba
             cell_colors = [
-                int_cells_cmap(norm(cell)) if isinstance(cell, int) else cell
+                cmap(norm(cell)) if isinstance(cell, int) else cell
                 for cell in self.cell_types]
             cmap = colors.ListedColormap(cell_colors)
 
-        if values is None:
-            values = self.state_space.copy()
         # Plot values
         im = plt.imshow(values, interpolation='None', cmap=cmap)
         plt.title(title)
