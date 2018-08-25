@@ -38,7 +38,7 @@ def visualize_options_grid(grid_mdp, action_abstr, scr_width=720, scr_height=720
     small_font = pygame.font.SysFont("CMU Serif", 22)
 
     if len(action_abstr.get_actions()) == 0:
-        print "Options Error: 0 options found. Can't visualize."
+        print("Options Error: 0 options found. Can't visualize.")
         sys.exit(0)
 
     if isinstance(grid_mdp, MDPDistribution):
@@ -174,7 +174,7 @@ def visualize_option(screen, grid_mdp, state_dict, option=None, goal_locs=[]):
             if option is not None:
                 # Visualize option.
 
-                if i+1 not in state_dict.keys() or grid_mdp.height - j not in state_dict[i+1].keys():
+                if i+1 not in list(state_dict.keys()) or grid_mdp.height - j not in list(state_dict[i+1].keys()):
                     # At a wall, don't draw Option stuff.
                     continue
 
@@ -233,7 +233,7 @@ def main():
     # Visualize Action Abstractions.
     visualize_options_grid(mdp_distr, goal_based_aa)
 
-    raw_input("Press any key to quit ")
+    input("Press any key to quit ")
     quit()
 
 if __name__ == "__main__":
