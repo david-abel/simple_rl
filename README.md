@@ -42,7 +42,7 @@ Running the above code will run unleash _Q_-learning on a simple GridWorld. When
 
 <img src="https://david-abel.github.io/blog/posts/images/simple_grid.jpg" width="480" align="center">
 
-For a slightly more complicated example, take a look at the code of _simple_example.py_. Here we run three few agents on the grid world from the Russell-Norvig AI textbook:
+For a slightly more complicated example, take a look at the code of _simple_example.py_. Here we run two agents on the grid world from the Russell-Norvig AI textbook:
 
 	from simple_rl.agents import QLearningAgent, RandomAgent, RMaxAgent
 	from simple_rl.tasks import GridWorldMDP
