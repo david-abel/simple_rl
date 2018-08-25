@@ -8,7 +8,9 @@ There are loads of other great libraries out there for RL. The aim of this one i
 
 A brief tutorial for a slightly earlier version is available [here](http://cs.brown.edu/~dabel/blog/posts/simple_rl.html). As of version 0.77, the library should work with both Python 2 and Python 3. Please let me know if you find that is not the case!
 
-simple_rl requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). I recently added a basic test script, contained in the _tests_ directory.
+simple_rl requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). The library comes along with basic test script, contained in the _tests_ directory. I suggest running it and making sure all tests pass when you install the library.
+
+I just added a new feature I'm quite excited about: *easy reproduction of experiments*. Every experiment you run now outputs a file "full_exp_info.txt" in the _results/exp_name/_ directory. The new function _reproduce_from_exp_file(file_name)_, when pointed at an experiment directory, will reassemble and rerun an entire experiment based on this file. The goal here is to encourage simple tracking of experiments and enable quick result-reproduction. It does not yet work with OOMDPs, POMDPs, or MarkovGames (I'd be delighted if someone wants to make it work, though!).
 
 
 ## Installation
