@@ -40,7 +40,7 @@ To run a simple experiment, import the _run_agents_on_mdp(agent_list, mdp)_ meth
 	agent = QLearningAgent(mdp.get_actions())
 	run_agents_on_mdp([agent], mdp)
 
-Running the above code will run unleash _Q_-learning on a simple GridWorld. When it finishes it will store the results in _cur_dir/results/*_ and open the following plot:
+Running the above code will run _Q_-learning on a simple GridWorld. When it finishes it stores the results in _cur_dir/results/*_ and makes and opens the following plot:
 
 <img src="https://david-abel.github.io/blog/posts/images/simple_grid.jpg" width="480" align="center">
 
