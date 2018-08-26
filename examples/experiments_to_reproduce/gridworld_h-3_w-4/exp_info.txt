@@ -1,0 +1,10 @@
+(MDP)
+	gridworld_h-3_w-4
+(Agents)
+	Q-learning,0
+	Random,1
+(Params)
+	instances : 5
+	episodes : 50
+	steps : 10
+	track_disc_reward : False

@@ -262,8 +262,8 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     else:
         exp_name = exp_dir_split_list[0]
-    experiment_dir = experiment_dir + "/" if experiment_dir[-1] != "/" else experiment_dir
-    plot_file_name = plot_file_name if plot_file_name != "" else experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    experiment_dir = os.path.join(experiment_dir, "")
+    plot_file_name = os.path.join(experiment_dir, plot_file_name + ".pdf") if plot_file_name != "" else experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
     if CUSTOM_TITLE is None:
         plot_title = _format_title(plot_title)

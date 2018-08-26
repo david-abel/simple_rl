@@ -131,7 +131,7 @@ def run_agents_lifelong(agents,
                             reset_at_terminal=False,
                             resample_at_terminal=False,
                             cumulative_plot=True,
-                            experiment_name_extension=""):
+                            dir_for_plot="results"):
     '''
     Args:
         agents (list)
@@ -147,6 +147,7 @@ def run_agents_lifelong(agents,
         reset_at_terminal (bool)
         resample_at_terminal (bool)
         cumulative_plot (bool)
+        dir_for_plot (str)
 
     Summary:
         Runs each agent on the MDP distribution according to the given parameters.
@@ -162,7 +163,7 @@ def run_agents_lifelong(agents,
                     clear_old_results=clear_old_results,
                     track_disc_reward=track_disc_reward,
                     cumulative_plot=cumulative_plot,
-                    experiment_name_extension=experiment_name_extension)
+                    dir_for_plot=dir_for_plot)
 
     # Record how long each agent spends learning.
     print("Running experiment: \n" + str(experiment))
@@ -219,7 +220,8 @@ def run_agents_on_mdp(agents,
                         verbose=False,
                         reset_at_terminal=False,
                         cumulative_plot=True,
-                        experiment_name_extension=""):
+                        dir_for_plot="results",
+                        experiment_name_prefix=""):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -234,7 +236,8 @@ def run_agents_on_mdp(agents,
         verbose (bool): If true, prints status bars per episode/instance.
         reset_at_terminal (bool): If true sends the agent to the start state after terminal.
         cumulative_plot (bool): If true makes a cumulative plot, otherwise plots avg. reward per timestep.
-        experiment_name_extension (str): Adds this to the end of the usual experiment name.
+        dir_for_plot (str): Path
+        experiment_name_prefix (str): Adds this to the end of the usual experiment name.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
@@ -252,7 +255,8 @@ def run_agents_on_mdp(agents,
                             track_disc_reward=track_disc_reward,
                             count_r_per_n_timestep=rew_step_count,
                             cumulative_plot=cumulative_plot,
-                            experiment_name_extension=experiment_name_extension)
+                            dir_for_plot=dir_for_plot,
+                            experiment_name_prefix=experiment_name_prefix)
 
     # Record how long each agent spends learning.
     print("Running experiment: \n" + str(experiment))
@@ -444,7 +448,7 @@ def evaluate_agent(agent, mdp, instances=10):
 
     return total / instances
 
-def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=False):
+def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=True):
     '''
     Args:
         exp_name (str)
@@ -521,7 +525,7 @@ def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=Fals
 
     # Reproduce.
     chart_utils.CUSTOM_TITLE = "Reproduce: " + str(mdp)
-    experiment_func(agents, mdp, experiment_name_extension="-rep", open_plot=open_plot, **experiment_param_dict)
+    experiment_func(agents, mdp, dir_for_plot=results_dir_name, experiment_name_prefix="reproduce_", open_plot=open_plot, **experiment_param_dict)
 
     print("\n" + "%"*22)
     print("%"*2, "Done Reproducing", "%"*2)

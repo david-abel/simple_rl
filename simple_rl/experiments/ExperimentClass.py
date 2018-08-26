@@ -39,7 +39,8 @@ class Experiment(object):
                     count_r_per_n_timestep=1,
                     cumulative_plot=True,
                     exp_function="run_agents_on_mdp",
-                    experiment_name_extension=""):
+                    dir_for_plot="",
+                    experiment_name_prefix=""):
         '''
         Args:
             agents (list)
@@ -53,7 +54,8 @@ class Experiment(object):
             count_r_per_n_timestep (int)
             cumulative_plot (bool)
             exp_function (lambda): tracks with run_experiments.py function was called.
-            experiment_name_extension (str)
+            dir_for_plot (str)
+            experiment_name_prefix (str)
         '''
         # Store all relevant bools.
         self.agents = agents
@@ -71,7 +73,12 @@ class Experiment(object):
         self.name = str(self.mdp)
         self.rewards = defaultdict(list)
         self.times = defaultdict(list)
-        self.exp_directory = os.path.join(Experiment.RESULTS_DIR, self.name + experiment_name_extension)
+        if dir_for_plot == "":
+            self.exp_directory = os.path.join(Experiment.RESULTS_DIR, self.name)
+        else:
+            self.exp_directory = os.path.join(os.getcwd(), dir_for_plot, self.name)
+
+        self.experiment_name_prefix = experiment_name_prefix
         self.is_episodic = is_episodic
         self.is_markov_game = is_markov_game
         self._setup_files(clear_old_results)
@@ -154,8 +161,8 @@ class Experiment(object):
         else:
             agent_name_ls = [a.get_name() for a in self.agents]
             
-        if self.exp_directory[-4:] == "-rep":
-            plot_file_name = "reproduce_" + str(self.mdp)
+        if self.experiment_name_prefix != "":
+            plot_file_name = self.experiment_name_prefix + str(self.mdp)
         else:
             plot_file_name = ""
 
