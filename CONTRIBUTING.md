@@ -27,5 +27,17 @@ Please:
   * Doc-strings follow the (now deprecated, sadly) [Google doc-string format](https://google.github.io/styleguide/pyguide.html#Comments). Please use this until this contribution guide says otherwise.
   * Separate standard python imports from non-python imports at the top of each file, with python imports appearing first.
 
+## Things to Work On
+
+If you'd like to help add on to the library, here are the key ways I'm hoping to extend its current features:
+* __Planning__: Finish MCTS [[Coloum 2006]](https://hal.inria.fr/file/index/docid/116992/filename/CG2006.pdf), implement RTDP [[Barto et al. 1995]](https://pdfs.semanticscholar.org/2838/e01572bf53805c502ec31e3e00a8e1e0afcf.pdf)
+* __Deep RL__: Write a DQN [[Mnih et al. 2015]](http://www.davidqiu.com:8888/research/nature14236.pdf) in PyTorch, possibly others (some kind of policy gradient).
+* __Efficiency__: Convert most defaultdict/dict uses to numpy.
+* __Reproducibility__: The new reproduce feature is limited in scope -- I'd love for someone to extend it to work with OO-MDPs, Planning, MarkovGames, POMDPs, and beyond.
+* __Docs__: Write a nice tutorial and give thorough documentation.
+* __Visuals__: Unify MDP visualization.
+* __Misc__: Additional testing.
+
+
 Best,
 Dave Abel (david_abel@brown.edu)
