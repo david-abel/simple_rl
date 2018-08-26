@@ -18,9 +18,9 @@ The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just
 
 Alternatively, you can download simple_rl [here](https://github.com/david-abel/simple_rl/tarball/v0.76).
 
-## New Feature: Easy Reproduction of Experiments
+## New Feature: Easy Reproduction of Results
 
-I just added a new feature I'm quite excited about: *easy reproduction of experiments*. Every experiment you run now outputs a file "full_experiment.txt" in the _results/exp_name/_ directory. The new function _reproduce_from_exp_file(file_name)_, when pointed at an experiment directory, will reassemble and rerun an entire experiment based on this file. The goal here is to encourage simple tracking of experiments and enable quick result-reproduction. It only works with MDPs though -- it does not yet work with OOMDPs, POMDPs, or MarkovGames (I'd be delighted if someone wants to make it work, though!).
+I just added a new feature I'm quite excited about: *easy reproduction of results*. Every experiment run now outputs a file "full_experiment.txt" in the _results/exp_name/_ directory. The new function _reproduce_from_exp_file(file_name)_, when pointed at an experiment directory, will reassemble and rerun an entire experiment based on this file. The goal here is to encourage simple tracking of experiments and enable quick result-reproduction. It only works with MDPs though -- it does not yet work with OOMDPs, POMDPs, or MarkovGames (I'd be delighted if someone wants to make it work, though!).
 
 See the second example below for a quick sense of how to use this feature.
 
@@ -74,7 +74,7 @@ Which will rerun the entire experiment, based on a file created and populated be
 
 <img src="https://david-abel.github.io/blog/posts/images/rn_grid_reproduce.jpg" width="480" align="center">
 
-Easy! This is a new feature, so there may be bugs -- just let me know as things come up. It's only supposed to work for MDPs, not POMDPs/OOMDPs/MarkovGameMDPs (so far).
+Easy! This is a new feature, so there may be bugs -- just let me know as things come up. It's only supposed to work for MDPs, not POMDPs/OOMDPs/MarkovGameMDPs (so far). Take a look at [_reproduce_example.py_](https://github.com/david-abel/simple_rl/blob/master/examples/reproduce_example.py) for a bit more detail.
 
 ## Overview
 
@@ -125,6 +125,16 @@ I'm hoping to add the following features:
 * __Docs__: Tutorials, contribution policy, and thorough documentation.
 * __Visuals__: Unify MDP visualization.
 * __Misc__: Additional testing, reproducibility checks (store more in params file, rerun experiment from params file).
+
+## Citing the Library
+
+If you use _simple_rl_ in your work, please cite as follows:
+
+	@article{simple_rl2018,
+	author = {David Abel},
+	title = {{simple_rl: Lightweight RL in Python}},
+	year = {2018},
+	}
 
 Cheers,
 
