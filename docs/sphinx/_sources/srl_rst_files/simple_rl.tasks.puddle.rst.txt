@@ -1,0 +1,22 @@
+simple\_rl.tasks.puddle package
+===============================
+
+Submodules
+----------
+
+simple\_rl.tasks.puddle.PuddleMDPClass module
+---------------------------------------------
+
+.. automodule:: simple_rl.tasks.puddle.PuddleMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.puddle
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,46 @@
+simple\_rl.mdp package
+======================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    simple_rl.mdp.markov_game
+    simple_rl.mdp.oomdp
+
+Submodules
+----------
+
+simple\_rl.mdp.MDPClass module
+------------------------------
+
+.. automodule:: simple_rl.mdp.MDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.mdp.MDPDistributionClass module
+------------------------------------------
+
+.. automodule:: simple_rl.mdp.MDPDistributionClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.mdp.StateClass module
+--------------------------------
+
+.. automodule:: simple_rl.mdp.StateClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.mdp
+    :members:
+    :undoc-members:
+    :show-inheritance:

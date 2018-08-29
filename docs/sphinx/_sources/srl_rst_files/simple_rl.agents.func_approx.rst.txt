@@ -1,0 +1,46 @@
+simple\_rl.agents.func\_approx package
+======================================
+
+Submodules
+----------
+
+simple\_rl.agents.func\_approx.DQNAgentClass module
+---------------------------------------------------
+
+.. automodule:: simple_rl.agents.func_approx.DQNAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.func\_approx.GradientBoostingAgentClass module
+----------------------------------------------------------------
+
+.. automodule:: simple_rl.agents.func_approx.GradientBoostingAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.func\_approx.LinearQAgentClass module
+-------------------------------------------------------
+
+.. automodule:: simple_rl.agents.func_approx.LinearQAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.func\_approx.tile\_coding module
+--------------------------------------------------
+
+.. automodule:: simple_rl.agents.func_approx.tile_coding
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.agents.func_approx
+    :members:
+    :undoc-members:
+    :show-inheritance:

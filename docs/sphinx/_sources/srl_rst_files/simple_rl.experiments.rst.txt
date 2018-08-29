@@ -1,0 +1,30 @@
+simple\_rl.experiments package
+==============================
+
+Submodules
+----------
+
+simple\_rl.experiments.ExperimentClass module
+---------------------------------------------
+
+.. automodule:: simple_rl.experiments.ExperimentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.experiments.ExperimentParametersClass module
+-------------------------------------------------------
+
+.. automodule:: simple_rl.experiments.ExperimentParametersClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.experiments
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,22 @@
+simple\_rl.tasks.rock\_paper\_scissors package
+==============================================
+
+Submodules
+----------
+
+simple\_rl.tasks.rock\_paper\_scissors.RockPaperScissorsMDPClass module
+-----------------------------------------------------------------------
+
+.. automodule:: simple_rl.tasks.rock_paper_scissors.RockPaperScissorsMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.rock_paper_scissors
+    :members:
+    :undoc-members:
+    :show-inheritance:

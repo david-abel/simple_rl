@@ -1,0 +1,54 @@
+simple\_rl.planning package
+===========================
+
+Submodules
+----------
+
+simple\_rl.planning.BeliefSparseSamplingClass module
+----------------------------------------------------
+
+.. automodule:: simple_rl.planning.BeliefSparseSamplingClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.planning.BoundedRTDPClass module
+-------------------------------------------
+
+.. automodule:: simple_rl.planning.BoundedRTDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.planning.MCTSClass module
+------------------------------------
+
+.. automodule:: simple_rl.planning.MCTSClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.planning.PlannerClass module
+---------------------------------------
+
+.. automodule:: simple_rl.planning.PlannerClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.planning.ValueIterationClass module
+----------------------------------------------
+
+.. automodule:: simple_rl.planning.ValueIterationClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.planning
+    :members:
+    :undoc-members:
+    :show-inheritance:

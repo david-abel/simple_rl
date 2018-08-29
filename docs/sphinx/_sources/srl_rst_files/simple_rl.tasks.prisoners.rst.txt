@@ -1,0 +1,22 @@
+simple\_rl.tasks.prisoners package
+==================================
+
+Submodules
+----------
+
+simple\_rl.tasks.prisoners.PrisonersDilemmaMDPClass module
+----------------------------------------------------------
+
+.. automodule:: simple_rl.tasks.prisoners.PrisonersDilemmaMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.prisoners
+    :members:
+    :undoc-members:
+    :show-inheritance:

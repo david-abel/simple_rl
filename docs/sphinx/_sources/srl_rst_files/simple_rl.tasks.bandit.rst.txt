@@ -1,0 +1,22 @@
+simple\_rl.tasks.bandit package
+===============================
+
+Submodules
+----------
+
+simple\_rl.tasks.bandit.BanditMDPClass module
+---------------------------------------------
+
+.. automodule:: simple_rl.tasks.bandit.BanditMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.bandit
+    :members:
+    :undoc-members:
+    :show-inheritance:

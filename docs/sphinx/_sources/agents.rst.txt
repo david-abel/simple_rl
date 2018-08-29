@@ -1,0 +1,86 @@
+simple\_rl.agents package
+=========================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    simple_rl.agents.bandits
+    simple_rl.agents.func_approx
+
+Submodules
+----------
+
+simple\_rl.agents.AgentClass module
+-----------------------------------
+
+.. automodule:: simple_rl.agents.AgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.BeliefAgentClass module
+-----------------------------------------
+
+.. automodule:: simple_rl.agents.BeliefAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.DelayedQAgentClass module
+-------------------------------------------
+
+.. automodule:: simple_rl.agents.DelayedQAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.DoubleQAgentClass module
+------------------------------------------
+
+.. automodule:: simple_rl.agents.DoubleQAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.FixedPolicyAgentClass module
+----------------------------------------------
+
+.. automodule:: simple_rl.agents.FixedPolicyAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.QLearningAgentClass module
+--------------------------------------------
+
+.. automodule:: simple_rl.agents.QLearningAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.RMaxAgentClass module
+---------------------------------------
+
+.. automodule:: simple_rl.agents.RMaxAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.agents.RandomAgentClass module
+-----------------------------------------
+
+.. automodule:: simple_rl.agents.RandomAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.agents
+    :members:
+    :undoc-members:
+    :show-inheritance:

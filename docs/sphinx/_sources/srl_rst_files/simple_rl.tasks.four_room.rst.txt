@@ -1,0 +1,22 @@
+simple\_rl.tasks.four\_room package
+===================================
+
+Submodules
+----------
+
+simple\_rl.tasks.four\_room.FourRoomMDPClass module
+---------------------------------------------------
+
+.. automodule:: simple_rl.tasks.four_room.FourRoomMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.four_room
+    :members:
+    :undoc-members:
+    :show-inheritance:

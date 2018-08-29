@@ -1,0 +1,252 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simple_rl.tasks.gather.GatherStateClass &#8212; simple_rl v0.801 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for simple_rl.tasks.gather.GatherStateClass</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; GatherStateClass.py: Contains the GatherState class. &#39;&#39;&#39;</span>
+
+<span class="c1"># Other imports.</span>
+<span class="kn">from</span> <span class="nn">simple_rl.mdp.StateClass</span> <span class="k">import</span> <span class="n">State</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;TkAgg&#39;</span><span class="p">)</span>   
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span> <span class="c1"># NOTE: for debugging</span>
+
+<span class="n">COLORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;agent1&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">244</span><span class="p">),</span>
+    <span class="s1">&#39;agent2&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">236</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>
+    <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">46</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="mi">46</span><span class="p">),</span>
+    <span class="s1">&#39;apple&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">132</span><span class="p">,</span> <span class="mi">249</span><span class="p">,</span> <span class="mi">77</span><span class="p">),</span>
+    <span class="s1">&#39;light&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">139</span><span class="p">,</span> <span class="mi">42</span><span class="p">),</span>
+    <span class="s1">&#39;walls&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">140</span><span class="p">,</span> <span class="mi">137</span><span class="p">),</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="GatherState"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherState">[docs]</a><span class="k">class</span> <span class="nc">GatherState</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent1</span><span class="p">,</span> <span class="n">agent2</span><span class="p">,</span> <span class="n">apple_locations</span><span class="p">,</span> <span class="n">apple_times</span><span class="p">,</span> <span class="n">render_time</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GatherState</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[],</span> <span class="n">is_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Locations of player 1 and player 2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span> <span class="o">=</span> <span class="n">agent1</span><span class="p">,</span> <span class="n">agent2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span> <span class="o">=</span> <span class="n">apple_locations</span>
+        <span class="c1"># TODO: 1. Incorporate apple_times into hash, str, and eq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apple_times</span> <span class="o">=</span> <span class="n">apple_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">=</span> <span class="n">apple_locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="o">=</span> <span class="n">apple_locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">render_time</span> <span class="o">=</span> <span class="n">render_time</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">stateString</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span><span class="o">.</span><span class="n">tostring</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stateString</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">GatherState</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">agent1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">agent2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">apple_locations</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GatherState.to_rgb"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherState.to_rgb">[docs]</a>    <span class="k">def</span> <span class="nf">to_rgb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 3 by x_length by y_length array with values 0 (0) --&gt; 1 (255)</span>
+        <span class="n">board</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">])</span>
+
+        <span class="c1"># Orientation (do this first so that more important things override)</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="o">.</span><span class="n">get_orientation</span><span class="p">()</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;orientation&#39;</span><span class="p">]</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="o">.</span><span class="n">get_orientation</span><span class="p">()</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;orientation&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Beams</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="o">.</span><span class="n">is_shining</span><span class="p">:</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="o">.</span><span class="n">get_beam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">)</span>
+            <span class="n">board</span><span class="p">[:,</span> <span class="n">beam</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">beam</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">beam</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;light&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="o">.</span><span class="n">is_shining</span><span class="p">:</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="o">.</span><span class="n">get_beam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">)</span>
+            <span class="n">board</span><span class="p">[:,</span> <span class="n">beam</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">beam</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">beam</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;light&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Apples</span>
+        <span class="n">board</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">board</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">board</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Agents</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="o">.</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;agent1&#39;</span><span class="p">]</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="o">.</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;agent2&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Walls</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;walls&#39;</span><span class="p">])</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;walls&#39;</span><span class="p">])</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;walls&#39;</span><span class="p">])</span>
+        <span class="n">board</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;walls&#39;</span><span class="p">])</span>
+        <span class="n">board</span> <span class="o">=</span> <span class="n">board</span><span class="o">/</span><span class="p">(</span><span class="mf">255.0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">board</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="GatherState.generate_next_state"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherState.generate_next_state">[docs]</a>    <span class="k">def</span> <span class="nf">generate_next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># assume that we are just copying the current apple locations</span>
+        <span class="c1"># print self.apple_locations</span>
+        <span class="c1"># new_apple_locations = np.copyto(np.empty_like(self.apple_locations), self.apple_locations)</span>
+        <span class="n">new_apple_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apple_locations</span><span class="p">)</span>
+        <span class="n">new_apple_times</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">apple</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">apple_times</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">new_apple_times</span><span class="p">[</span><span class="n">apple</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apple_times</span><span class="p">[</span><span class="n">apple</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">GatherState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent2</span><span class="p">,</span> <span class="n">new_apple_locations</span><span class="p">,</span> <span class="n">new_apple_times</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GatherState.show"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherState.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rgb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">rgb</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_time</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div></div>
+
+<div class="viewcode-block" id="GatherAgent"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherAgent">[docs]</a><span class="k">class</span> <span class="nc">GatherAgent</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_shining</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">hits</span><span class="p">,</span> <span class="n">frozen_time_remaining</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_shining</span><span class="p">,</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_shining</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">hits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frozen_time_remaining</span> <span class="o">=</span> <span class="n">frozen_time_remaining</span>
+
+<div class="viewcode-block" id="GatherAgent.get_orientation"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherAgent.get_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">get_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;NORTH&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;SOUTH&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;WEST&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;EAST&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Invalid direction.&#39;</span></div>
+
+<div class="viewcode-block" id="GatherAgent.get_beam"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherAgent.get_beam">[docs]</a>    <span class="k">def</span> <span class="nf">get_beam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_shining</span><span class="p">,</span> <span class="s1">&#39;get_beam called when beam not shining&#39;</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_orientation</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;NORTH&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;SOUTH&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_dim</span><span class="p">),</span> <span class="n">y_dim</span> <span class="o">-</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;WEST&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;EAST&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_dim</span><span class="p">),</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x_dim</span> <span class="o">-</span> <span class="n">orientation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Invalid direction.&#39;</span></div>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">agentString</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{:02d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="s1">&#39;</span><span class="si">{:02d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="s1">&#39;1&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_shining</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frozen_time_remaining</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">agentString</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Agent</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GatherAgent.clone"><a class="viewcode-back" href="../../../../srl_rst_files/simple_rl.tasks.gather.html#simple_rl.tasks.gather.GatherStateClass.GatherAgent.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">GatherAgent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_shining</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frozen_time_remaining</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">agent1</span> <span class="o">=</span> <span class="n">GatherAgent</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;NORTH&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">agent2</span> <span class="o">=</span> <span class="n">GatherAgent</span><span class="p">(</span><span class="mi">31</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;NORTH&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">agent3</span> <span class="o">=</span> <span class="n">GatherAgent</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;NORTH&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">agent4</span> <span class="o">=</span> <span class="n">GatherAgent</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;EAST&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">state1</span> <span class="o">=</span> <span class="n">GatherState</span><span class="p">(</span><span class="n">agent1</span><span class="p">,</span> <span class="n">agent2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">35</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">state2</span> <span class="o">=</span> <span class="n">GatherState</span><span class="p">(</span><span class="n">agent3</span><span class="p">,</span> <span class="n">agent4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">21</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">state3</span> <span class="o">=</span> <span class="n">GatherState</span><span class="p">(</span><span class="n">agent3</span><span class="p">,</span> <span class="n">agent4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">21</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">state1</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">())</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">simple_rl</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">simple_rl Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code.html">Auto Generated Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, David Abel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

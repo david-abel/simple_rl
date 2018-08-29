@@ -1,0 +1,22 @@
+simple\_rl.mdp.markov\_game package
+===================================
+
+Submodules
+----------
+
+simple\_rl.mdp.markov\_game.MarkovGameMDPClass module
+-----------------------------------------------------
+
+.. automodule:: simple_rl.mdp.markov_game.MarkovGameMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.mdp.markov_game
+    :members:
+    :undoc-members:
+    :show-inheritance:

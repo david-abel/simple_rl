@@ -1,0 +1,22 @@
+simple\_rl.agents.bandits package
+=================================
+
+Submodules
+----------
+
+simple\_rl.agents.bandits.LinUCBAgentClass module
+-------------------------------------------------
+
+.. automodule:: simple_rl.agents.bandits.LinUCBAgentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.agents.bandits
+    :members:
+    :undoc-members:
+    :show-inheritance:
