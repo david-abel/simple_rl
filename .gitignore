@@ -6,8 +6,10 @@ todo.txt
 update.py
 *.egg-info
 *.idea
-.DS_Store
+*.DS_Store
+*.DSStore
 to_update_instr.txt
 examples/blank_example.py
 *.csv
 *.pdf
+docs/sphinx/

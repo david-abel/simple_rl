@@ -1,4 +1,4 @@
-simple_rl Tutorial
+Tutorial
 ==================
 
 (forthcoming)
