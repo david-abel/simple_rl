@@ -10,6 +10,8 @@ A brief tutorial for a slightly earlier version is available [here](http://cs.br
 
 simple_rl requires [numpy](http://www.numpy.org/) and [matplotlib](http://matplotlib.org/). Some MDPs have visuals, too, which requires [pygame](http://www.pygame.org/news). Also includes support for hooking into any of the [Open AI Gym environments](https://gym.openai.com/envs). The library comes along with basic test script, contained in the _tests_ directory. I suggest running it and making sure all tests pass when you install the library.
 
+[Documentation available here](docs/sphinx/index.html)
+
 ## Installation
 
 The easiest way to install is with [pip](https://pypi.python.org/pypi/pip). Just run:
