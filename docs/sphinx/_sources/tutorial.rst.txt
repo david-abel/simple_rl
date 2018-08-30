@@ -1,4 +1,0 @@
-simple_rl Tutorial
-==================
-
-(forthcoming)
