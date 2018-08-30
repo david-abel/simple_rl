@@ -7,19 +7,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>simple_rl.planning package &#8212; simple_rl v0.801 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" href="static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="static/documentation_options.js"></script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="simple_rl.tasks package" href="tasks.html" />
     <link rel="prev" title="simple_rl.mdp package" href="mdp.html" />
    
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -43,7 +43,7 @@
 <span id="simple-rl-planning-beliefsparsesamplingclass-module"></span><h2>simple_rl.planning.BeliefSparseSamplingClass module<a class="headerlink" href="#module-simple_rl.planning.BeliefSparseSamplingClass" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling">
-<em class="property">class </em><code class="descclassname">simple_rl.planning.BeliefSparseSamplingClass.</code><code class="descname">BeliefSparseSampling</code><span class="sig-paren">(</span><em>gen_model</em>, <em>gamma</em>, <em>tol</em>, <em>max_reward</em>, <em>state</em>, <em>name='bss'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BeliefSparseSamplingClass.html#BeliefSparseSampling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">simple_rl.planning.BeliefSparseSamplingClass.</code><code class="descname">BeliefSparseSampling</code><span class="sig-paren">(</span><em>gen_model</em>, <em>gamma</em>, <em>tol</em>, <em>max_reward</em>, <em>state</em>, <em>name='bss'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BeliefSparseSamplingClass.html#BeliefSparseSampling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A Sparse Sampling Algorithm for Near-Optimal Planning in Large Markov Decision Processes (Kearns et al)</p>
 <p>Assuming that you don't have access to the underlying transition dynamics, but do have access to a naiive generative
@@ -51,7 +51,7 @@ model of the underlying MDP, this algorithm performs on-line, near-optimal plann
 that has no dependence on the number of states in the MDP.</p>
 <dl class="method">
 <dt id="simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling.plan_from_state">
-<code class="descname">plan_from_state</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BeliefSparseSamplingClass.html#BeliefSparseSampling.plan_from_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling.plan_from_state" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plan_from_state</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BeliefSparseSamplingClass.html#BeliefSparseSampling.plan_from_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling.plan_from_state" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>state (State): the current state in the MDP</dd>
@@ -62,7 +62,7 @@ that has no dependence on the number of states in the MDP.</p>
 
 <dl class="method">
 <dt id="simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BeliefSparseSamplingClass.html#BeliefSparseSampling.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BeliefSparseSamplingClass.html#BeliefSparseSampling.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BeliefSparseSamplingClass.BeliefSparseSampling.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -73,7 +73,7 @@ that has no dependence on the number of states in the MDP.</p>
 <p>BoundedRTDPClass.py: Contains the Bounded-RTPDP solver class.</p>
 <dl class="class">
 <dt id="simple_rl.planning.BoundedRTDPClass.BoundedRTDP">
-<em class="property">class </em><code class="descclassname">simple_rl.planning.BoundedRTDPClass.</code><code class="descname">BoundedRTDP</code><span class="sig-paren">(</span><em>mdp</em>, <em>lower_values_init</em>, <em>upper_values_init</em>, <em>tau=10.0</em>, <em>name='BRTDP'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">simple_rl.planning.BoundedRTDPClass.</code><code class="descname">BoundedRTDP</code><span class="sig-paren">(</span><em>mdp</em>, <em>lower_values_init</em>, <em>upper_values_init</em>, <em>tau=10.0</em>, <em>name='BRTDP'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#simple_rl.planning.PlannerClass.Planner" title="simple_rl.planning.PlannerClass.Planner"><code class="xref py py-class docutils literal notranslate"><span class="pre">simple_rl.planning.PlannerClass.Planner</span></code></a></p>
 <p>Bounded Real-Time Dynamic Programming: RTDP with monotone upper bounds and performance guarantees (McMahan et al)</p>
 <p>The Bounded RTDP solver can produce partial policies with strong performance guarantees while only touching a
@@ -81,7 +81,7 @@ fraction of the state space, even on problems where other algorithms would have 
 To do so, Bounded RTDP maintains both upper and lower bounds on the optimal value function.</p>
 <dl class="method">
 <dt id="simple_rl.planning.BoundedRTDPClass.BoundedRTDP.plan">
-<code class="descname">plan</code><span class="sig-paren">(</span><em>state=None</em>, <em>horizon=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP.plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP.plan" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plan</code><span class="sig-paren">(</span><em>state=None</em>, <em>horizon=100</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP.plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP.plan" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function of the Planner class.
 Args:</p>
 <blockquote>
@@ -95,7 +95,7 @@ horizon (int)</div></blockquote>
 
 <dl class="method">
 <dt id="simple_rl.planning.BoundedRTDPClass.BoundedRTDP.policy">
-<code class="descname">policy</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP.policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP.policy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">policy</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP.policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP.policy" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>state (State)</dd>
@@ -106,7 +106,7 @@ horizon (int)</div></blockquote>
 
 <dl class="method">
 <dt id="simple_rl.planning.BoundedRTDPClass.BoundedRTDP.run_sample_trial">
-<code class="descname">run_sample_trial</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP.run_sample_trial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP.run_sample_trial" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run_sample_trial</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/BoundedRTDPClass.html#BoundedRTDP.run_sample_trial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.BoundedRTDPClass.BoundedRTDP.run_sample_trial" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -117,11 +117,11 @@ horizon (int)</div></blockquote>
 <p>MCTSClass.py: Class for a basic Monte Carlo Tree Search Planner.</p>
 <dl class="class">
 <dt id="simple_rl.planning.MCTSClass.MCTS">
-<em class="property">class </em><code class="descclassname">simple_rl.planning.MCTSClass.</code><code class="descname">MCTS</code><span class="sig-paren">(</span><em>mdp</em>, <em>name='mcts'</em>, <em>explore_param=1.4142135623730951</em>, <em>rollout_depth=20</em>, <em>num_rollouts_per_step=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/MCTSClass.html#MCTS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.MCTSClass.MCTS" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">simple_rl.planning.MCTSClass.</code><code class="descname">MCTS</code><span class="sig-paren">(</span><em>mdp</em>, <em>name='mcts'</em>, <em>explore_param=1.4142135623730951</em>, <em>rollout_depth=20</em>, <em>num_rollouts_per_step=10</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/MCTSClass.html#MCTS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.MCTSClass.MCTS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#simple_rl.planning.PlannerClass.Planner" title="simple_rl.planning.PlannerClass.Planner"><code class="xref py py-class docutils literal notranslate"><span class="pre">simple_rl.planning.PlannerClass.Planner</span></code></a></p>
 <dl class="method">
 <dt id="simple_rl.planning.MCTSClass.MCTS.plan">
-<code class="descname">plan</code><span class="sig-paren">(</span><em>cur_state</em>, <em>horizon=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/MCTSClass.html#MCTS.plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.MCTSClass.MCTS.plan" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plan</code><span class="sig-paren">(</span><em>cur_state</em>, <em>horizon=20</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/MCTSClass.html#MCTS.plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.MCTSClass.MCTS.plan" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>cur_state (State)
@@ -133,7 +133,7 @@ horizon (int)</dd>
 
 <dl class="method">
 <dt id="simple_rl.planning.MCTSClass.MCTS.policy">
-<code class="descname">policy</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/MCTSClass.html#MCTS.policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.MCTSClass.MCTS.policy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">policy</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/MCTSClass.html#MCTS.policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.MCTSClass.MCTS.policy" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>state (State)</dd>
@@ -149,7 +149,7 @@ horizon (int)</dd>
 <span id="simple-rl-planning-plannerclass-module"></span><h2>simple_rl.planning.PlannerClass module<a class="headerlink" href="#module-simple_rl.planning.PlannerClass" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="simple_rl.planning.PlannerClass.Planner">
-<em class="property">class </em><code class="descclassname">simple_rl.planning.PlannerClass.</code><code class="descname">Planner</code><span class="sig-paren">(</span><em>mdp</em>, <em>name='planner'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/PlannerClass.html#Planner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.PlannerClass.Planner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">simple_rl.planning.PlannerClass.</code><code class="descname">Planner</code><span class="sig-paren">(</span><em>mdp</em>, <em>name='planner'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/PlannerClass.html#Planner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.PlannerClass.Planner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Abstract class for a Planner.</p>
 </dd></dl>
@@ -159,16 +159,16 @@ horizon (int)</dd>
 <span id="simple-rl-planning-valueiterationclass-module"></span><h2>simple_rl.planning.ValueIterationClass module<a class="headerlink" href="#module-simple_rl.planning.ValueIterationClass" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration">
-<em class="property">class </em><code class="descclassname">simple_rl.planning.ValueIterationClass.</code><code class="descname">ValueIteration</code><span class="sig-paren">(</span><em>mdp</em>, <em>name='value_iter'</em>, <em>delta=0.0001</em>, <em>max_iterations=500</em>, <em>sample_rate=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">simple_rl.planning.ValueIterationClass.</code><code class="descname">ValueIteration</code><span class="sig-paren">(</span><em>mdp</em>, <em>name='value_iter'</em>, <em>delta=0.0001</em>, <em>max_iterations=500</em>, <em>sample_rate=3</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#simple_rl.planning.PlannerClass.Planner" title="simple_rl.planning.PlannerClass.Planner"><code class="xref py py-class docutils literal notranslate"><span class="pre">simple_rl.planning.PlannerClass.Planner</span></code></a></p>
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_gamma">
-<code class="descname">get_gamma</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_gamma" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_gamma</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_gamma" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_max_q_actions">
-<code class="descname">get_max_q_actions</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_max_q_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_max_q_actions" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_max_q_actions</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_max_q_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_max_q_actions" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>state (State)</dd>
@@ -179,17 +179,17 @@ horizon (int)</dd>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_num_backups_in_recent_run">
-<code class="descname">get_num_backups_in_recent_run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_num_backups_in_recent_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_num_backups_in_recent_run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_num_backups_in_recent_run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_num_backups_in_recent_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_num_backups_in_recent_run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_num_states">
-<code class="descname">get_num_states</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_num_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_num_states" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_num_states</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_num_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_num_states" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_q_value">
-<code class="descname">get_q_value</code><span class="sig-paren">(</span><em>s</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_q_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_q_value" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_q_value</code><span class="sig-paren">(</span><em>s</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_q_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_q_value" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>s (State)
@@ -201,12 +201,12 @@ a (str): action</dd>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_states">
-<code class="descname">get_states</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_states" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_states</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_states" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.get_value">
-<code class="descname">get_value</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_value" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_value</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.get_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.get_value" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>s (State)</dd>
@@ -217,7 +217,7 @@ a (str): action</dd>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.plan">
-<code class="descname">plan</code><span class="sig-paren">(</span><em>state=None</em>, <em>horizon=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.plan" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plan</code><span class="sig-paren">(</span><em>state=None</em>, <em>horizon=100</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.plan" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>state (State)
@@ -229,7 +229,7 @@ horizon (int)</dd>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.policy">
-<code class="descname">policy</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.policy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">policy</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.policy" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Args:</dt>
 <dd>state (State)</dd>
@@ -242,12 +242,12 @@ horizon (int)</dd>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.print_value_func">
-<code class="descname">print_value_func</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.print_value_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.print_value_func" title="Permalink to this definition">¶</a></dt>
+<code class="descname">print_value_func</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.print_value_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.print_value_func" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="simple_rl.planning.ValueIterationClass.ValueIteration.run_vi">
-<code class="descname">run_vi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.run_vi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.run_vi" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run_vi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/planning/ValueIterationClass.html#ValueIteration.run_vi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.planning.ValueIterationClass.ValueIteration.run_vi" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Returns:</dt>
 <dd><dl class="first last docutils">
@@ -344,7 +344,7 @@ MCTSClass: Monte Carlo Tree Search.</div></blockquote>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
       |
-      <a href="_sources/planning.rst.txt"
+      <a href="sources/planning.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
