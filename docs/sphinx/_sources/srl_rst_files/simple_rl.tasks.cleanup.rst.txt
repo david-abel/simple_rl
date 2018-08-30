@@ -1,0 +1,70 @@
+simple\_rl.tasks.cleanup package
+================================
+
+Submodules
+----------
+
+simple\_rl.tasks.cleanup.CleanUpMDPClass module
+-----------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.CleanUpMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.cleanup.cleanup\_block module
+----------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.cleanup_block
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.cleanup.cleanup\_door module
+---------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.cleanup_door
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.cleanup.cleanup\_room module
+---------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.cleanup_room
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.cleanup.cleanup\_state module
+----------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.cleanup_state
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.cleanup.cleanup\_task module
+---------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.cleanup_task
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.cleanup.cleanup\_visualizer module
+---------------------------------------------------
+
+.. automodule:: simple_rl.tasks.cleanup.cleanup_visualizer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.cleanup
+    :members:
+    :undoc-members:
+    :show-inheritance:

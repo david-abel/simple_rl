@@ -1,0 +1,36 @@
+simple\_rl package
+==================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    simple_rl.abstraction
+    simple_rl.agents
+    simple_rl.experiments
+    simple_rl.mdp
+    simple_rl.planning
+    simple_rl.pomdp
+    simple_rl.tasks
+    simple_rl.utils
+
+Submodules
+----------
+
+simple\_rl.run\_experiments module
+----------------------------------
+
+.. automodule:: simple_rl.run_experiments
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl
+    :members:
+    :undoc-members:
+    :show-inheritance:

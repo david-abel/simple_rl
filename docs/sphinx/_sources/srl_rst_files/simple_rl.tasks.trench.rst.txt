@@ -1,0 +1,30 @@
+simple\_rl.tasks.trench package
+===============================
+
+Submodules
+----------
+
+simple\_rl.tasks.trench.TrenchOOMDPClass module
+-----------------------------------------------
+
+.. automodule:: simple_rl.tasks.trench.TrenchOOMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.trench.TrenchOOMDPState module
+-----------------------------------------------
+
+.. automodule:: simple_rl.tasks.trench.TrenchOOMDPState
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.trench
+    :members:
+    :undoc-members:
+    :show-inheritance:

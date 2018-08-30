@@ -1,0 +1,30 @@
+simple\_rl.tasks.random package
+===============================
+
+Submodules
+----------
+
+simple\_rl.tasks.random.RandomMDPClass module
+---------------------------------------------
+
+.. automodule:: simple_rl.tasks.random.RandomMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+simple\_rl.tasks.random.RandomStateClass module
+-----------------------------------------------
+
+.. automodule:: simple_rl.tasks.random.RandomStateClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.random
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,35 @@
+simple\_rl.tasks package
+========================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    simple_rl.tasks.bandit
+    simple_rl.tasks.chain
+    simple_rl.tasks.cleanup
+    simple_rl.tasks.combo_lock
+    simple_rl.tasks.dev_rock_sample
+    simple_rl.tasks.four_room
+    simple_rl.tasks.gather
+    simple_rl.tasks.grid_game
+    simple_rl.tasks.grid_world
+    simple_rl.tasks.gym
+    simple_rl.tasks.hanoi
+    simple_rl.tasks.maze_1d
+    simple_rl.tasks.navigation
+    simple_rl.tasks.prisoners
+    simple_rl.tasks.puddle
+    simple_rl.tasks.random
+    simple_rl.tasks.rock_paper_scissors
+    simple_rl.tasks.taxi
+    simple_rl.tasks.trench
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks
+    :members:
+    :undoc-members:
+    :show-inheritance:

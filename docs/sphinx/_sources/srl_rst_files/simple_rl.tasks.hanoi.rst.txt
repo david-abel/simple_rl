@@ -1,0 +1,22 @@
+simple\_rl.tasks.hanoi package
+==============================
+
+Submodules
+----------
+
+simple\_rl.tasks.hanoi.HanoiMDPClass module
+-------------------------------------------
+
+.. automodule:: simple_rl.tasks.hanoi.HanoiMDPClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: simple_rl.tasks.hanoi
+    :members:
+    :undoc-members:
+    :show-inheritance:
