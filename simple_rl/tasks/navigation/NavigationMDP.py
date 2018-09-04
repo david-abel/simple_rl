@@ -22,7 +22,7 @@ class NavigationMDP(GridWorldMDP):
             Intention Learning." IJCAI. 2015.
     '''
 
-    ACTIONS = ["up", "down", "left", "right"]
+    GridWorldMDP.ACTIONS = ["up", "down", "left", "right"]
 
     @staticmethod
     def states_to_features(states, phi):
@@ -39,7 +39,7 @@ class NavigationMDP(GridWorldMDP):
         return np.asarray([(s.x, s.y) for s in states], dtype=np.float32)
 
     def __init__(self, width=30, height=30,
-                 living_cell_types=["empty", "yellow", "red", "green", "purple"],
+                 living_cell_types=["white", "yellow", "red", "green", "purple"],
                  living_cell_rewards=[0, 0, -10, -10, -10],
                  living_cell_distribution="probability",
                  living_cell_type_probs=[0.68, 0.17, 0.05, 0.05, 0.05],
@@ -47,7 +47,7 @@ class NavigationMDP(GridWorldMDP):
                  goal_cell_locs=[],
                  goal_cell_rewards=[],
                  goal_cell_types=[],
-                 gamma=0.99, slip_prob=0.00, step_cost=0.0,
+                 gamma=0.99, slip_prob=0.00, step_cost=0.5,
                  is_goal_terminal=True, traj_init_cell_types=[0],
                  planning_init_loc=(1,1), planning_rand_init=True, name="Navigation MDP"):
         """
@@ -92,9 +92,8 @@ class NavigationMDP(GridWorldMDP):
                               rand_init=planning_rand_init,
                               goal_locs=goal_cell_locs, lava_locs=[()],
                               walls=[], is_goal_terminal=is_goal_terminal,
-                              gamma=gamma, init_state=None,
-                              slip_prob=slip_prob, step_cost=step_cost,
-                              name=name)
+                              gamma=gamma, slip_prob=slip_prob,
+                              step_cost=step_cost, name=name)
 
         # Sets up state space (2d grid where each element holds a cell id)
         self.__setup_state_space(height, width, living_cell_types,
@@ -140,9 +139,10 @@ class NavigationMDP(GridWorldMDP):
         self.state_space_wo_goals = self.state_space.copy()
 
         # Add goals to state space
-        self.goal_cell_locs = goal_cell_locs
+        self.goal_locs = goal_cell_locs
         self.state_space, self.goal_xy_to_idx = self.__add_goal_cells_to_state_space(
             self.state_space, goal_cell_locs, self.goal_cell_ids)
+        self.n_unique_cells = len(np.unique(self.state_space))
 
     def __add_goal_cells_to_state_space(self, state_space, goal_cell_locs,
                                         goal_cell_ids):
@@ -199,13 +199,15 @@ class NavigationMDP(GridWorldMDP):
         """
         Sets up rewards grid corresponding to @self.state_space
         """
+        assert isinstance(living_cell_rewards, list) and isinstance(
+            goal_cell_rewards, list)
         self.living_cell_rewards = living_cell_rewards
         self.goal_cell_rewards = goal_cell_rewards
         self.cell_type_rewards = self.living_cell_rewards + self.goal_cell_rewards
 
         # State rewards with no goals (preserve a copy without goals)
         self.state_rewards_wo_goals = np.asarray(
-            [[living_cell_rewards[item] for item in row] for row in
+            [[self.living_cell_rewards[item] for item in row] for row in
              self.state_space_wo_goals]).reshape(self.height, self.width)
         # State rewards
         self.state_rewards = np.asarray(
@@ -231,7 +233,7 @@ class NavigationMDP(GridWorldMDP):
         # Retrieve state space copy without goals
         self.state_space = self.state_space_wo_goals.copy()
         # Add goals to state space
-        self.goal_cell_locs = goal_cell_locs
+        self.goal_locs = goal_cell_locs
         self.state_space, self.goal_xy_to_idx = self.__add_goal_cells_to_state_space(
             self.state_space, goal_cell_locs, self.goal_cell_ids)
 
@@ -241,7 +243,23 @@ class NavigationMDP(GridWorldMDP):
         # Mark flag for invalidating previous value iteration results
         self._policy_invalidated = True
 
+        self.n_unique_cells = len(np.unique(self.state_space))
+
     def get_states(self):
+        """
+        Returns all states 
+        """
+        return [GridWorldState(x, y) for x in range(1, self.width + 1) for y in
+                range(1, self.height + 1)]
+
+    def get_states(self):
+        """
+        Returns all states 
+        """
+        return [GridWorldState(x, y) for x in range(1, self.width + 1) for y in
+                range(1, self.height + 1)]
+
+    def get_reachable_states(self):
         """
         Returns all reachable states 
         """
@@ -281,8 +299,6 @@ class NavigationMDP(GridWorldMDP):
             return self.goal_cell_rewards[self.goal_xy_to_idx[
                 (next_state.x, next_state.y)]] \
                    + self.state_rewards[r, c] - self.step_cost
-        elif self.state_rewards[r, c] == 0:
-            return 0 - self.step_cost
         else:
             return self.state_rewards[r, c] - self.step_cost
 
@@ -355,6 +371,7 @@ class NavigationMDP(GridWorldMDP):
         """
         # If value iteration was run previously, don't re-run it
         if self._policy_invalidated == True:
+            self.value_iter = ValueIteration(self, sample_rate=1)
             _ = self.value_iter.run_vi()
             self._policy_invalidated = False
         return self.value_iter
@@ -416,7 +433,7 @@ class NavigationMDP(GridWorldMDP):
                 init_states = init_states[:n_trajectory]
 
         if policy is None:
-            if len(self.goal_cell_locs) == 0:
+            if len(self.goal_locs) == 0:
                 print("Running value iteration with no goals assigned..")
             policy = self.run_value_iteration().policy
 
@@ -470,8 +487,16 @@ class NavigationMDP(GridWorldMDP):
         return self.__transfrom(self.feature_cell_dist,
                                 "normalize_manhattan" if normalize else "None")
 
+    def cell_type_feature(self, cell_type, include_goal=True):
+        if include_goal:
+            return np.eye(len(self.cell_ids))[cell_type]
+        else:
+            # use 0 vector for goals
+            return np.vstack((np.eye(len(self.living_cell_ids)), np.zeros(
+                (len(self.goal_cell_ids), len(self.cell_ids)))))[cell_type]
+
     def feature_at_loc(self, x, y, feature_type="indicator",
-                       incl_cell_distances=False, incl_goal_indicator=False,
+                       incl_cell_distances=False, incl_goal_indicator=True,
                        incl_goal_distances=False, normalize_distance=False,
                        dtype=np.float32):
         """
@@ -495,13 +520,8 @@ class NavigationMDP(GridWorldMDP):
         assert feature_type in ["indicator", "cartesian", "rowcol"]
 
         if feature_type == "indicator":
-            if incl_goal_indicator:
-                ind_feature = np.eye(len(self.cell_ids))[self.state_space[row, col]]
-            else:
-                if (x, y) in self.goal_cell_locs:
-                    ind_feature = np.zeros(len(self.living_cell_ids))
-                else:
-                    ind_feature = np.eye(len(self.living_cell_ids))[self.state_space[row, col]]
+            ind_feature = self.cell_type_feature(self.state_space[row, col],
+                                                  incl_goal_indicator)
         elif feature_type == "cartesian":
             ind_feature = np.array([x, y])
         elif feature_type == "rowcol":
@@ -516,7 +536,7 @@ class NavigationMDP(GridWorldMDP):
             return ind_feature.astype(dtype)
 
     def feature_at_state(self, mdp_state, feature_type="indicator",
-                         incl_cell_distances=False, incl_goal_indicator=False,
+                         incl_cell_distances=False, incl_goal_indicator=True,
                          incl_goal_distances=False, normalize_distance=False,
                          dtype=np.float32):
         """
@@ -566,7 +586,7 @@ class NavigationMDP(GridWorldMDP):
                        traj_linewidth=0.7, init_marker_sz=10,
                        goal_marker="*c", goal_marker_sz=10,
                        end_marker="", end_marker_sz=10,
-                       axis_tick_font_sz=8, title="Navigation MDP"):
+                       axis_tick_font_sz=8, title=None):
         """
         Args:
             values (2d ndarray): Values to be visualized in the grid, 
@@ -598,11 +618,11 @@ class NavigationMDP(GridWorldMDP):
             cell_colors = [
                 cmap(norm(cell)) if isinstance(cell, int) else cell
                 for cell in self.cell_types]
-            cmap = colors.ListedColormap(cell_colors)
+            cmap = colors.ListedColormap(cell_colors, N=self.n_unique_cells)
 
         # Plot values
         im = plt.imshow(values, interpolation='None', cmap=cmap)
-        plt.title(title)
+        plt.title(title if title else self.name)
         ax = plt.gca()
         ax.set_xticklabels('')
         ax.set_yticklabels('')
@@ -625,8 +645,8 @@ class NavigationMDP(GridWorldMDP):
                 plt.plot(path_xs[-1], path_ys[-1], end_marker,
                          markersize=end_marker_sz) # Mark end state
         # Mark goals
-        if len(self.goal_cell_locs) != 0:
-            for goal_x, goal_y in self.goal_cell_locs:
+        if len(self.goal_locs) != 0:
+            for goal_x, goal_y in self.goal_locs:
                 plt.plot(goal_x - 1, self.height - goal_y, goal_marker,
                          markersize=goal_marker_sz)
         # Text values on cell
