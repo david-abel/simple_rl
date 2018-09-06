@@ -14,6 +14,7 @@ from simple_rl.tasks.grid_world.GridWorldMDPClass import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 from simple_rl.tasks.hanoi.HanoiMDPClass import HanoiMDP
 from simple_rl.tasks.navigation.NavigationMDP import NavigationMDP
+from simple_rl.tasks.navigation.NavigationWorldMDP import NavigationWorldMDP
 from simple_rl.tasks.prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
 from simple_rl.tasks.puddle.PuddleMDPClass import PuddleMDP
 from simple_rl.tasks.random.RandomMDPClass import RandomMDP
