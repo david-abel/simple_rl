@@ -43,7 +43,7 @@ class NavigationMDP(GridWorldMDP):
                  living_cell_rewards=[0, 0, -10, -10, -10],
                  living_cell_distribution="probability",
                  living_cell_type_probs=[0.68, 0.17, 0.05, 0.05, 0.05],
-                 living_cell_locs=[np.inf, np.inf, [(1,1),(5,5)], [(2,2)], [4,4]],
+                 living_cell_locs=[np.inf, np.inf, [(1,1),(5,5)], [(2,2)], [(4,4)]],
                  goal_cell_locs=[],
                  goal_cell_rewards=[],
                  goal_cell_types=[],
@@ -244,13 +244,6 @@ class NavigationMDP(GridWorldMDP):
         self._policy_invalidated = True
 
         self.n_unique_cells = len(np.unique(self.state_space))
-
-    def get_states(self):
-        """
-        Returns all states 
-        """
-        return [GridWorldState(x, y) for x in range(1, self.width + 1) for y in
-                range(1, self.height + 1)]
 
     def get_states(self):
         """
