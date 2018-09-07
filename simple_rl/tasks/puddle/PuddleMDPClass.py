@@ -8,6 +8,7 @@ PuddleMDPClass.py: Contains the Puddle class from:
 # Python imports.
 import math
 import numpy as np
+from collections import defaultdict
 
 # Other imports
 from simple_rl.mdp.MDPClass import MDP
