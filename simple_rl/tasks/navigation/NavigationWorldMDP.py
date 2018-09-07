@@ -384,18 +384,13 @@ class NavigationWorldMDP(MDP):
         Returns
             (float)
         """
-        r = self.cell_type_rewards[
-                self.get_cell_id(state.x, state.y)] - self.step_cost
-        if self._is_goal_state_action(state, action):
-            next_state = self._transition_func(state, action)
-            return r + self.cell_type_rewards[
-                self.get_cell_id(next_state.x, next_state.y)]
-        return r
+        next_state = self._transition_func(state, action)
+        return self.cell_type_rewards[
+                self.get_cell_id(next_state.x, next_state.y)] - self.step_cost
 
     # -------------------------
     # -- Trajectory Sampling --
     # -------------------------
-
     def plan(self, state, policy=None, horizon=100):
         '''
         Args:
@@ -569,6 +564,13 @@ class NavigationWorldMDP(MDP):
         Returns all reachable states from @self.init_loc.
         """
         return self.value_iter.get_states()
+
+    def get_trans_dict(self):
+        """
+        Returns transition dynamics matrix 
+        """
+        self.value_iter._compute_matrix_from_trans_func()
+        return self.value_iter.trans_dict
 
     # --------------
     # -- Features --
