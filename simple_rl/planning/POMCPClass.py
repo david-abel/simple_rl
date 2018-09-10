@@ -46,13 +46,25 @@ class POMCP(Planner):
             action = self._search(history)
             reward, observation, _ = self.mdp.execute_agent_action(action)
             policy[history] = action
-            if verbose: print('From history {}, took action {}'.format(history, action)),
+            if verbose: print('From history {}, took action {}'.format(history, action))
             history = history + ((action, observation),)
-            belief = self.search_tree[history][2]
-            if verbose: print('and my new belief is {}'.format(belief))
             discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
             num_iter += 1
         return discounted_sum_rewards, policy
+
+    def belief(self, state, history):
+        '''
+        bel_hat(s, h) = (1/K) * sum_(i=1, K){KroneckerDelta(s, B_i)}
+        POMCP tracks the belief state by aggregating over the set of particles associated with the current history
+        Args:
+            state (State): the state over which we want to compute the belief probability
+            history (tuple): the (action, observation) sequence observed so far
+
+        Returns:
+            belief_state (float): probability that we are in `state` given that we have seen `history`
+        '''
+        particles = self.search_tree[history][2] # type: list
+        return particles.count(state) / float(len(particles))
 
     def _search(self, history):
         '''
@@ -112,7 +124,7 @@ class POMCP(Planner):
 
         if history not in self.search_tree:
             # T(h) --> <N(h), V(h), B(h)>
-            self.search_tree[history] = [self.init_visits, self.init_value, set()]
+            self.search_tree[history] = [self.init_visits, self.init_value, list()]
             for action in self.mdp.actions:
                 history_action = history + ((action,),)
                 # T(ha) --> <N(ha), Q(ha)>
@@ -126,7 +138,7 @@ class POMCP(Planner):
         next_history = history + ((action, observation),)
         discounted_reward = reward + (self.gamma * self._simulate(next_state, next_history, depth+1))
 
-        self.search_tree[history][2].add(state)
+        self.search_tree[history][2].append(state)
         self.search_tree[history][0] += 1
         self.search_tree[history_action][0] += 1
         self.search_tree[history_action][1] += (discounted_reward - self.search_tree[history_action][1]) / self.search_tree[history_action][0]
@@ -204,4 +216,4 @@ if __name__ == '__main__':
     import time
     maze = Maze1DPOMDP()
     p = POMCP(maze, max_time_duration=3., max_rollout_depth=20)
-    p.run()
+    r, pi = p.run(verbose=True)
