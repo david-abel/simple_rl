@@ -1,5 +1,6 @@
 # Python imports.
 from collections import defaultdict
+import random
 
 # Other imports.
 from simple_rl.mdp.StateClass import State
@@ -38,4 +39,6 @@ class BeliefState(State):
         '''
         if sampling_method == 'max':
             return max(self.distribution, key=self.distribution.get)
+        if sampling_method == 'random':
+            return random.choice(self.distribution.keys())
         raise NotImplementedError('Sampling method {} not implemented yet'.format(sampling_method))
