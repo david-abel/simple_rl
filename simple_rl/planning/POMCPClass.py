@@ -46,8 +46,10 @@ class POMCP(Planner):
             action = self._search(history)
             reward, observation, _ = self.mdp.execute_agent_action(action)
             policy[history] = action
-            if verbose: print('From history {}, took action {}'.format(history, action))
+            if verbose: print('From history {}, took action {}'.format(history, action)),
             history = history + ((action, observation),)
+            belief = self.search_tree[history][2]
+            if verbose: print('and my new belief is {}'.format(belief))
             discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
             num_iter += 1
         return discounted_sum_rewards, policy
