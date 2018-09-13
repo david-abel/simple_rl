@@ -13,6 +13,7 @@ from simple_rl.mdp.MDPClass import MDP
 from simple_rl.tasks.navigation.NavigationStateClass import NavigationWorldState
 from simple_rl.planning import ValueIteration
 
+
 class NavigationWorldMDP(MDP):
     """
         Class for Navigation MDP from:
@@ -36,47 +37,46 @@ class NavigationWorldMDP(MDP):
                  wall_cell_locs=[],
                  goal_cell_types=["blue"],
                  goal_cell_rewards=[1.],
-                 goal_cell_locs=[[(21,21)]],
+                 goal_cell_locs=[[(21, 21)]],
                  init_loc=(1, 1),
                  rand_init=False,
                  gamma=0.99, slip_prob=0.00, step_cost=0.5,
                  is_goal_terminal=True,
                  name="Navigation MDP"):
-
         """
-        Note: Locations are specified in (x,y) format, but (row, col) convention 
+        Note: Locations are specified in (x,y) format, but (row, col) convention
             is used while storing in memory.
         Args:
             height (int): Navigation grid height (in no. of cells).
             width (int): Navigation grid width (in no. of cells).
             nav_cell_types (list of <str / int>): Navigation cell types.
-            nav_cell_rewards (list of float): Rewards associated with 
+            nav_cell_rewards (list of float): Rewards associated with
                 @nav_cell_types.
-            nav_cell_p_or_locs (list of <float / list of tuples (int x, int y)>): 
-                Probability corresponding to @nav_cell_types distribution, or 
-                it could be list of fixed/forced locations [(x,y),...]. 
-                (Default values are chosen arbitrarily larger than percolation 
-                threshold for square lattice--just an approximation to match 
+            nav_cell_p_or_locs (list of <float / list of tuples (int x, int y)>):
+                Probability corresponding to @nav_cell_types distribution, or
+                it could be list of fixed/forced locations [(x,y),...].
+                (Default values are chosen arbitrarily larger than percolation
+                threshold for square lattice--just an approximation to match
                 cell distribution in the paper.)
             goal_cell_types (list of <str / int>): Goal cell types.
-            goal_cell_locs (list of list of tuples (int, int)): Goal cell 
+            goal_cell_locs (list of list of tuples (int, int)): Goal cell
                 locations [(x,y),...] associated with @goal_cell_types.
-            nav_cell_rewards (list of float): Rewards associated with 
+            nav_cell_rewards (list of float): Rewards associated with
                 @goal_cell_types.
-            init_loc (int x, int y): Init cell to compute state space reachability 
+            init_loc (int x, int y): Init cell to compute state space reachability
                 and value iteration.
-            gamma (float): MDP discount factor 
-            slip_prob (float): With this probability agent could fall either on 
-                left or right from the intended cell. 
+            gamma (float): MDP discount factor
+            slip_prob (float): With this probability agent could fall either on
+                left or right from the intended cell.
             step_cost (float): Living penalty.
             is_goal_terminal (bool): True to set goal state terminal.
         """
         assert len(nav_cell_types) == len(nav_cell_rewards) \
-               == len(nav_cell_p_or_locs)
+            == len(nav_cell_p_or_locs)
         assert len(wall_cell_types) == len(wall_cell_rewards) \
-               == len(wall_cell_locs)
+            == len(wall_cell_locs)
         assert len(goal_cell_types) == len(goal_cell_rewards) \
-               == len(goal_cell_locs)
+            == len(goal_cell_locs)
 
         self.width = width
         self.height = height
@@ -111,7 +111,7 @@ class NavigationWorldMDP(MDP):
         self.__add_cells_by_locs(self.wall_cell_ids, wall_cell_locs,
                                  NavigationWorldMDP.CELL_KIND_WALL)
         self.__add_nav_cells(self.nav_cell_ids, nav_cell_p_or_locs,
-                                      NavigationWorldMDP.CELL_KIND_NAV)
+                             NavigationWorldMDP.CELL_KIND_NAV)
         self.__check_state_map()
 
         self.__register_cell_rewards(nav_cell_rewards,
@@ -203,7 +203,7 @@ class NavigationWorldMDP(MDP):
                 self.xy_to_cell_kind[(x, y)] = kind
 
     def __add_nav_cells(self, cell_ids, cell_p_or_locs_list,
-                                 kind="<Undefined>"):
+                        kind="<Undefined>"):
 
         self.nav_p_cell_ids = []
         self.nav_p_cell_probs = []
@@ -224,7 +224,7 @@ class NavigationWorldMDP(MDP):
                 self.nav_p_cell_probs.append(prob)
 
         assert round(sum(self.nav_p_cell_probs),
-                             9) == 1, "Probability values must sum to 1."
+                     9) == 1, "Probability values must sum to 1."
         for r in range(self.height):
             for c in range(self.width):
                 if self.map_state_cell_id[r, c] == -1:
@@ -241,13 +241,13 @@ class NavigationWorldMDP(MDP):
         self.wall_cell_rewards = wall_cell_rewards
         self.goal_cell_rewards = goal_cell_rewards
         self.cell_type_rewards = nav_cell_rewards + \
-                                 wall_cell_rewards + \
-                                 goal_cell_rewards
+            wall_cell_rewards + \
+            goal_cell_rewards
 
     def get_cell_id(self, x, y):
         """
-        Get cell id of (x, y) location. (Cell id is unique id assigned to 
-            each cell type for internal book-keeping).  
+        Get cell id of (x, y) location. (Cell id is unique id assigned to
+            each cell type for internal book-keeping).
         """
         return self.map_state_cell_id[tuple(self._xy_to_rowcol(x, y))]
 
@@ -268,7 +268,7 @@ class NavigationWorldMDP(MDP):
     def get_state_kind(self, x, y):
         """
         Returns:
-            (str): Kind of cell at (x, y), which could be "wall", "nav", or "goal". 
+            (str): Kind of cell at (x, y), which could be "wall", "nav", or "goal".
         """
         return self.xy_to_cell_kind[(x, y)]
 
@@ -307,6 +307,7 @@ class NavigationWorldMDP(MDP):
     # ---------
     # -- MDP --
     # ---------
+
     def _is_goal_state_action(self, state, action):
         """
         Args:
@@ -362,7 +363,7 @@ class NavigationWorldMDP(MDP):
                                                                    state.y - 1):
             next_state = NavigationWorldState(state.x, state.y - 1)
         elif action == "right" and state.x < self.width and not self.is_wall(
-                        state.x + 1, state.y):
+                state.x + 1, state.y):
             next_state = NavigationWorldState(state.x + 1, state.y)
         elif action == "left" and state.x > 1 and not self.is_wall(state.x - 1,
                                                                    state.y):
@@ -386,7 +387,7 @@ class NavigationWorldMDP(MDP):
         """
         next_state = self._transition_func(state, action)
         return self.cell_type_rewards[
-                self.get_cell_id(next_state.x, next_state.y)] - self.step_cost
+            self.get_cell_id(next_state.x, next_state.y)] - self.step_cost
 
     # -------------------------
     # -- Trajectory Sampling --
@@ -416,7 +417,7 @@ class NavigationWorldMDP(MDP):
 
     def set_traj_init_cell_types(self, cell_types):
         """
-        Sets cell types for sampling first state of trajectory 
+        Sets cell types for sampling first state of trajectory
         """
         self.traj_init_cell_row_idxs, self.traj_init_cell_col_idxs = [], []
         for cell_type in cell_types:
@@ -427,7 +428,7 @@ class NavigationWorldMDP(MDP):
 
     def sample_traj_init_state(self, idx=None):
         """
-        Samples trajectory init state (GridWorldState). Type of init cells to be 
+        Samples trajectory init state (GridWorldState). Type of init cells to be
             sampled is specified by set_traj_init_cell_types().
         """
         if idx is None:
@@ -476,8 +477,8 @@ class NavigationWorldMDP(MDP):
                 unless @n_traj > @self.num_traj_init_states
             policy (fn): S->A
             rand_init_to_match_n_traj: If True, this will always return
-                @n_traj many trajectories. If # of unique states are less 
-                than @n_traj, this will override the effect of @init_unique and 
+                @n_traj many trajectories. If # of unique states are less
+                than @n_traj, this will override the effect of @init_unique and
                 sample repeated init states.
         Returns:
             (traj_states_list, traj_actions_list) where
@@ -567,7 +568,7 @@ class NavigationWorldMDP(MDP):
 
     def get_trans_dict(self):
         """
-        Returns transition dynamics matrix 
+        Returns transition dynamics matrix
         """
         self.value_iter._compute_matrix_from_trans_func()
         return self.value_iter.trans_dict
@@ -586,7 +587,7 @@ class NavigationWorldMDP(MDP):
     def compute_grid_distance_features(self, incl_cells, incl_goals,
                                        normalize=False):
         """
-        Computes distances to specified cell types for entire grid. 
+        Computes distances to specified cell types for entire grid.
         Returns 3D array (row, col, distance)
         """
         # Convert 2 flags to decimal representation. This is useful to check if
@@ -598,7 +599,7 @@ class NavigationWorldMDP(MDP):
                                     "normalize_manhattan" if normalize else "None")
 
         dist_cell_ids = copy.deepcopy(
-                                self.nav_cell_ids) if incl_cells else []
+            self.nav_cell_ids) if incl_cells else []
         dist_cell_ids += self.goal_cell_ids if incl_goals else []
         loc_cells = [
             np.vstack(np.where(self.map_state_cell_id == cell_id)).transpose()
@@ -647,8 +648,8 @@ class NavigationWorldMDP(MDP):
             incl_cell_distances (bool): Include distance to each type of cell.
             incl_goal_distances (bool): Include distance to the goals.
             incl_goal_indicator: True - adds goal indicator feature
-                If all goals have same color, it'll add single indicator variable 
-                for all goals, otherwise it'll use different indicator variables 
+                If all goals have same color, it'll add single indicator variable
+                for all goals, otherwise it'll use different indicator variables
                 for each goal.
                 (only applicable for "indicator" feature type).
             normalize_distance (bool): Whether to normalize cell type distances
@@ -669,8 +670,8 @@ class NavigationWorldMDP(MDP):
         if incl_cell_distances or incl_goal_distances:
             return np.hstack((ind_feature,
                               self.compute_grid_distance_features(
-                                incl_cell_distances, incl_goal_distances,
-                                normalize_distance)[row, col])).astype(dtype)
+                                  incl_cell_distances, incl_goal_distances,
+                                  normalize_distance)[row, col])).astype(dtype)
         else:
             return ind_feature.astype(dtype)
 
@@ -687,8 +688,8 @@ class NavigationWorldMDP(MDP):
             incl_cell_distances (bool): Include distance to each type of cell.
             incl_goal_distances (bool): Include distance to the goals.
             incl_goal_indicator: True - adds goal indicator feature
-                If all goals have same color, it'll add single indicator variable 
-                for all goals, otherwise it'll use different indicator variables 
+                If all goals have same color, it'll add single indicator variable
+                for all goals, otherwise it'll use different indicator variables
                 for each goal.
                 (only applicable for "indicator" feature type).
             normalize_distance (bool): Whether to normalize cell type distances
@@ -732,10 +733,10 @@ class NavigationWorldMDP(MDP):
                        axis_tick_font_sz=8, title=None):
         """
         Args:
-            values (2d ndarray): Values to be visualized in the grid, 
+            values (2d ndarray): Values to be visualized in the grid,
                 defaults to cell types.
             cmap (Matplotlib Colormap): Colormap corresponding to values,
-                defaults to ListedColormap with colors specified in 
+                defaults to ListedColormap with colors specified in
                 @self.nav_cell_types and @self.goal_cell_types
             trajectories: Trajectories to be shown on the grid.
             subplot_str (str): Subplot number string (e.g., "411", "412", etc.)
@@ -784,9 +785,9 @@ class NavigationWorldMDP(MDP):
                 path_ys = [self.height - (s.y) for s in state_seq]
                 plt.plot(path_xs, path_ys, traj_marker, linewidth=traj_linewidth)
                 plt.plot(path_xs[0], path_ys[0], init_marker,
-                         markersize=init_marker_sz) # Mark init state
+                         markersize=init_marker_sz)  # Mark init state
                 plt.plot(path_xs[-1], path_ys[-1], end_marker,
-                         markersize=end_marker_sz) # Mark end state
+                         markersize=end_marker_sz)  # Mark end state
         # Mark goals
         if len(self.goal_cell_locs) != 0:
             for goal_cells in self.goal_cell_locs:

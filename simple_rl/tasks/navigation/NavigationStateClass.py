@@ -7,8 +7,8 @@ class NavigationWorldState(State):
 
     def __init__(self, x, y, phi=lambda state: [state.x, state.y]):
         State.__init__(self, data=[x, y])
-        self.x = round(x, 5)
-        self.y = round(y, 5)
+        self.x = x
+        self.y = y
         self.phi = phi
 
     def __hash__(self):
@@ -22,7 +22,7 @@ class NavigationWorldState(State):
 
     def __eq__(self, other):
         return isinstance(other, NavigationWorldState) and \
-               self.x == other.x and self.y == other.y
+            self.x == other.x and self.y == other.y
 
     def __getitem__(self, index):
         return self.data[index]
