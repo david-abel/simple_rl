@@ -76,7 +76,7 @@ def visualize_options_grid(grid_mdp, action_abstr, scr_width=720, scr_height=720
     # Initiation rect and text.
     option_text = small_font.render("Init: ", True, (46, 49, 49))
     screen.blit(option_text, (40, option_text_point[1]))
-    pygame.draw.rect(screen, colors[-1], (90, option_text_point[1]) + (24, 24))
+    pygame.draw.rect(screen, colors[0], (90, option_text_point[1]) + (24, 24))
 
     # Terminal rect and text.
     option_text = small_font.render("Term: ", True, (46, 49, 49))
@@ -182,7 +182,7 @@ def visualize_option(screen, grid_mdp, state_dict, option=None, goal_locs=[]):
 
                 if option.is_init_true(s):
                     # Init.
-                    r = pygame.draw.rect(screen, colors[-1], (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width - 10, cell_height - 10), 0)
+                    r = pygame.draw.rect(screen, colors[0], (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width - 10, cell_height - 10), 0)
                 elif option.is_term_true(s):
                     # Term.
                     r = pygame.draw.rect(screen, colors[1], (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width - 10, cell_height - 10), 0)

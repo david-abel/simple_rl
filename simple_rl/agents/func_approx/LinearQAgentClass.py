@@ -7,6 +7,7 @@ Contains implementation for a Q Learner with a Linear Function Approximator.
 # Python imports.
 import numpy as np
 import math
+from collections import defaultdict
 
 # Other imports.
 from simple_rl.agents import Agent, QLearningAgent
@@ -20,6 +21,8 @@ class LinearQAgent(QLearningAgent):
         name = name + "-rbf" if rbf else name
         QLearningAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
         self.num_features = num_features
+        self.rand_init = rand_init
+        
         # Add a basis feature.
         if rand_init:
             self.weights = np.random.random(self.num_features*len(self.actions))

@@ -33,14 +33,14 @@ class ValueIteration(Planner):
         self.reachability_done = False
         self.has_computed_matrix = False
         self.bellman_backups = 0
+        self.trans_dict = defaultdict(lambda:defaultdict(lambda:defaultdict(float)))
 
     def _compute_matrix_from_trans_func(self):
         if self.has_computed_matrix:
             self._compute_reachable_state_space()
             # We've already run this, just return.
             return
-
-        self.trans_dict = defaultdict(lambda:defaultdict(lambda:defaultdict(float)))
+        
             # K: state
                 # K: a
                     # K: s_prime
