@@ -42,7 +42,6 @@ font = {'size':14}
 matplotlib.rc('font', **font)
 matplotlib.rcParams['pdf.fonttype'] = 42
 # matplotlib.rcParams['text.usetex'] = True
-fig = matplotlib.pyplot.gcf()
 
 CUSTOM_TITLE = None
 X_AXIS_LABEL = None
