@@ -308,6 +308,9 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     # For each episode.
     for episode in range(1, episodes + 1):
 
+        cumulative_episodic_reward = 0
+
+
         if verbose:
             # Print episode numbers out nicely.
             sys.stdout.write("\tEpisode %s of %s" % (episode, episodes))
@@ -337,6 +340,9 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
             # Terminal check.
             if state.is_terminal():
+                if verbose:
+                    sys.stdout.write("x")
+
                 if episodes == 1 and not reset_at_terminal and experiment is not None and action != "terminate":
                     # Self loop if we're not episodic or resetting and in a terminal state.
                     experiment.add_experience(agent, state, action, 0, state, time_taken=time.clock()-step_start)
@@ -348,6 +354,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
             # Track value.
             value += reward * gamma ** step
+            cumulative_episodic_reward += reward
 
             # Record the experience.
             if experiment is not None:
@@ -384,6 +391,8 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     # Process that learning instance's info at end of learning.
     if experiment is not None:
         experiment.end_of_instance(agent)
+
+    print("\tLast episode reward:", cumulative_episodic_reward)
 
     return False, steps, value
 
