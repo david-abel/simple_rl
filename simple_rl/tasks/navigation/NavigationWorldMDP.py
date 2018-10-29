@@ -286,16 +286,12 @@ class NavigationWorldMDP(MDP):
         Resamples previous goal locations with navigation cells.
         """
         # Re-sample old goal state cells
-        for r in range(self.height):
-            for c in range(self.width):
-                x, y = self._rowcol_to_xy(r, c)
-                if self.is_goal(x, y):
-                    self.map_state_cell_id[r, c] = np.random.choice(
-                        self.nav_p_cell_ids,
-                        size=1,
-                        p=self.nav_p_cell_probs)
-                    self.xy_to_cell_kind[
-                        (x, y)] = NavigationWorldMDP.CELL_KIND_NAV
+        old_goal_locs = self.goal_cell_locs
+        # To keep it simple, navigation cells are sampled uniformly at random
+        # to replace existing goal cells.
+        new_cell_ids = np.random.choice(self.nav_cell_ids, size=len(old_goal_locs))
+        self.__add_cells_by_locs(new_cell_ids, old_goal_locs,
+                                 NavigationWorldMDP.CELL_KIND_NAV)
 
         self.__register_cell_types(self.nav_cell_types, self.wall_cell_types,
                                    goal_cell_types)
