@@ -46,7 +46,9 @@ class State(object):
         return "s." + str(self.data)
 
     def __eq__(self, other):
-        return self.data == other.data
+        if isinstance(other, State):
+            return self.data == other.data
+        return False
 
     def __getitem__(self, index):
         return self.data[index]
