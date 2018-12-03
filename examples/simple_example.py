@@ -5,7 +5,6 @@ import sys
 
 # Other imports.
 import srl_example_setup
-from simple_rl.planning import
 from simple_rl.agents import QLearningAgent, RandomAgent
 from simple_rl.tasks import GridWorldMDP
 from simple_rl.run_experiments import run_agents_on_mdp
