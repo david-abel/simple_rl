@@ -41,7 +41,6 @@ color_ls = [[118, 167, 125], [102, 120, 173],\
 font = {'size':14}
 matplotlib.rc('font', **font)
 matplotlib.rcParams['pdf.fonttype'] = 42
-# matplotlib.rcParams['text.usetex'] = True
 
 CUSTOM_TITLE = None
 X_AXIS_LABEL = None
@@ -290,7 +289,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     pyplot.cla()
     pyplot.close()
 
-def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False):
+def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False, new_title=None, new_x_label=None, new_y_label=None):
     '''
     Args:
         experiment_dir (str): path to results.
@@ -300,11 +299,23 @@ def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=
         use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         track_disc_reward (bool): If true, plots discounted reward (changes plot title, too).
-
+        new_title (str): Sets the title of the plot.
+        new_x_label (str): Sets the x axis label of the plot.
+        new_y_label (str): Sets the y axis label of the plot.
+    
     Summary:
         Creates plots for all agents run under the experiment.
         Stores the plot in results/<experiment_name>/<plot_name>.pdf
     '''
+
+    # Update plot labels if needed.
+    global CUSTOM_TITLE, X_AXIS_LABEL, Y_AXIS_LABEL
+    if new_title is not None:
+        CUSTOM_TITLE = new_title
+    if new_x_label is not None:
+        X_AXIS_LABEL = new_x_label
+    if new_y_label is not None:
+        Y_AXIS_LABEL = new_y_label
 
     # Load the data.
     data = load_data(experiment_dir, experiment_agents) # [alg][instance][episode]
@@ -409,11 +420,11 @@ def _is_episodic(data_dir):
     from simple_rl.experiments import Experiment
 
     # Open param file for the experiment.
-    if not os.path.exists(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
+    if not os.path.exists(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
         print("Warning: no experiment parameters file found for experiment. Assuming non-episodic.")
         return False
 
-    params_file = open(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
+    params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
 
     # Check if episodes > 1.
     for line in params_file.readlines():
@@ -429,11 +440,11 @@ def _is_disc_reward(data_dir):
     from simple_rl.experiments import Experiment
 
     # Open param file for the experiment.
-    if not os.path.exists(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
+    if not os.path.exists(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
         print("Warning: no experiment parameters file found for experiment. Assuming non-episodic.")
         return False
 
-    params_file = open(os.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
+    params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
 
     # Check if episodes > 1.
     for line in params_file.readlines():
@@ -476,9 +487,19 @@ def main():
     cumulative = not(args.a)
     episodic = _is_episodic(data_dir)
     track_disc_reward = _is_disc_reward(data_dir)
+    plot_file_name = ""
+
+    # Success plot.
+    if "success" in data_dir:
+        global X_AXIS_LABEL, Y_AXIS_LABEL, CUSTOM_TITLE
+        plot_file_name = "Success_Rate"
+        CUSTOM_TITLE = "Success Rate"
+        X_AXIS_LABEL = "Episode"
+        Y_AXIS_LABEL = "Avg. % Success"
+        cumulative = False
 
     # Plot.
-    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, track_disc_reward=track_disc_reward)
+    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, plot_file_name=plot_file_name, track_disc_reward=track_disc_reward)
 
 if __name__ == "__main__":
     main()

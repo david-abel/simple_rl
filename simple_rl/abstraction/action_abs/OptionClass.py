@@ -77,14 +77,12 @@ class Option(object):
 			# First step.
 			total_reward += reward_func(cur_state, self.act(cur_state)) - step_cost
 			cur_state = transition_func(cur_state, self.act(cur_state))
-
 			# Act until terminal.
-			while rollout_depth < max_rollout_depth and not self.is_term_true(cur_state):
-				cur_state = transition_func(cur_state, self.act(cur_state))
+			while not self.is_term_true(cur_state) and not cur_state.is_terminal():
 				total_reward += reward_func(cur_state, self.act(cur_state)) - step_cost
+				cur_state = transition_func(cur_state, self.act(cur_state))
 				rollout_depth += 1
 
-		# print self.name, cur_state
 		return cur_state, total_reward
 
 	def policy_from_dict(self, state):

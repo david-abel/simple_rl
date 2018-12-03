@@ -40,7 +40,9 @@ class Experiment(object):
                     cumulative_plot=True,
                     exp_function="run_agents_on_mdp",
                     dir_for_plot="",
-                    experiment_name_prefix=""):
+                    experiment_name_prefix="",
+                    track_success=False,
+                    success_reward=None):
         '''
         Args:
             agents (list)
@@ -56,13 +58,13 @@ class Experiment(object):
             exp_function (lambda): tracks with run_experiments.py function was called.
             dir_for_plot (str)
             experiment_name_prefix (str)
+            track_success (bool)
+            success_reward (int)
         '''
         # Store all relevant bools.
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
         params["track_disc_reward"] = track_disc_reward
-        # params["is_lifelong"] = is_lifelong
-        # params["agent_colors"] = agent_colors
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.track_disc_reward = track_disc_reward
@@ -81,6 +83,8 @@ class Experiment(object):
         self.experiment_name_prefix = experiment_name_prefix
         self.is_episodic = is_episodic
         self.is_markov_game = is_markov_game
+        self.track_success = track_success
+        self.success_reward = success_reward
         self._setup_files(clear_old_results)
 
         # Write experiment reproduction file.
@@ -149,6 +153,10 @@ class Experiment(object):
             for agent in self.agents:
                 if os.path.exists(os.path.join(self.exp_directory, str(agent)) + ".csv"):
                     os.remove(os.path.join(self.exp_directory, str(agent)) + ".csv")
+                if os.path.exists(os.path.join(self.exp_directory, "times", str(agent)) + ".csv"):
+                    os.remove(os.path.join(self.exp_directory, "times", str(agent)) + ".csv")
+                if os.path.exists(os.path.join(self.exp_directory, "success", str(agent)) + ".csv"):
+                    os.remove(os.path.join(self.exp_directory, "success", str(agent)) + ".csv")
         self.write_exp_info_to_file()
 
     def make_plots(self, open_plot=True):
@@ -166,13 +174,24 @@ class Experiment(object):
         else:
             plot_file_name = ""
 
-        chart_utils.make_plots(self.exp_directory,
-                                agent_name_ls,
+        chart_utils.make_plots(self.exp_directory, agent_name_ls,
                                 episodic=self.is_episodic,
                                 plot_file_name=plot_file_name,
                                 cumulative=self.cumulative_plot,
                                 track_disc_reward=self.track_disc_reward,
                                 open_plot=open_plot)
+
+        if self.track_success:
+            print(os.path.join("success", self.exp_directory))
+            chart_utils.make_plots(os.path.join(self.exp_directory, "success"), agent_name_ls,
+                                episodic=True,
+                                plot_file_name="success_rate",
+                                cumulative=False,
+                                track_disc_reward=False,
+                                open_plot=open_plot,
+                                new_title="Success Rate",
+                                new_x_label="Episode Number",
+                                new_y_label="Avg. Success %")
 
     def _write_extra_datum_to_file(self, mdp_name, agent, datum, datum_name):
         out_file = open(os.path.join(self.exp_directory, str(agent)) + "-" + datum_name + ".csv", "a+")
@@ -232,6 +251,8 @@ class Experiment(object):
             for x in range(num_times_to_write):
                 self.write_datum_to_file(agent, sum(self.rewards[agent]))
                 self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
+                if self.track_success:
+                    self.write_datum_to_file(agent, int(self.rewards[agent][-1] >= self.success_reward), extra_dir="success/")
         else:
             for x in range(num_times_to_write):
                 for step_reward in self.rewards[agent]:
@@ -247,6 +268,11 @@ class Experiment(object):
         out_file = open(os.path.join(self.exp_directory, str(agent)) + ".csv", "a+")
         out_file.write("\n")
         out_file.close()
+
+        if self.track_success:
+            out_file = open(os.path.join(self.exp_directory, "success", str(agent)) + ".csv", "a+")
+            out_file.write("\n")
+            out_file.close()
 
         if os.path.isdir(os.path.join(self.exp_directory, "times", "")):
             out_file = open(os.path.join(self.exp_directory, "times", str(agent)) + ".csv", "a+")

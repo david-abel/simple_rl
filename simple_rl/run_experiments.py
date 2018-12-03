@@ -221,7 +221,9 @@ def run_agents_on_mdp(agents,
                         reset_at_terminal=False,
                         cumulative_plot=True,
                         dir_for_plot="results",
-                        experiment_name_prefix=""):
+                        experiment_name_prefix="",
+                        track_success=False,
+                        success_reward=None):
     '''
     Args:
         agents (list of Agents): See agents/AgentClass.py (and friends).
@@ -238,12 +240,16 @@ def run_agents_on_mdp(agents,
         cumulative_plot (bool): If true makes a cumulative plot, otherwise plots avg. reward per timestep.
         dir_for_plot (str): Path
         experiment_name_prefix (str): Adds this to the end of the usual experiment name.
+        track_success (bool): If true, tracks whether each run is successful and generates an additional success plot at the end.
+        success_reward (int): If set, determines the success criteria.
 
     Summary:
         Runs each agent on the given mdp according to the given parameters.
         Stores results in results/<agent_name>.csv and automatically
         generates a plot and opens it.
     '''
+    if track_success and success_reward is None:
+        raise ValueError("(simple_rl): run_agents_on_mdp must set param @success_reward when @track_success=True.")
 
     # Experiment (for reproducibility, plotting).
     exp_params = {"instances":instances, "episodes":episodes, "steps":steps}
@@ -256,7 +262,9 @@ def run_agents_on_mdp(agents,
                             count_r_per_n_timestep=rew_step_count,
                             cumulative_plot=cumulative_plot,
                             dir_for_plot=dir_for_plot,
-                            experiment_name_prefix=experiment_name_prefix)
+                            experiment_name_prefix=experiment_name_prefix,
+                            track_success=track_success,
+                            success_reward=success_reward)
 
     # Record how long each agent spends learning.
     print("Running experiment: \n" + str(experiment))
@@ -310,7 +318,6 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
         cumulative_episodic_reward = 0
 
-
         if verbose:
             # Print episode numbers out nicely.
             sys.stdout.write("\tEpisode %s of %s" % (episode, episodes))
@@ -340,6 +347,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
             # Terminal check.
             if state.is_terminal():
+
                 if verbose:
                     sys.stdout.write("x")
 
@@ -360,6 +368,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             if experiment is not None:
                 reward_to_track = mdp.get_gamma()**(step + 1 + episode*steps) * reward if track_disc_reward else reward
                 reward_to_track = round(reward_to_track, 5)
+
                 experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
 
             if next_state.is_terminal():
@@ -392,7 +401,9 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
     if experiment is not None:
         experiment.end_of_instance(agent)
 
-    print("\tLast episode reward:", cumulative_episodic_reward)
+    # Only print if our experiment isn't trivially short.
+    if steps >= 500:
+        print("\tLast episode reward:", cumulative_episodic_reward)
 
     return False, steps, value
 

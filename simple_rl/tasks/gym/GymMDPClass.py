@@ -53,7 +53,7 @@ class GymMDP(MDP):
         '''
         obs, reward, is_terminal, info = self.env.step(action)
 
-        if self.render and self.episode % self.render_every_n_episodes == 0:
+        if self.render and (self.render_every_n_episodes == 0 or self.episode % self.render_every_n_episodes == 0):
             self.env.render()
 
         self.next_state = GymState(obs, is_terminal=is_terminal)

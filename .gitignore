@@ -13,3 +13,4 @@ examples/blank_example.py
 *.csv
 *.pdf
 docs/sphinx/
+examples/experiments_to_reproduce/*

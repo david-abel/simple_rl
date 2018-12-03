@@ -54,6 +54,9 @@ class MDP(object):
     def get_slip_prob(self):
         pass
 
+    def get_name(self):
+        return str(self)
+
     # --------------
     # -- Mutators --
     # --------------
