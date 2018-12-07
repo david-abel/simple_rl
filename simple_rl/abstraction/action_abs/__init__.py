@@ -1,2 +1,2 @@
-from ActionAbstractionClass import ActionAbstraction
-from PredicateClass import Predicate
+from simple_rl.abstraction.action_abs.ActionAbstractionClass import ActionAbstraction
+from simple_rl.abstraction.action_abs.PredicateClass import Predicate
