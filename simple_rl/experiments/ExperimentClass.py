@@ -105,11 +105,11 @@ class Experiment(object):
 
         out_file = open(os.path.join(self.exp_directory, Experiment.FULL_EXP_FILE_NAME), "w")
 
-        from simple_rl.mdp import OOMDP
+        from simple_rl.mdp import OOMDP, MDPDistribution
         from simple_rl.pomdp.POMDPClass import POMDP
         from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
 
-        if isinstance(mdp, OOMDP) or isinstance(mdp, POMDP) or isinstance(mdp, MarkovGameMDP):
+        if isinstance(mdp, OOMDP) or isinstance(mdp, POMDP) or isinstance(mdp, MarkovGameMDP) or isinstance(mdp, MDPDistribution):
             # We don't do markov games.
             return
 
