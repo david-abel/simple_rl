@@ -9,7 +9,7 @@ from collections import defaultdict
 
 # Other imports.
 from simple_rl.mdp.MDPClass import MDP
-from CartPoleStateClass import CartPoleState
+from simple_rl.tasks.cart_pole.CartPoleStateClass import CartPoleState
 
 # Fix input to cooperate with python 2 and 3.
 try:

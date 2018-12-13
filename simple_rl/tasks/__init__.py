@@ -3,6 +3,8 @@ from __future__ import print_function
 
 # Grab classes.
 from simple_rl.tasks.bandit.BanditMDPClass import BanditMDP
+from simple_rl.tasks.cart_pole.CartPoleMDPClass import CartPoleMDP
+from simple_rl.tasks.cart_pole.CartPoleStateClass import CartPoleState
 from simple_rl.tasks.chain.ChainMDPClass import ChainMDP
 from simple_rl.tasks.chain.ChainStateClass import ChainState
 from simple_rl.tasks.combo_lock.ComboLockMDPClass import ComboLockMDP

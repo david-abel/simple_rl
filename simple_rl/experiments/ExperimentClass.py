@@ -18,8 +18,8 @@ from simple_rl.experiments.ExperimentParametersClass import ExperimentParameters
 
 class Experiment(object):
 
-    FULL_EXP_FILE_NAME = "full_experiment.txt"
-    EXP_PARAM_FILE_NAME = "exp_info.txt"
+    FULL_EXP_FILE_NAME = "full_experiment_data.json"
+    EXP_PARAM_FILE_NAME = "readable_experiment_data.txt"
 
     ''' Experiment Class for RL Experiments '''
 
@@ -101,46 +101,48 @@ class Experiment(object):
             Writes enough detail about @agents, @mdp, and @parameters to the file results/<exp_name>/params.txt 
             so that the function simple_rl.run_experiments.reproduce_from_exp_file can rerun the experiment.
         '''
+        import json
+
         out_file = open(os.path.join(self.exp_directory, Experiment.FULL_EXP_FILE_NAME), "w")
 
         from simple_rl.mdp import OOMDP
         from simple_rl.pomdp.POMDPClass import POMDP
         from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+
         if isinstance(mdp, OOMDP) or isinstance(mdp, POMDP) or isinstance(mdp, MarkovGameMDP):
             # We don't do markov games.
             return
 
+        # Dict to hold all experiment info to write to json.
+        all_exp_info_dict = {}
+
         # MDP.
         mdp_class = str(type(mdp))
         mdp_params = mdp.get_parameters()
-        out_file.write("MDP:" + mdp_class + "\n")
-        for param in mdp_params:
-            out_file.write("\t\t" + param + "=" + str(mdp_params[param]) + "=" + str(type(mdp_params[param])) + "\n")
-
-        out_file.write("\n")
+        all_exp_info_dict["MDP"] = {"name":mdp_class, "params":mdp_params}
 
         # Get agents and their parameters.
+        all_exp_info_dict["AGENTS"] = defaultdict(lambda: defaultdict(str))
         for i, agent in enumerate(agents):
             agent_params = agent.get_parameters()
-            agent_class = str(i) + "-" + str(type(agent))
-
-            out_file.write("AGENT:" + agent_class + "\n")
-            for param in agent_params:
-                out_file.write("\t\t" + param + "=" + str(agent_params[param]) + "=" + str(type(agent_params[param])) + "\n")
-            out_file.write("\n")
-
-        out_file.write("\n")
+            agent_class = str(type(agent))
+            all_exp_info_dict["AGENTS"][agent_class]["params"] = agent_params
+            all_exp_info_dict["AGENTS"][agent_class]["index"] = i
 
         # Misc. Params.
-        out_file.write("MISC\n")
-        for param in parameters:
-            out_file.write("\t\t" + param + "=" + str(parameters[param]) + "=" + str(type(parameters[param])) + "\n")
+        all_exp_info_dict["MISC"] = parameters
 
-        # Track the function called.
-        out_file.write("\n\nFUNC\n\t" + exp_function + "\n")
+        # Function called.
+        all_exp_info_dict["FUNC"] = exp_function
 
-        # Close.
+        # Encode and store.
+        from simple_rl.utils.additional_datastructures import TupleEncoder
+        encoder = TupleEncoder()
+        data_to_store = encoder.encode(all_exp_info_dict)
+        load_enc = json.loads(data_to_store)
+        json.dump(load_enc, out_file, indent=4)
         out_file.close()
+        return
 
     def _setup_files(self, clear_old_results=True):
         '''

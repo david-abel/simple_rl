@@ -283,6 +283,8 @@ def run_agents_on_mdp(agents,
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal=reset_at_terminal)
             
             # Reset the agent.
+            # if "Q" in str(agent):
+            #     agent.print_q_func()
             agent.reset()
             mdp.end_of_instance()
 
@@ -359,6 +361,8 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
             # Execute in MDP.
             reward, next_state = mdp.execute_agent_action(action)
+
+            # print(state, action, reward, next_state)
 
             # Track value.
             value += reward * gamma ** step
@@ -468,21 +472,21 @@ def evaluate_agent(agent, mdp, instances=10):
 
     return total / instances
 
-def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=True):
+def reproduce_from_exp_file(exp_name, results_dir="results", open_plot=True):
     '''
     Args:
         exp_name (str)
-        results_dir_name (str)
+        results_dir (str)
         open_plot (bool)
 
     Summary:
         Extracts the agents, MDP, and parameters from the file and runs the experiment.
-        Stores data in "results_dir_name/exp_name/reproduce_i/*", where "i" is determined
+        Stores data in "results_dir/exp_name/reproduce_i/*", where "i" is determined
         based on the existence of earlier "reproduce" files.
     '''
 
     # Get dir and file.
-    exp_dir = os.path.join(results_dir_name, exp_name)
+    exp_dir = os.path.join(results_dir, exp_name)
     exp_file = Experiment.FULL_EXP_FILE_NAME
     full_exp_file = os.path.join(exp_dir, exp_file)
 
@@ -491,46 +495,43 @@ def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=True
         raise ImportError("(simple_rl): no such experiment: " + str(full_exp_file) + ".")
 
     # Open the file.
-    exp_file = open(full_exp_file, "r")
+    import json
+    from simple_rl.utils.additional_datastructures import TupleEncoder
+    all_exp_info = json.load(open(full_exp_file, "r"), object_hook=TupleEncoder.hinted_tuple_hook)
 
     # Placeholders.
-    agents = []
-    mdp = None
     experiment_param_dict = {}
     actions = []
     experiment_func = None
 
-    # Read the file in.
-    lines = exp_file.readlines()
-    for i, line in enumerate(lines):
+    # Make MDP.
+    full_mdp_class_str = all_exp_info["MDP"]["name"]
+    mdp_class_str = full_mdp_class_str[full_mdp_class_str.find("'") + 1 : full_mdp_class_str.rfind("'")].split(".")[-1]
+    mdp_param_dict = all_exp_info["MDP"]["params"]
+    MDPClass = globals()[mdp_class_str]
+    mdp = MDPClass(**mdp_param_dict)
 
-        if "OOMDP" in line or "POMDP" in line:
-            raise TypeError("(simple_rl): reproduction not yet implemented for OOMDPs and POMDPs.")
-            sys.exit(0)
+    # Make Agents.
+    agents = []
+    for full_agent_class_str in all_exp_info["AGENTS"].keys():
+        # Convert full str into class name.
+        agent_class_str = full_agent_class_str[full_agent_class_str.find("'") + 1 : full_agent_class_str.rfind("'")].split(".")[-1]
 
-        elif "MDP:" in line:
-            mdp_class_str = line[line.find("'") + 1 : line.rfind("'")].split(".")[-1]
-            mdp_param_dict = _get_params_from_lines(lines, start_index=i + 1)
-            MDPClass = eval(mdp_class_str)
-            mdp = MDPClass(**mdp_param_dict)
+        # Get class and make agent.
+        agent_param_dict = all_exp_info["AGENTS"][full_agent_class_str]["params"]
+        agent_index = all_exp_info["AGENTS"][full_agent_class_str]["index"]
+        AgentClass = globals()[agent_class_str]
 
-        elif "AGENT:" in line:
-            # Get class and make agent.
-            agent_class_str = line[line.find("'") + 1 : line.rfind("'")].split(".")[-1]
-            agent_param_dict = _get_params_from_lines(lines, start_index=i + 1)
-            AgentClass = eval(agent_class_str)
+        # Create agent.
+        agent_param_dict["actions"] = mdp.get_actions()
+        agent = AgentClass(**agent_param_dict)
+        agents.insert(agent_index, agent)
 
-            agent_param_dict["actions"] = mdp.get_actions()
-            agent = AgentClass(**agent_param_dict)
-            agents.append(agent)
+    # Experiment parameters.
+    experiment_param_dict = all_exp_info["MISC"]
 
-        elif "MISC" in line:
-            experiment_param_dict = _get_params_from_lines(lines, start_index=i + 1)
-
-        elif "FUNC" in line:
-            i += 1
-            func_name = lines[i].strip()
-            experiment_func = eval(func_name)
+    # Function.
+    experiment_func = eval(all_exp_info["FUNC"])
 
     # Prints.
     print("\n" + "%"*17)
@@ -544,14 +545,12 @@ def reproduce_from_exp_file(exp_name, results_dir_name="results", open_plot=True
     print("%"*17, "\n")
 
     # Reproduce.
-    chart_utils.CUSTOM_TITLE = "Reproduce: " + str(mdp)
-    experiment_func(agents, mdp, dir_for_plot=results_dir_name, experiment_name_prefix="reproduce_", open_plot=open_plot, **experiment_param_dict)
+    chart_utils.CUSTOM_TITLE = "Reproduction: " + str(mdp)
+    experiment_func(agents, mdp, dir_for_plot=results_dir, experiment_name_prefix="reproduce_", open_plot=open_plot, **experiment_param_dict)
 
     print("\n" + "%"*22)
     print("%"*2, "Done Reproducing", "%"*2)
     print("%"*22, "\n")
-
-    exp_file.close()
 
 def _get_params_from_lines(lines, start_index):
     '''
@@ -594,13 +593,6 @@ def _get_params_from_lines(lines, start_index):
         i += 1
 
     return agent_param_dict
-
-def _parse_tuple_string(tup_str):
-    '''
-    Args:
-        tup (tuple)
-
-    '''
 
 
 def choose_mdp(mdp_name, env_name="Asteroids-v0"):
