@@ -283,8 +283,6 @@ def run_agents_on_mdp(agents,
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal=reset_at_terminal)
             
             # Reset the agent.
-            # if "Q" in str(agent):
-            #     agent.print_q_func()
             agent.reset()
             mdp.end_of_instance()
 
@@ -497,7 +495,9 @@ def reproduce_from_exp_file(exp_name, results_dir="results", open_plot=True):
     # Open the file.
     import json
     from simple_rl.utils.additional_datastructures import TupleEncoder
-    all_exp_info = json.load(open(full_exp_file, "r"), object_hook=TupleEncoder.hinted_tuple_hook)
+    json_data_file = open(full_exp_file, "r")
+    all_exp_info = json.load(json_data_file, object_hook=TupleEncoder.hinted_tuple_hook)
+    json_data_file.close()
 
     # Placeholders.
     experiment_param_dict = {}

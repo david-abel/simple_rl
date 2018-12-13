@@ -105,12 +105,8 @@ class Experiment(object):
 
         out_file = open(os.path.join(self.exp_directory, Experiment.FULL_EXP_FILE_NAME), "w")
 
-        from simple_rl.mdp import OOMDP, MDPDistribution
-        from simple_rl.pomdp.POMDPClass import POMDP
-        from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
-
-        if isinstance(mdp, OOMDP) or isinstance(mdp, POMDP) or isinstance(mdp, MarkovGameMDP) or isinstance(mdp, MDPDistribution):
-            # We don't do markov games.
+        if not self._is_valid_mdp_type(mdp):
+            print("Warning (simple_rl): Cannot track and reproduce experiments for MDPs of type `" + str(type(mdp)) + "'.")
             return
 
         # Dict to hold all experiment info to write to json.
@@ -143,6 +139,21 @@ class Experiment(object):
         json.dump(load_enc, out_file, indent=4)
         out_file.close()
         return
+
+    def _is_valid_mdp_type(self, mdp):
+        from simple_rl.mdp import OOMDP, MDPDistribution
+        from simple_rl.pomdp.POMDPClass import POMDP
+        from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+        from simple_rl.tasks import BanditMDP
+
+        if isinstance(mdp, OOMDP) \
+            or isinstance(mdp, POMDP) \
+            or isinstance(mdp, MarkovGameMDP) \
+            or isinstance(mdp, MDPDistribution) \
+            or isinstance(mdp, BanditMDP):
+            return False
+
+        return True
 
     def _setup_files(self, clear_old_results=True):
         '''
