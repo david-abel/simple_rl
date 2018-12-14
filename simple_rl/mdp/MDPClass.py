@@ -70,6 +70,9 @@ class MDP(object):
     def set_slip_prob(self, slip_prob):
         pass
 
+    def set_init_state(self, new_init_state):
+        self.init_state = copy.deepcopy(new_init_state)
+
     # ----------
     # -- Core --
     # ----------
