@@ -93,7 +93,7 @@ class CartPoleMDP(MDP):
         '''
         x, _, theta, _ = self._transition_helper(state, action)
 
-        return 1.0 if self._is_within_threshold(theta, x) else 0.0
+        return 1.0 if self._is_within_threshold(theta, x) else -10.0
 
 
     def _transition_func(self, state, action):
@@ -114,7 +114,7 @@ class CartPoleMDP(MDP):
         return next_state
 
     def __str__(self):
-        return self.name + str(self.init_state) 
+        return self.name #+ str(self.init_state) 
 
     def __repr__(self):
         return self.__str__()

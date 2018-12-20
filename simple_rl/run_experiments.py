@@ -360,8 +360,6 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             # Execute in MDP.
             reward, next_state = mdp.execute_agent_action(action)
 
-            # print(state, action, reward, next_state)
-
             # Track value.
             value += reward * gamma ** step
             cumulative_episodic_reward += reward
@@ -372,6 +370,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
                 reward_to_track = round(reward_to_track, 5)
 
                 experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
+
 
             if next_state.is_terminal():
                 if reset_at_terminal:
@@ -545,7 +544,7 @@ def reproduce_from_exp_file(exp_name, results_dir="results", open_plot=True):
     print("%"*17, "\n")
 
     # Reproduce.
-    chart_utils.CUSTOM_TITLE = "Reproduction: " + str(mdp)
+    chart_utils.CUSTOM_TITLE = "Reproduction: " + chart_utils._format_title(str(mdp))
     experiment_func(agents, mdp, dir_for_plot=results_dir, experiment_name_prefix="reproduce_", open_plot=open_plot, **experiment_param_dict)
 
     print("\n" + "%"*22)

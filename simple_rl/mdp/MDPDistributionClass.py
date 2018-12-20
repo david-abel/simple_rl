@@ -92,6 +92,9 @@ class MDPDistribution(object):
     def get_actions(self):
         return list(self.mdp_prob_dict.keys())[0].get_actions()
 
+    def get_num_state_feats(self):
+        return list(self.mdp_prob_dict.keys())[0].get_num_state_feats()
+
     def get_gamma(self):
         '''
         Notes:
