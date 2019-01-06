@@ -57,6 +57,7 @@ For a slightly more complicated example, take a look at the code of _simple_exam
 
     # Setup Agents.
     ql_agent = QLearningAgent(actions=mdp.get_actions())
+    rmax_agent = RMaxAgent(actions=mdp.get_actions())
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
