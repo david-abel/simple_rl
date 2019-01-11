@@ -103,7 +103,7 @@ class NavigationWorldMDP(MDP):
         MDP.__init__(self, NavigationWorldMDP.ACTIONS, self._transition_func,
                      self._reward_func,
                      init_state=NavigationWorldState(*init_loc),
-                     gamma=gamma)
+                     gamma=gamma, step_cost=step_cost)
 
         # Navigation MDP
         self.__reset_nav_mdp()
@@ -401,7 +401,7 @@ class NavigationWorldMDP(MDP):
     # -------------------------
     # -- Trajectory Sampling --
     # -------------------------
-    def plan(self, state, policy=None, horizon=100):
+    def policy_propagate(self, state, policy=None, horizon=100):
         '''
         Args:
             state (State)
@@ -511,11 +511,13 @@ class NavigationWorldMDP(MDP):
             traj_init_states = self.sample_init_states(n_traj,
                                                        init_unique=init_unique)
         else:
+            if type(init_states[0]) == tuple or type(init_states[0]) == list:
+                init_states = [NavigationWorldState(*s) for s in init_states]
             traj_init_states = copy.deepcopy(init_states)
 
         if len(traj_init_states) >= n_traj:
             traj_init_states = traj_init_states[:n_traj]
-        else:
+        elif rand_init_to_match_n_traj:
             # If # init_states < n_traj, sample remaining ones
             if len(traj_init_states) < n_traj:
                 traj_init_states += self.sample_init_states(
@@ -534,7 +536,7 @@ class NavigationWorldMDP(MDP):
             policy = self.run_value_iteration().policy
 
         for init_state in traj_init_states:
-            action_seq, state_seq = self.plan(init_state, policy=policy,
+            action_seq, state_seq = self.policy_propagate(init_state, policy=policy,
                                               horizon=horizon)
             traj_states_list.append(state_seq)
             traj_action_list.append(action_seq)
