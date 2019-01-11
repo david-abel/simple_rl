@@ -227,8 +227,9 @@ class NavigationWorldMDP(MDP):
                 self.nav_p_cell_ids.append(cell_id)
                 self.nav_p_cell_probs.append(prob)
 
-        assert round(sum(self.nav_p_cell_probs),
-                     9) == 1, "Probability values must sum to 1."
+        assert len(self.nav_p_cell_probs) == 0 or\
+            round(sum(self.nav_p_cell_probs), 9) == 1, "Probability values must sum to 1."
+
         for r in range(self.height):
             for c in range(self.width):
                 if self.map_state_cell_id[r, c] == -1:
