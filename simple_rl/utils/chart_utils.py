@@ -244,7 +244,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
         print("\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")")
 
-        marker_every = max(len(y_axis) / 30,1)
+        marker_every = max(int(len(y_axis) / 30), 1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
         if add_legend:
             pyplot.legend()
