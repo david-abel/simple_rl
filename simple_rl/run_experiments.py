@@ -281,7 +281,8 @@ def run_agents_on_mdp(agents,
             print("  Instance " + str(instance) + " of " + str(instances) + ".")
             sys.stdout.flush()
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal=reset_at_terminal)
-            
+            if "fixed" in agent.name:
+                break
             # Reset the agent.
             agent.reset()
             mdp.end_of_instance()
@@ -305,12 +306,12 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         Main loop of a single MDP experiment.
 
     Returns:
-        (tuple): (bool:reached terminal, int: num steps taken, float: cumulative discounted reward)
+        (tuple): (bool:reached terminal, int: num steps taken, list: cumulative discounted reward per episode)
     '''
     if reset_at_terminal and resample_at_terminal:
         raise ValueError("(simple_rl) ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True.")
 
-    value = 0
+    value_per_episode = [0] * episodes
     gamma = mdp.get_gamma()
 
     # For each episode.
@@ -361,7 +362,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             reward, next_state = mdp.execute_agent_action(action)
 
             # Track value.
-            value += reward * gamma ** step
+            value_per_episode[episode - 1] += reward * gamma ** step
             cumulative_episodic_reward += reward
 
             # Record the experience.
@@ -371,7 +372,6 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
 
                 experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
 
-
             if next_state.is_terminal():
                 if reset_at_terminal:
                     # Reset the MDP.
@@ -379,7 +379,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
                     mdp.reset()
                 elif resample_at_terminal and step < steps:
                     mdp.reset()
-                    return True, step, value
+                    return True, step, value_per_episode
 
             # Update pointer.
             state = next_state
@@ -403,10 +403,10 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         experiment.end_of_instance(agent)
 
     # Only print if our experiment isn't trivially short.
-    if steps >= 500:
+    if steps >= 2000:
         print("\tLast episode reward:", cumulative_episodic_reward)
 
-    return False, steps, value
+    return False, steps, value_per_episode
 
 def run_single_belief_agent_on_pomdp(belief_agent, pomdp, episodes, steps, experiment=None, verbose=False,
                                      track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False):
@@ -446,21 +446,23 @@ def _increment_bar():
     sys.stdout.write("-")
     sys.stdout.flush()
 
-def evaluate_agent(agent, mdp, instances=10):
+def evaluate_agent(agent, mdp, instances=10, episodes=1, steps=None):
     '''
     Args:
         agent (simple_rl.Agent)
         mdp (simple_rl.MDP)
         instances (int)
+        episodes (int)
+        steps (int)
 
     Returns:
         (float): Avg. cumulative discounted reward.
     '''
     total = 0.0
-    steps = int(1 / (1 - mdp.get_gamma())) * 10
+    steps = int(1 / (1 - mdp.get_gamma())) * 10 if steps is None else steps
     for i in range(instances):
-        _, _, val = run_single_agent_on_mdp(agent, mdp, episodes=1, steps=steps)
-        total += val
+        _, _, val_per_episode = run_single_agent_on_mdp(agent, mdp, episodes=episodes, steps=steps)
+        total += val_per_episode[-1]
 
         # Reset the agent.
         agent.reset()

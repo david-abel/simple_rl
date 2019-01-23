@@ -195,7 +195,6 @@ class Experiment(object):
                                 open_plot=open_plot)
 
         if self.track_success:
-            print(os.path.join("success", self.exp_directory))
             chart_utils.make_plots(os.path.join(self.exp_directory, "success"), agent_name_ls,
                                 episodic=True,
                                 plot_file_name="success_rate",

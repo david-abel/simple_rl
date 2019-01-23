@@ -67,11 +67,9 @@ class DelayedQAgent(Agent):
         '''
         param_dict = defaultdict(int)
         
-        param_dict["alpha"] = self.alpha
         param_dict["gamma"] = self.gamma
         param_dict["m"] = self.m
         param_dict["epsilon1"] = self.epsilon1
-        param_dict["init_q"] = self.init_q
 
         return param_dict
 

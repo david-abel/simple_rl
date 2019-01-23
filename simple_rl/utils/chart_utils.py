@@ -42,12 +42,14 @@ font = {'size':14}
 matplotlib.rc('font', **font)
 matplotlib.rcParams['pdf.fonttype'] = 42
 
+EVERY_OTHER_X = False
 CUSTOM_TITLE = None
 X_AXIS_LABEL = None
 Y_AXIS_LABEL = None
 X_AXIS_START_VAL = 0
 X_AXIS_INCREMENT = 1
 Y_AXIS_END_VAL = None
+COLOR_SHIFT = 0
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -172,7 +174,7 @@ def _format_title(plot_title):
 
     return plot_title_final
 
-def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False):
+def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False, add_legend=True):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -185,6 +187,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         open_plot (bool)
         track_disc_reward (bool): If true, plots discounted reward.
+        add_legend (bool)
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -202,6 +205,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
     # Map them to floats in [0:1].
     colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
+    colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
 
     # Puts the legend into the best location in the plot and use a tight layout.
     pyplot.rcParams['legend.loc'] = 'best'
@@ -242,7 +246,8 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
         marker_every = max(len(y_axis) / 30,1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
-        pyplot.legend()
+        if add_legend:
+            pyplot.legend()
     print()
     
     # Configure plot naming information.
@@ -272,6 +277,9 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
     # Pyplot calls.
     pyplot.xlabel(x_axis_label)
+    if EVERY_OTHER_X:
+        pyplot.xticks(range(X_AXIS_START_VAL, len(x_axis) * X_AXIS_INCREMENT + X_AXIS_START_VAL, X_AXIS_INCREMENT * 2))
+
     pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
@@ -289,7 +297,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     pyplot.cla()
     pyplot.close()
 
-def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False, new_title=None, new_x_label=None, new_y_label=None):
+def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False, new_title=None, new_x_label=None, new_y_label=None, add_legend=True):
     '''
     Args:
         experiment_dir (str): path to results.
@@ -302,6 +310,7 @@ def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=
         new_title (str): Sets the title of the plot.
         new_x_label (str): Sets the x axis label of the plot.
         new_y_label (str): Sets the y axis label of the plot.
+        add_legend (bool)
     
     Summary:
         Creates plots for all agents run under the experiment.
@@ -334,7 +343,8 @@ def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=
                 cumulative=cumulative,
                 episodic=episodic,
                 open_plot=open_plot,
-                track_disc_reward=track_disc_reward)
+                track_disc_reward=track_disc_reward,
+                add_legend=add_legend)
 
 def drange(x_min, x_max, x_increment):
     '''
@@ -466,6 +476,39 @@ def parse_args():
     return parser.parse_args()
 
 
+def format_and_make_plot(data_dir, avg_plot=False, add_legend=True):
+    '''
+    Args:
+        data_dir (str)
+        avg_plot (bool)
+        add_legend (bool)
+    '''
+
+    # Grab agents.
+    agent_names = _get_agent_names(data_dir)
+    if len(agent_names) == 0:
+        raise ValueError("Error: no csv files found.")
+
+    if data_dir[-1] != "/":
+        data_dir = data_dir + "/"
+
+    cumulative = not(avg_plot)
+    episodic = _is_episodic(data_dir)
+    track_disc_reward = _is_disc_reward(data_dir)
+    plot_file_name = ""
+
+    # Success plot.
+    if "success" in data_dir:
+        global X_AXIS_LABEL, Y_AXIS_LABEL, CUSTOM_TITLE
+        plot_file_name = "Success_Rate"
+        CUSTOM_TITLE = "Success Rate:"
+        X_AXIS_LABEL = "Episode"
+        Y_AXIS_LABEL = "Avg. % Success"
+        cumulative = False
+
+    # Plot.
+    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, plot_file_name=plot_file_name, track_disc_reward=track_disc_reward, add_legend=add_legend)
+
 def main():
     '''
     Summary:
@@ -475,31 +518,8 @@ def main():
     # Parse args.
     args = parse_args()
 
-    # Grab agents.
-    data_dir = args.dir
-    agent_names = _get_agent_names(data_dir)
-    if len(agent_names) == 0:
-        raise ValueError("Error: no csv files found.")
-
-    if data_dir[-1] != "/":
-        data_dir = data_dir + "/"
-
-    cumulative = not(args.a)
-    episodic = _is_episodic(data_dir)
-    track_disc_reward = _is_disc_reward(data_dir)
-    plot_file_name = ""
-
-    # Success plot.
-    if "success" in data_dir:
-        global X_AXIS_LABEL, Y_AXIS_LABEL, CUSTOM_TITLE
-        plot_file_name = "Success_Rate"
-        CUSTOM_TITLE = "Success Rate"
-        X_AXIS_LABEL = "Episode"
-        Y_AXIS_LABEL = "Avg. % Success"
-        cumulative = False
-
-    # Plot.
-    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, plot_file_name=plot_file_name, track_disc_reward=track_disc_reward)
+    # Run.
+    format_and_make_plot(data_dir=args.dir, avg_plot=args.a)
 
 if __name__ == "__main__":
     main()

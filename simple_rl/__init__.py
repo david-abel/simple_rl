@@ -40,7 +40,7 @@ simple_rl
 	run_experiments.py
 
 Author and Maintainer: David Abel (david_abel.github.io)
-Last Updated: December 3rd, 2018
+Last Updated: January 23rd, 2018
 Contact: david_abel@brown.edu
 License: Apache
 '''

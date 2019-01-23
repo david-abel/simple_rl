@@ -3,7 +3,7 @@
 # Python imports.
 from __future__ import print_function
 import random, math
-import sys, os
+import sys, os, copy
 import numpy as np
 from collections import defaultdict
 
@@ -29,9 +29,14 @@ class CartPoleMDP(MDP):
                 length=.5,
                 gamma=0.99,
                 tau=.02,
+                init_state_params=None,
                 name="Cart-Pendulum"):
 
-        init_state = CartPoleState(x=0, x_dot=0, theta=0, theta_dot=0)
+        if init_state_params is None:
+            init_state = CartPoleState(x=0, x_dot=0, theta=0, theta_dot=0)
+        else:
+            init_state = CartPoleState(x=init_state_params["x"], x_dot=init_state_params["x_dot"],\
+                                        theta=init_state_params["theta"], theta_dot=init_state_params["theta_dot"])
 
         MDP.__init__(self, CartPoleMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state, gamma=gamma)
 
@@ -118,6 +123,19 @@ class CartPoleMDP(MDP):
 
     def __repr__(self):
         return self.__str__()
+
+    def reset(self, init_state_params=None):
+        '''
+        Args:
+            init_state_params (dict)
+        '''
+        if init_state_params is None:
+            self.init_state = copy.deepcopy(self.init_state)
+        else:
+            self.init_state = CartPoleState(x=init_state_params["x"], x_dot=init_state_params["x_dot"],\
+                                        theta=init_state_params["theta"], theta_dot=init_state_params["theta_dot"])
+
+        self.cur_state = self.init_state
 
 def main():
     x = CartPoleMDP()

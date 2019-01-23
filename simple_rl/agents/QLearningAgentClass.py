@@ -150,8 +150,8 @@ class QLearningAgent(Agent):
 
     def _anneal(self):
         # Taken from "Note on learning rate schedules for stochastic optimization, by Darken and Moody (Yale)":
-        self.alpha = self.alpha_init / (1.0 +  (self.step_number / 200.0)*(self.episode_number + 1) / 2000.0 )
-        self.epsilon = self.epsilon_init / (1.0 + (self.step_number / 200.0)*(self.episode_number + 1) / 2000.0 )
+        self.alpha = self.alpha_init / (1.0 +  (self.step_number / 1000.0)*(self.episode_number + 1) / 2000.0 )
+        self.epsilon = self.epsilon_init / (1.0 + (self.step_number / 1000.0)*(self.episode_number + 1) / 2000.0 )
 
     def _compute_max_qval_action_pair(self, state):
         '''
@@ -252,3 +252,12 @@ class QLearningAgent(Agent):
             self._anneal()
         Agent.end_of_episode(self)
 
+    def print_q_func(self):
+        '''
+        Summary:
+            Prints the Q function.
+        '''
+        for state in self.q_func.keys():
+            print(state)
+            for action in self.actions:
+                print("    ", action, self.q_func[state][action])

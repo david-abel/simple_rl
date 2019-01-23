@@ -173,7 +173,7 @@ class ValueIteration(Planner):
         for key in self.value_func.keys():
             print(key, ":", self.value_func[key])
 
-    def plan(self, state=None, horizon=100):
+    def plan(self, state=None, horizon=50):
         '''
         Args:
             state (State)

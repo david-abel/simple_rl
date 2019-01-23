@@ -11,6 +11,7 @@ update.py
 to_update_instr.txt
 examples/blank_example.py
 *.csv
+*.json
 *.pdf
 docs/sphinx/
 examples/experiments_to_reproduce/*
