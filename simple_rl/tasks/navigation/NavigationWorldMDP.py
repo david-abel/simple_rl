@@ -40,7 +40,7 @@ class NavigationWorldMDP(MDP):
                  goal_cell_locs=[[(21, 21)]],
                  init_loc=(1, 1),
                  rand_init=False,
-                 gamma=0.99, slip_prob=0.00, step_cost=0.5,
+                 gamma=0.95, slip_prob=0.00, step_cost=0.01,
                  is_goal_terminal=True,
                  name="Navigation MDP"):
         """Navigation World MDP constructor.
@@ -398,6 +398,17 @@ class NavigationWorldMDP(MDP):
         return self.cell_type_rewards[
             self.get_cell_id(next_state.x, next_state.y)] - self.step_cost
 
+    def _reward_func_state_only(self, state):
+        """
+        Args:
+            state (State)
+
+        Returns
+            (float)
+        """
+        return self.cell_type_rewards[
+            self.get_cell_id(state.x, state.y)] - self.step_cost
+
     # -------------------------
     # -- Trajectory Sampling --
     # -------------------------
@@ -744,14 +755,15 @@ class NavigationWorldMDP(MDP):
                         va='center', fontsize=fontsize)
 
     def visualize_grid(self, values=None, cmap=cm.viridis, trajectories=None,
-                       subplot_str=None, new_fig=True, show_colorbar=False,
+                       subplot_str=None, show_colorbar=False,
                        show_rewards_colorbar=False, state_space_cmap=True,
                        init_marker=".k", traj_marker="-k",
                        text_values=None, text_size=10,
                        traj_linewidth=0.7, init_marker_sz=10,
                        goal_marker="*c", goal_marker_sz=10,
                        end_marker="", end_marker_sz=10,
-                       axis_tick_font_sz=8, title=None):
+                       axis_tick_font_sz=8, title=None,
+                       vmin=None, vmax=None, fig=None, ax=None, plot=True):
         """Visualize Navigation World.
 
         Args:
@@ -762,17 +774,23 @@ class NavigationWorldMDP(MDP):
                 @self.nav_cell_types and @self.goal_cell_types
             trajectories: Trajectories to be shown on the grid.
             subplot_str (str): Subplot number string (e.g., "411", "412", etc.)
-            new_fig (bool): Whether to use existing figure context.
+            fig (matplotlib.figure.Figure): Matplotlib figure object.
+                Defaults to None.
+            ax (matplotlib.axes): Matplotlib axes to use. Defaults to None.
+            vmin & vmax (floats): Matplotlib colormap normalization [vmin, vmax].
             show_rewards_colorbar (bool): Shows colorbar with cell
                 reward values.
             title (str): Title of the plot.
         """
-        if new_fig:
-            plt.figure(
+        if fig is None:
+            fig = plt.figure(
                 figsize=(max(self.height // 4, 6), max(self.width // 4, 6)))
-        # Subplot if needed
-        if subplot_str is not None:
-            plt.subplot(subplot_str)
+
+        if ax is None:
+            if subplot_str is not None:
+                ax = fig.add_subplot(subplot_str)
+            else:
+                ax = fig.add_subplot("111")
 
         # Use state space (cell types) if values is None
         if values is None:
@@ -790,17 +808,21 @@ class NavigationWorldMDP(MDP):
             cmap = colors.ListedColormap(cell_colors, N=self.n_unique_cells)
 
         # Plot values
-        im = plt.imshow(values, interpolation='None', cmap=cmap)
-        plt.title(title if title else self.name)
-        ax = plt.gca()
+        im = ax.imshow(values, interpolation='None', cmap=cmap, vmin=vmin, vmax=vmax)
+        ax.set_title(title if title else self.name)
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        # To disable major ticks
         ax.set_xticklabels('')
         ax.set_yticklabels('')
         ax.set_xticks(np.arange(self.width), minor=True)
         ax.set_yticks(np.arange(self.height), minor=True)
-        ax.set_xticklabels(1 + np.arange(self.width), minor=True,
-                           fontsize=axis_tick_font_sz)
-        ax.set_yticklabels(1 + np.arange(self.height)[::-1], minor=True,
-                           fontsize=axis_tick_font_sz)
+        # Minor ticks
+        ax.set_xticklabels(1 + np.arange(self.width),
+                           minor=True, fontsize=axis_tick_font_sz)
+        ax.set_yticklabels(1 + np.arange(self.height)[::-1],
+                           minor=True, fontsize=axis_tick_font_sz)
+
         # Plot Trajectories
         if trajectories is not None and len(trajectories) > 0:
             for state_seq in trajectories:
@@ -808,17 +830,17 @@ class NavigationWorldMDP(MDP):
                     continue
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
-                plt.plot(path_xs, path_ys, traj_marker,
-                         linewidth=traj_linewidth)
-                plt.plot(path_xs[0], path_ys[0], init_marker,
-                         markersize=init_marker_sz)  # Mark init state
-                plt.plot(path_xs[-1], path_ys[-1], end_marker,
-                         markersize=end_marker_sz)  # Mark end state
+                ax.plot(path_xs, path_ys, traj_marker,
+                        linewidth=traj_linewidth)
+                ax.plot(path_xs[0], path_ys[0], init_marker,
+                        markersize=init_marker_sz)  # Mark init state
+                ax.plot(path_xs[-1], path_ys[-1], end_marker,
+                        markersize=end_marker_sz)  # Mark end state
         # Mark goals
         if len(self.goal_cell_locs) != 0:
             for goal_cells in self.goal_cell_locs:
                 for goal_x, goal_y in goal_cells:
-                    plt.plot(goal_x - 1, self.height - goal_y, goal_marker,
+                    ax.plot(goal_x - 1, self.height - goal_y, goal_marker,
                              markersize=goal_marker_sz)
         # Text values on cell
         if text_values is not None:
@@ -829,10 +851,12 @@ class NavigationWorldMDP(MDP):
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="3%", pad=0.05)
             if show_rewards_colorbar:
-                cb = plt.colorbar(im, ticks=range(len(self.cell_type_rewards)),
+                cb = fig.colorbar(im, ticks=range(len(self.cell_type_rewards)),
                                   cax=cax)
                 cb.set_ticklabels(self.cell_type_rewards)
             else:
-                plt.colorbar(im, cax=cax)
-        if subplot_str is None:
+                fig.colorbar(im, cax=cax)
+
+        if plot and subplot_str is None:
             plt.show()
+        return fig, ax
