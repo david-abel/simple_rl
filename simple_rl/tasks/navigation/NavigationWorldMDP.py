@@ -5,7 +5,7 @@ import numpy as np
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib import colors
+from matplotlib import colors as mplotcolors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Other imports.
@@ -13,6 +13,25 @@ from simple_rl.mdp.MDPClass import MDP
 from simple_rl.tasks.navigation.NavigationStateClass import NavigationWorldState
 from simple_rl.planning import ValueIteration
 
+def get_css4_colors(N, shuffled=False):
+
+    colors = list(mplotcolors.CSS4_COLORS.keys())
+
+    if shuffled:
+        np.random.shuffle(colors)
+
+    if N == 0:
+        return None
+    elif N < 0:
+        return colors
+
+    times = int(np.ceil(N / len(colors)))
+
+    if times == 1:
+        return colors[:N]
+    else:
+        colors_tiled = colors * times
+        return colors_tiled[:N]
 
 class NavigationWorldMDP(MDP):
     """Class for Navigation MDP from:
@@ -100,7 +119,7 @@ class NavigationWorldMDP(MDP):
                 init_loc = random.randint(1, width), random.randint(1, height)
         self.init_loc = init_loc
         # Construct base class
-        MDP.__init__(self, NavigationWorldMDP.ACTIONS, self._transition_func,
+        MDP.__init__(self, self.ACTIONS, self._transition_func,
                      self._reward_func,
                      init_state=NavigationWorldState(*init_loc),
                      gamma=gamma, step_cost=step_cost)
@@ -585,8 +604,14 @@ class NavigationWorldMDP(MDP):
         """Returns all states.
 
         """
-        return [NavigationWorldState(x, y) for x in range(1, self.width + 1)
-                for y in range(1, self.height + 1)]
+        states = []
+        for x in range(1, self.width + 1):
+            for y in range(1, self.height + 1):
+                state = NavigationWorldState(x, y)
+                if self.is_goal(x, y) and self.is_goal_terminal:
+                    state.set_terminal(True)
+                states.append(state)
+        return states
 
     def get_reachable_states(self):
         """Returns all reachable states from @self.init_loc.
@@ -668,7 +693,7 @@ class NavigationWorldMDP(MDP):
     def feature_at_loc(self, x, y, feature_type="indicator",
                        incl_cell_distances=False, incl_goal_indicator=True,
                        incl_goal_distances=False, normalize_distance=False,
-                       dtype=np.float32):
+                       custom_feature_map=None, dtype=np.float32):
         """Returns feature vector at a state corresponding to (x, y) location.
 
         Args:
@@ -686,26 +711,32 @@ class NavigationWorldMDP(MDP):
             normalize_distance (bool): Whether to normalize cell type
                 distances to 0-1 range (only used when
                 "incl_distance_features" is True).
-            dtype (numpy datatype): cast feature vector to dtype
+            dtype (numpy datatype): cast feature vector to dtype.
+            custom_feature_map (dict): Custom feature map: s->phi(s).
+                Defaults to None. To use, set feature_type = "custom".
         """
         row, col = self._xy_to_rowcol(x, y)
         assert feature_type in ["indicator", "cartesian", "rowcol"]
 
         if feature_type == "indicator":
-            ind_feature = self.cell_id_ind_feature(
+            phi = self.cell_id_ind_feature(
                 self.map_state_cell_id[row, col], incl_goal_indicator)
         elif feature_type == "cartesian":
-            ind_feature = np.array([x, y])
+            phi = np.array([x, y])
         elif feature_type == "rowcol":
-            ind_feature = np.array([row, col])
+            phi = np.array([row, col])
+        elif feature_type == "custom":
+            # unless incl_cell_distances or incl_goal_distances is True,
+            # there's no purpose for using this.
+            phi = custom_feature_map[(x, y)]
 
         if incl_cell_distances or incl_goal_distances:
-            return np.hstack((ind_feature,
+            return np.hstack((phi,
                               self.compute_grid_distance_features(
                                   incl_cell_distances, incl_goal_distances,
                                   normalize_distance)[row, col])).astype(dtype)
         else:
-            return ind_feature.astype(dtype)
+            return phi.astype(dtype)
 
     def feature_at_state(self, mdp_state, feature_type="indicator",
                          incl_cell_distances=False, incl_goal_indicator=True,
@@ -762,7 +793,8 @@ class NavigationWorldMDP(MDP):
                        goal_marker="*c", goal_marker_sz=10,
                        end_marker="", end_marker_sz=10,
                        axis_tick_font_sz=8, title=None,
-                       vmin=None, vmax=None, fig=None, ax=None, plot=True):
+                       vmin=None, vmax=None, fig=None, ax=None, plot=True,
+                       traj_colors_auto=True):
         """Visualize Navigation World.
 
         Args:
@@ -797,14 +829,14 @@ class NavigationWorldMDP(MDP):
 
         # Colormap
         if cmap is not None and state_space_cmap:
-            norm = colors.Normalize(vmin=0,
+            norm = mplotcolors.Normalize(vmin=0,
                                     vmax=len(self.combined_cell_types)-1)
             # Leave string colors as it is, convert int colors to
             # normalized rgba
             cell_colors = [
                 cmap(norm(cell)) if isinstance(cell, int) else cell
                 for cell in self.combined_cell_types]
-            cmap = colors.ListedColormap(cell_colors, N=self.n_unique_cells)
+            cmap = mplotcolors.ListedColormap(cell_colors, N=self.n_unique_cells)
 
         # Plot values
         im = ax.imshow(values, interpolation='None', cmap=cmap, vmin=vmin, vmax=vmax)
@@ -823,18 +855,31 @@ class NavigationWorldMDP(MDP):
                            minor=True, fontsize=axis_tick_font_sz)
 
         # Plot Trajectories
+        traj_color_list = get_css4_colors(len(trajectories))
         if trajectories is not None and len(trajectories) > 0:
-            for state_seq in trajectories:
+
+            traj_color = None
+            for i, state_seq in enumerate(trajectories):
                 if len(state_seq) == 0:
                     continue
+
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
+
+                if traj_colors_auto:
+                    traj_color = traj_color_list[i]
+
                 ax.plot(path_xs, path_ys, traj_marker,
-                        linewidth=traj_linewidth)
+                        linewidth=traj_linewidth,
+                        color=traj_color)
+                # Mark init state
                 ax.plot(path_xs[0], path_ys[0], init_marker,
-                        markersize=init_marker_sz)  # Mark init state
+                        markersize=init_marker_sz,
+                        color=traj_color)
+                # Mark end state
                 ax.plot(path_xs[-1], path_ys[-1], end_marker,
-                        markersize=end_marker_sz)  # Mark end state
+                        markersize=end_marker_sz,
+                        color=traj_color)
         # Mark goals
         if len(self.goal_cell_locs) != 0:
             for goal_cells in self.goal_cell_locs:
