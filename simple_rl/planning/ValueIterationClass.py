@@ -162,6 +162,53 @@ class ValueIteration(Planner):
 
         return iterations, value_of_init_state
 
+    def run_vi_histories(self):
+        '''
+        Returns:
+            (tuple):
+                1. (int): num iterations taken.
+                2. (float): value.
+                3. (list of dict of state and float): 
+                    histories of the previous iterations.
+        Summary:
+            Runs ValueIteration and fills in the self.value_func and returns histories        
+        '''
+        # Algorithm bookkeeping params.
+        iterations = 0
+        max_diff = float("inf")
+        self._compute_matrix_from_trans_func()
+        state_space = self.get_states()
+        self.bellman_backups = 0
+
+        histories = []
+
+        # Main loop.
+        while max_diff > self.delta and iterations < self.max_iterations:
+            max_diff = 0
+            for s in state_space:
+                self.bellman_backups += 1
+                if s.is_terminal():
+                    continue
+
+                max_q = float("-inf")
+                for a in self.actions:
+                    q_s_a = self.get_q_value(s, a)
+                    max_q = q_s_a if q_s_a > max_q else max_q
+
+                # Check terminating condition.
+                max_diff = max(abs(self.value_func[s] - max_q), max_diff)
+
+                # Update value.
+                self.value_func[s] = max_q
+
+            histories = histories.append(self.value_func)
+            iterations += 1
+
+        value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
+        self.has_planned = True
+
+        return iterations, value_of_init_state, histories
+
     def get_num_backups_in_recent_run(self):
         if self.has_planned:
             return self.bellman_backups
