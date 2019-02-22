@@ -2,6 +2,7 @@
 from __future__ import print_function
 from collections import defaultdict
 import random
+import copy 
 
 # Check python version for queue module.
 import sys
@@ -201,7 +202,7 @@ class ValueIteration(Planner):
                 # Update value.
                 self.value_func[s] = max_q
 
-            histories.append(self.value_func)
+            histories.append(copy.deepcopy(self.value_func))
             iterations += 1
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
