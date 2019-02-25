@@ -3,6 +3,7 @@ from __future__ import print_function
 from collections import defaultdict
 import random
 import copy 
+import pdb
 
 # Check python version for queue module.
 import sys
@@ -31,6 +32,7 @@ class ValueIteration(Planner):
         self.max_iterations = max_iterations
         self.sample_rate = sample_rate
         self.value_func = defaultdict(float)
+        self.max_q_act_histories = defaultdict(str)
         self.reachability_done = False
         self.has_computed_matrix = False
         self.bellman_backups = 0
@@ -92,7 +94,8 @@ class ValueIteration(Planner):
         # Compute expected value.
         expected_future_val = 0
         for s_prime in self.trans_dict[s][a].keys():
-            expected_future_val += self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
+            if not s_prime.is_terminal():
+                expected_future_val += self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
 
         return self.reward_func(s,a) + self.gamma*expected_future_val
 
@@ -144,6 +147,10 @@ class ValueIteration(Planner):
             for s in state_space:
                 self.bellman_backups += 1
                 if s.is_terminal():
+                    # terminal_reward = self.reward_func(s, self.actions[0])
+                    # print("s: {}\t terminal_reward: {}".format(s, terminal_reward))
+                    # self.value_func[s] = terminal_reward
+                    # self.value_func[s] = max_q
                     continue
 
                 max_q = float("-inf")
@@ -188,13 +195,15 @@ class ValueIteration(Planner):
             max_diff = 0
             for s in state_space:
                 self.bellman_backups += 1
-                if s.is_terminal():
+                if s.is_terminal():                    
                     continue
 
                 max_q = float("-inf")
                 for a in self.actions:
                     q_s_a = self.get_q_value(s, a)
-                    max_q = q_s_a if q_s_a > max_q else max_q
+                    if(q_s_a > max_q):
+                        max_q = q_s_a
+                        self.max_q_act_histories[s] = a
 
                 # Check terminating condition.
                 max_diff = max(abs(self.value_func[s] - max_q), max_diff)
@@ -202,7 +211,7 @@ class ValueIteration(Planner):
                 # Update value.
                 self.value_func[s] = max_q
 
-            histories.append(copy.deepcopy(self.value_func))
+            histories.append(copy.deepcopy(self.max_q_act_histories))
             iterations += 1
 
         value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]

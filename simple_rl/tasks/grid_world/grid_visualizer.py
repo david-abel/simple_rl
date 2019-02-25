@@ -19,7 +19,7 @@ def _draw_state(screen,
                 state,
                 policy=None,
                 action_char_dict={},
-                show_value=False,
+                show_value=True,
                 agent=None,
                 draw_statics=False,
                 agent_shape=None):
