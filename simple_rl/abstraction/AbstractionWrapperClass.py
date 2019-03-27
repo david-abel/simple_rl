@@ -47,7 +47,6 @@ class AbstractionWrapper(Agent):
         else:
             abstr_state = ground_state
 
-
         if self.action_abstr is not None:
             ground_action = self.action_abstr.act(self.agent, abstr_state, ground_state, reward)
         else:

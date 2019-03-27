@@ -46,7 +46,7 @@ class PuddleMDP(GridWorldMDP):
    
         return param_dict
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state):
         if state.is_terminal():
             return 0
         if self._is_goal_state_action(state, action):

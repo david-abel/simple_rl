@@ -19,7 +19,7 @@ def main(open_plot=True):
     rand_agent = RandomAgent(actions=mdp_distr.get_actions())
 
     # Run experiment and make plot.
-    run_agents_lifelong([ql_agent, rand_agent], mdp_distr, samples=20, episodes=50, steps=250, reset_at_terminal=True, open_plot=open_plot)
+    run_agents_lifelong([ql_agent, rand_agent], mdp_distr, samples=10, episodes=50, steps=100, reset_at_terminal=True, open_plot=open_plot)
 
 if __name__ == "__main__":
     main(open_plot=not sys.argv[-1] == "no_plot")

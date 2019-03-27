@@ -82,7 +82,7 @@ class GatherMDP(MarkovGameMDP):
             init_state=GatherState(agent1, agent2, initial_apple_locations, initial_apple_times),
         )
 
-    def _reward_func(self, state, action_dict):
+    def _reward_func(self, state, action_dict, next_state=None):
         # Repeat computations above & update player location if they moved.
         agent_a, agent_b = state.agent1.clone(), state.agent2.clone()
         agent_a_name, agent_b_name = action_dict.keys()[0], action_dict.keys()[1]

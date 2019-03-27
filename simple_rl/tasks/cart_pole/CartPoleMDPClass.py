@@ -88,11 +88,13 @@ class CartPoleMDP(MDP):
         
         return (x, x_dot, theta, theta_dot)
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state=None):
         '''
         Args:
             state (State)
             action (str)
+            next_state (State)
+
         Returns
             (float)
         '''

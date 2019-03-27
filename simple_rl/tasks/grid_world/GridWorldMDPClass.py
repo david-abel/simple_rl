@@ -35,7 +35,7 @@ class GridWorldMDP(MDP):
                 gamma=0.99,
                 slip_prob=0.0,
                 step_cost=0.0,
-                lava_cost=0.01,
+                lava_cost=1.0,
                 name="gridworld"):
         '''
         Args:
@@ -103,18 +103,20 @@ class GridWorldMDP(MDP):
     def is_goal_state(self, state):
         return (state.x, state.y) in self.goal_locs
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state):
         '''
         Args:
             state (State)
             action (str)
+            next_state (State)
 
         Returns
             (float)
         '''
-        if self._is_goal_state_action(state, action):
+        if (int(next_state.x), int(next_state.y)) in self.goal_locs:
+            # self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
-        elif (int(state.x), int(state.y)) in self.lava_locs:
+        elif (int(next_state.x), int(next_state.y)) in self.lava_locs:
             return -self.lava_cost
         else:
             return 0 - self.step_cost
@@ -218,31 +220,26 @@ class GridWorldMDP(MDP):
         }
 
         mdpv.visualize_policy(self, policy, _draw_state, action_char_dict)
-        input("Press anything to quit")
 
     def visualize_agent(self, agent):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_agent(self, agent, _draw_state)
-        input("Press anything to quit")
 
     def visualize_value(self):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_value(self, _draw_state)
-        input("Press anything to quit")
 
     def visualize_learning(self, agent, delay=0.0):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_learning(self, agent, _draw_state, delay=delay)
-        input("Press anything to quit")
 
     def visualize_interaction(self):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_interaction(self, _draw_state)
-        input("Press anything to quit")
 
 def _error_check(state, action):
     '''

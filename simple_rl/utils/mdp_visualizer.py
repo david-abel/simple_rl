@@ -35,10 +35,10 @@ def val_to_color(val, good_col=(169, 193, 249), bad_col=(249, 193, 169)):
 
     if val > 0:
         # Show positive as interpolated between white (0) and good_cal (1.0)
-        result = tuple([255 * (1 - val) + col * val for col in good_col])
+        result = tuple([255 * (1 - val) + (col * val) for col in good_col])
     else:
         # Show negative as interpolated between white (0) and bad_col (-1.0)
-        result = tuple([255 * (1 - abs(val)) + col * abs(val) for col in bad_col])
+        result = tuple([255 * (1 - abs(val)) + (col * abs(val)) for col in bad_col])
 
     return result
 
@@ -112,6 +112,16 @@ def visualize_policy(mdp, policy, draw_state, action_char_dict, cur_state=None, 
 
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
     draw_state(screen, mdp, cur_state, policy=policy, action_char_dict=action_char_dict, show_value=False, draw_statics=True)
+    pygame.display.flip()
+    while True:
+        # Check for key presses.
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                # Quit.
+                pygame.quit()
+                sys.exit()
+
+        time.sleep(0.1)
 
 def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=720):
     '''
@@ -130,8 +140,19 @@ def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=7
 
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
     draw_state(screen, mdp, cur_state, show_value=True, draw_statics=True)
+    pygame.display.flip()
 
-def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720, delay=0):
+    while True:
+        # Check for key presses.
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                # Quit.
+                pygame.quit()
+                sys.exit()
+
+        time.sleep(0.1)
+
+def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720, delay=0.1):
     '''
     Args:
         mdp (MDP)
@@ -171,24 +192,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                 mdp.goal_locs = [(default_goal_x, default_goal_y)]
                 mdp.reset()
 
-            elif event.type == pygame.MOUSEBUTTONUP:
-                pos = pygame.mouse.get_pos()
-                x, y = pos[0], pos[1]
-                width_buffer = scr_width / 10.0
-                height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
-                cell_x, cell_y = convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp.width, mdp.height)
-
-                if event.button == 1:
-                    # Left clicked a cell, move the goal.
-                    mdp.goal_locs = [(cell_x, cell_y)]
-                    mdp.reset()
-                elif event.button == 3:
-                    # Right clicked a cell, move the lava lava.
-                    if (cell_x, cell_y) in mdp.lava_locs:
-                        mdp.lava_locs.remove((cell_x, cell_y))
-                    else:
-                        mdp.lava_locs += [(cell_x, cell_y)]
-
         # Move agent.
         action = agent.act(cur_state, reward)
         reward, cur_state = mdp.execute_agent_action(action)
@@ -201,11 +204,11 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
         time.sleep(delay)
 
         if cur_state.is_terminal():
-            score += 1
             cur_state = mdp.get_init_state()
             mdp.reset()
             agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
 
+    pygame.display.flip()
 
 def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
     '''
@@ -253,7 +256,7 @@ def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_h
             screen.blit(goal_text_rendered, goal_text_point)
             done = True
 
-        pygame.display.update()
+        pygame.display.flip()
 
 def visualize_interaction(mdp, draw_state, cur_state=None, scr_width=720, scr_height=720):
     '''

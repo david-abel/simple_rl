@@ -45,7 +45,7 @@ def _draw_state(screen,
                 val_text_dict[s.x][s.y] = agent.get_value(s)
         else:
             # Use Value Iteration to compute value.
-            vi = ValueIteration(grid_mdp)
+            vi = ValueIteration(grid_mdp, sample_rate=10)
             vi.run_vi()
             for s in vi.get_states():
                 val_text_dict[s.x][s.y] = vi.get_value(s)
@@ -112,6 +112,13 @@ def _draw_state(screen,
                     circle_center = int(top_left_point[0] + cell_width/2.0), int(top_left_point[1] + cell_height/2.0)
                     circler_color = (224, 145, 157)
                     pygame.draw.circle(screen, circler_color, circle_center, int(min(cell_width, cell_height) / 4.0))
+
+                if show_value and not grid_mdp.is_wall(i+1, grid_mdp.height - j):
+                    # Write value text to each state.
+                    value_text = reg_font.render(str(round(val, 2)), True, (46, 49, 49))
+                    text_center_point = int(top_left_point[0] + cell_width/2.0 - 10), int(top_left_point[1] + cell_height/3.0)
+                    screen.blit(value_text, text_center_point)
+
 
                 # Current state.
                 if not show_value and (i+1,grid_mdp.height - j) == (state.x, state.y) and agent_shape is None:

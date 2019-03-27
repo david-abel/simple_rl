@@ -42,7 +42,7 @@ class GymMDP(MDP):
    
         return param_dict
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state):
         '''
         Args:
             state (AtariState)
@@ -51,14 +51,7 @@ class GymMDP(MDP):
         Returns
             (float)
         '''
-        obs, reward, is_terminal, info = self.env.step(action)
-
-        if self.render and (self.render_every_n_episodes == 0 or self.episode % self.render_every_n_episodes == 0):
-            self.env.render()
-
-        self.next_state = GymState(obs, is_terminal=is_terminal)
-
-        return reward
+        return self.prev_reward
 
     def _transition_func(self, state, action):
         '''
@@ -69,6 +62,14 @@ class GymMDP(MDP):
         Returns
             (State)
         '''
+        obs, reward, is_terminal, info = self.env.step(action)
+
+        if self.render and (self.render_every_n_episodes == 0 or self.episode % self.render_every_n_episodes == 0):
+            self.env.render()
+
+        self.prev_reward = reward
+        self.next_state = GymState(obs, is_terminal=is_terminal)
+
         return self.next_state
 
     def reset(self):

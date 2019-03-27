@@ -44,19 +44,20 @@ class HanoiMDP(MDP):
    
         return param_dict
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state):
         '''
         Args:
             state (State)
             action (str)
+            next_state (State)
 
         Returns
             (float)
         '''
-        source_index = int(action[0])
-        dest_index = int(action[1])
+        if state.is_terminal():
+            return 0
 
-        return int(self._transition_func(state, action).is_terminal())
+        return int(next_state.is_terminal())
 
     def _transition_func(self, state, action):
         '''

@@ -385,18 +385,17 @@ class NavigationWorldMDP(MDP):
 
         return next_state
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state):
         """
         Args:
             state (State)
             action (str)
+            next_state (State)
 
         Returns
             (float)
         """
-        next_state = self._transition_func(state, action)
-        return self.cell_type_rewards[
-            self.get_cell_id(next_state.x, next_state.y)] - self.step_cost
+        return self.cell_type_rewards[self.get_cell_id(next_state.x, next_state.y)] - self.step_cost
 
     def _reward_func_state_only(self, state):
         """

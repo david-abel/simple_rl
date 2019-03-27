@@ -89,8 +89,8 @@ class MDP(object):
             Core method of all of simple_rl. Facilitates interaction
             between the MDP and an agent.
         '''
-        reward = self.reward_func(self.cur_state, action)
         next_state = self.transition_func(self.cur_state, action)
+        reward = self.reward_func(self.cur_state, action, next_state)
         self.cur_state = next_state
 
         return reward, next_state
