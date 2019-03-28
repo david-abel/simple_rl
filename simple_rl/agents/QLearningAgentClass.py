@@ -47,7 +47,7 @@ class QLearningAgent(Agent):
             (dict) key=param_name (str) --> val=param_val (object).
         '''
         param_dict = defaultdict(int)
-        
+
         param_dict["alpha"] = self.alpha
         param_dict["gamma"] = self.gamma
         param_dict["epsilon"] = self.epsilon_init
@@ -77,7 +77,7 @@ class QLearningAgent(Agent):
         '''
         if learning:
             self.update(self.prev_state, self.prev_action, reward, state)
-        
+
         if self.explore == "softmax":
             # Softmax exploration
             action = self.soft_max_policy(state)

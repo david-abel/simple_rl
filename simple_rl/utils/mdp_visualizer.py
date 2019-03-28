@@ -183,7 +183,7 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                     mdp.goal_locs = [(cell_x, cell_y)]
                     mdp.reset()
                 elif event.button == 3:
-                    # Right clicked a cell, move the lava lava.
+                    # Right clicked a cell, move the lava location.
                     if (cell_x, cell_y) in mdp.lava_locs:
                         mdp.lava_locs.remove((cell_x, cell_y))
                     else:

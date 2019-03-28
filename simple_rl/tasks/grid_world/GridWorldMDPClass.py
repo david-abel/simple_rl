@@ -262,7 +262,7 @@ class GridWorldMDP(MDP):
         mdpv.visualize_value(self, _draw_state)
         input("Press anything to quit")
 
-    def visualize_learning(self, agent, delay=0.0):
+    def visualize_learning(self, agent, delay=0.05):
         from simple_rl.utils import mdp_visualizer as mdpv
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_learning(self, agent, _draw_state, delay=delay)
