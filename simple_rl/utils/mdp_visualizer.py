@@ -131,7 +131,7 @@ def visualize_value(mdp, draw_state, cur_state=None, scr_width=720, scr_height=7
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, value=True)
     draw_state(screen, mdp, cur_state, show_value=True, draw_statics=True)
 
-def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720, delay=0):
+def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720, delay=0, num_ep=None, num_steps=None):
     '''
     Args:
         mdp (MDP)
@@ -152,59 +152,125 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
     # Setup and draw initial state.
     cur_state = mdp.get_init_state() if cur_state is None else cur_state
     reward = 0
+    rpl = 0 
     score = 0
     default_goal_x, default_goal_y = mdp.width, mdp.height
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
     done = False
 
-    # Main loop.
-    while not done:
-        # Check for key presses.
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                # Quit.
-                pygame.quit()
-                sys.exit()
-            elif event.type == KEYDOWN and event.key == K_r:
-                score = 0
-                agent.reset()
-                mdp.goal_locs = [(default_goal_x, default_goal_y)]
-                mdp.reset()
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-                pos = pygame.mouse.get_pos()
-                x, y = pos[0], pos[1]
-                width_buffer = scr_width / 10.0
-                height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
-                cell_x, cell_y = convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp.width, mdp.height)
-
-                if event.button == 1:
-                    # Left clicked a cell, move the goal.
-                    mdp.goal_locs = [(cell_x, cell_y)]
+    if not num_ep:
+        # Main loop.
+        while not done:
+            # Check for key presses.
+            for event in pygame.event.get():
+                if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                    # Quit.
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == KEYDOWN and event.key == K_r:
+                    score = 0
+                    agent.reset()
+                    mdp.goal_locs = [(default_goal_x, default_goal_y)]
                     mdp.reset()
-                elif event.button == 3:
-                    # Right clicked a cell, move the lava location.
-                    if (cell_x, cell_y) in mdp.lava_locs:
-                        mdp.lava_locs.remove((cell_x, cell_y))
-                    else:
-                        mdp.lava_locs += [(cell_x, cell_y)]
 
-        # Move agent.
-        action = agent.act(cur_state, reward)
-        reward, cur_state = mdp.execute_agent_action(action)
-        agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    pos = pygame.mouse.get_pos()
+                    x, y = pos[0], pos[1]
+                    width_buffer = scr_width / 10.0
+                    height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
+                    cell_x, cell_y = convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp.width, mdp.height)
 
-        score += int(reward)
+                    if event.button == 1:
+                        # Left clicked a cell, move the goal.
+                        mdp.goal_locs = [(cell_x, cell_y)]
+                        mdp.reset()
+                    elif event.button == 3:
+                        # Right clicked a cell, move the lava location.
+                        if (cell_x, cell_y) in mdp.lava_locs:
+                            mdp.lava_locs.remove((cell_x, cell_y))
+                        else:
+                            mdp.lava_locs += [(cell_x, cell_y)]
 
-        pygame.display.update()
+            # Move agent.
+            action = agent.act(cur_state, reward)
+            reward, cur_state = mdp.execute_agent_action(action)
+            agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
 
-        time.sleep(delay)
+            score += int(reward)
 
-        if cur_state.is_terminal():
-            score += 1
+            pygame.display.update()
+
+            time.sleep(delay)
+
+            if cur_state.is_terminal():
+                score += 1
+                cur_state = mdp.get_init_state()
+                mdp.reset()
+                agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+
+    else:
+        #print(num_ep)
+        # Main loop.
+        i = 0
+        while i < num_ep:
+            j = 0
+            while j < num_steps:
+                # Check for key presses.
+                for event in pygame.event.get():
+                    if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                        # Quit.
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == KEYDOWN and event.key == K_r:
+                        score = 0
+                        agent.reset()
+                        mdp.goal_locs = [(default_goal_x, default_goal_y)]
+                        mdp.reset()
+
+                    # elif event.type == pygame.MOUSEBUTTONUP:
+                    #     pos = pygame.mouse.get_pos()
+                    #     x, y = pos[0], pos[1]
+                    #     width_buffer = scr_width / 10.0
+                    #     height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
+                    #     cell_x, cell_y = convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp.width, mdp.height)
+
+                    #     if event.button == 1:
+                    #         # Left clicked a cell, move the goal.
+                    #         mdp.goal_locs = [(cell_x, cell_y)]
+                    #         mdp.reset()
+                    #     elif event.button == 3:
+                    #         # Right clicked a cell, move the lava location.
+                    #         if (cell_x, cell_y) in mdp.lava_locs:
+                    #             mdp.lava_locs.remove((cell_x, cell_y))
+                    #         else:
+                    #             mdp.lava_locs += [(cell_x, cell_y)]
+
+                # Move agent.
+                action = agent.act(cur_state, reward)
+                reward, cur_state = mdp.execute_agent_action(action)
+                agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
+                
+                score = round(rpl)
+                rpl += reward
+
+                pygame.display.update()
+
+                time.sleep(delay)
+                j+=1
+
+                if cur_state.is_terminal():
+                    # score += 1
+                    cur_state = mdp.get_init_state()
+                    mdp.reset()
+                    agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+                    break
+            
+            i+=1
             cur_state = mdp.get_init_state()
             mdp.reset()
             agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+        #print(rpl)
+
 
 
 def visualize_agent(mdp, agent, draw_state, cur_state=None, scr_width=720, scr_height=720):
@@ -315,7 +381,7 @@ def _vis_init(screen, mdp, draw_state, cur_state, agent=None, value=False, score
 
     if score != -1:
         _draw_lower_left_text("Score: " + str(score), screen)
-    agent_shape = draw_state(screen, mdp, cur_state, draw_statics=True)
+    agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True)
 
     return agent_shape
 

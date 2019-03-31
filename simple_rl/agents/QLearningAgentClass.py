@@ -12,7 +12,7 @@ from simple_rl.agents.AgentClass import Agent
 class QLearningAgent(Agent):
     ''' Implementation for a Q Learning Agent '''
 
-    def __init__(self, actions, name="Q-learning", alpha=0.1, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False):
+    def __init__(self, actions, name="Q-learning", alpha=0.1, gamma=0.99, epsilon=0.1, explore="uniform", anneal=False, custom_q_init=None):
         '''
         Args:
             actions (list): Contains strings denoting the actions.
@@ -32,9 +32,14 @@ class QLearningAgent(Agent):
         self.anneal = anneal
         self.default_q = 0 #1 / (1 - self.gamma)
         self.explore = explore
+        self.custom_q_init = custom_q_init
 
         # Q Function:
-        self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
+        if self.custom_q_init:
+            self.q_func = self.custom_q_init
+        else:
+            self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
+
         # Key: state
         # Val: dict
             #   Key: action

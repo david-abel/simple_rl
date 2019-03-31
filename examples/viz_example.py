@@ -48,11 +48,11 @@ def main():
     elif viz == "learning":
         # --> Press <r> to reset.
         # Run experiment and make plot.
-        mdp.visualize_learning(ql_agent, delay=0.1)
+        mdp.visualize_learning(ql_agent, delay=0.005, num_ep=500, num_steps=200)
     elif viz == "interactive":
         # Press <1>, <2>, <3>, and so on to execute action 1, action 2, etc.
     	mdp.visualize_interaction()
 
 
 if __name__ == "__main__":
-main()
+    main()
