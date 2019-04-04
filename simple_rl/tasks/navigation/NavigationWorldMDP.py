@@ -1,6 +1,7 @@
 from __future__ import print_function
 import copy
 import random
+import itertools
 import numpy as np
 from collections import defaultdict
 import matplotlib.pyplot as plt
@@ -32,6 +33,77 @@ def get_css4_colors(N, shuffled=False):
     else:
         colors_tiled = colors * times
         return colors_tiled[:N]
+
+class RectangularTile(object):
+
+    def __init__(self, x, y, w, h):
+
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.points = [(x+i, y+j) for j in range(h) for i in range(w)]
+
+    def intersects(self, o2):
+
+        x1, y1, w1, h1 = o2.x, o2.y ,o2.w, o2.h
+
+        # check if rect is on the left or right side of another one
+        if self.x + self.w < x1\
+            or self.x > x1 + w1:
+            return False
+
+        # check if rect is on the top or bottom side of another one
+        if self.y + self.h < y1 \
+            or self.y > y1 + h1:
+            return False
+
+        return True
+
+    def __eq__(self, o2):
+        return self.intersects(o2)
+
+    def __call__(self):
+        return self.points
+
+    def __repr__(self):
+        return "Obstacle at (x,y) = ({},{}) of size (w,h) = ({},{})".format(
+            self.x, self.y, self.w, self.h)
+
+def generate_obstacles(grid_w, grid_h, n_obstacles,
+                       obstacle_w_mu=3, obstacle_w_std=3,
+                       obstacle_h_mu=3, obstacle_h_std=3,
+                       buffer_w=0, buffer_h=0,
+                       max_search_tries=100, exclude_tiles=[]):
+
+    obstacle_list = []
+    count = 0
+    search_tries = 0
+
+    while count < n_obstacles:
+        w = int(min(max(int(np.round(np.random.normal(obstacle_w_mu, obstacle_w_std))), 1), grid_w))
+        h = int(min(max(int(np.round(np.random.normal(obstacle_h_mu, obstacle_h_std))), 1), grid_h))
+
+        # Restrict x, y so that obstacle is inside the desired region.
+        # +1 for 1 based indices to low and high limits, and +1 to high limit bc randit high limit is exclusive.
+        x = np.random.randint(1+buffer_w, grid_w-(w+buffer_w)+1+1)
+        y = np.random.randint(1+buffer_h, grid_h-(h+buffer_h)+1+1)
+
+        ob = RectangularTile(x, y, w, h)
+
+        if ob not in obstacle_list and not any(ob.intersects(tile) for tile in exclude_tiles):
+            obstacle_list.append(ob)
+            count += 1
+            search_tries = 0
+        else:
+            search_tries += 1
+            if search_tries < max_search_tries:
+                continue
+            else:
+                print("Couldn't find space for more obstacles, generated: {}. Probably that's okay.".format(count))
+                break
+
+    return obstacle_list
 
 class NavigationWorldMDP(MDP):
     """Class for Navigation MDP from:
@@ -588,6 +660,19 @@ class NavigationWorldMDP(MDP):
             self._policy_invalidated = False
         return self.value_iter
 
+    def convert_array_to_grid(self, values_list, states):
+        """Maps 1D values to 2d grid for visualization.
+
+        Returns:
+            2d array of size (height, width)
+        """
+        v_map = np.zeros((self.height, self.width))
+
+        for idx, s in enumerate(states):
+            row, col = self._xy_to_rowcol(s.x, s.y)
+            v_map[row, col] = values_list[idx]
+        return v_map
+
     def get_value_grid(self):
         """Returns value over states space grid.
 
@@ -789,7 +874,7 @@ class NavigationWorldMDP(MDP):
                        show_rewards_colorbar=False, state_space_cmap=True,
                        init_marker=".k", traj_marker="-k",
                        text_values=None, text_size=10,
-                       traj_linewidth=0.7, init_marker_sz=10,
+                       traj_linewidth=1.5, init_marker_sz=10,
                        goal_marker="*c", goal_marker_sz=10,
                        end_marker="", end_marker_sz=10,
                        axis_tick_font_sz=8, title=None,
@@ -855,9 +940,9 @@ class NavigationWorldMDP(MDP):
                            minor=True, fontsize=axis_tick_font_sz)
 
         # Plot Trajectories
-        traj_color_list = get_css4_colors(len(trajectories))
         if trajectories is not None and len(trajectories) > 0:
 
+            traj_color_list = get_css4_colors(len(trajectories))
             traj_color = None
             for i, state_seq in enumerate(trajectories):
                 if len(state_seq) == 0:
@@ -895,7 +980,7 @@ class NavigationWorldMDP(MDP):
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="3%", pad=0.05)
             if show_rewards_colorbar:
-                cb = fig.colorbar(im, ticks=range(len(self.cell_type_rewards)),
+                cb = plt.colorbar(im, ticks=range(len(self.cell_type_rewards)),
                                   cax=cax)
                 cb.set_ticklabels(self.cell_type_rewards)
             else:
