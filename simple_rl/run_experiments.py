@@ -286,11 +286,11 @@ def run_agents_on_mdp(agents,
             # Reset the agent.
             agent.reset()
             mdp.end_of_instance()
-
         # Track how much time this agent took.
         end = time.clock()
         time_dict[agent] = round(end - start, 3)
         print()
+        
 
     # Time stuff.
     print("\n--- TIMES ---")
