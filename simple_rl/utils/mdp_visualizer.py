@@ -156,6 +156,8 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
     score = 0
     default_goal_x, default_goal_y = mdp.width, mdp.height
     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+    
+    pygame.display.update()
     done = False
 
     if not num_ep:
