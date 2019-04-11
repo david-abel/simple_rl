@@ -70,7 +70,7 @@ class RectangularTile(object):
         return "Obstacle at (x,y) = ({},{}) of size (w,h) = ({},{})".format(
             self.x, self.y, self.w, self.h)
 
-def generate_obstacles(grid_w, grid_h, n_obstacles,
+def generate_states(grid_w, grid_h, n_states,
                        obstacle_w_mu=3, obstacle_w_std=3,
                        obstacle_h_mu=3, obstacle_h_std=3,
                        buffer_w=0, buffer_h=0,
@@ -80,7 +80,7 @@ def generate_obstacles(grid_w, grid_h, n_obstacles,
     count = 0
     search_tries = 0
 
-    while count < n_obstacles:
+    while count < n_states:
         w = int(min(max(int(np.round(np.random.normal(obstacle_w_mu, obstacle_w_std))), 1), grid_w))
         h = int(min(max(int(np.round(np.random.normal(obstacle_h_mu, obstacle_h_std))), 1), grid_h))
 
@@ -952,11 +952,13 @@ class NavigationWorldMDP(MDP):
                 path_ys = [self.height - (s.y) for s in state_seq]
 
                 if traj_colors_auto:
-                    traj_color = traj_color_list[i]
+                    ax.plot(path_xs, path_ys, traj_marker,
+                            linewidth=traj_linewidth,
+                            color=traj_color_list[i])
+                else:
+                    ax.plot(path_xs, path_ys, traj_marker,
+                            linewidth=traj_linewidth)
 
-                ax.plot(path_xs, path_ys, traj_marker,
-                        linewidth=traj_linewidth,
-                        color=traj_color)
                 # Mark init state
                 ax.plot(path_xs[0], path_ys[0], init_marker,
                         markersize=init_marker_sz,
