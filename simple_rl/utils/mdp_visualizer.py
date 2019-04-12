@@ -365,7 +365,7 @@ def visualize_interaction(mdp, draw_state, cur_state=None, scr_width=720, scr_he
                 _draw_lower_left_text(cur_state, screen)
 
         if cur_state.is_terminal():
-            # Done! Agent found goal.
+            # Done! Agent found goal. Not if the state is lava!! (Tofix)
             goal_text = "Victory!"
             goal_text_rendered = title_font.render(goal_text, True, (246, 207, 106))
             goal_text_point = scr_width / 2.0 - (len(goal_text)*7), 18*scr_height / 20.0

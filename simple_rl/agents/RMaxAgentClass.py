@@ -17,13 +17,16 @@ class RMaxAgent(Agent):
     Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=3, s_a_threshold=2, name="RMax-h"):
+    def __init__(self, actions, gamma=0.95, horizon=3, s_a_threshold=2, name="RMax-h", viz_table=None):
         name = name + str(horizon) if name[-2:] == "-h" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.rmax = 1.0
         self.horizon = horizon
         self.s_a_threshold = s_a_threshold
         self.reset()
+
+        if viz_table:
+            self.viz_table = viz_table
 
     def reset(self):
         '''
@@ -76,6 +79,16 @@ class RMaxAgent(Agent):
             if self.t_s_a_counts[state][action] <= self.s_a_threshold:
                 self.transitions[state][action][next_state] += 1
                 self.t_s_a_counts[state][action] += 1
+
+    def get_value(self, state):
+        '''
+        Args:
+            state (State)
+
+        Returns:
+            (float)
+        '''
+        return self.get_max_q_value(state)
 
     def _compute_max_qval_action_pair(self, state, horizon=None):
         '''
