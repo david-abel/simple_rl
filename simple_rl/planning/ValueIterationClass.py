@@ -91,7 +91,6 @@ class ValueIteration(Planner):
         # Compute expected value.
         expected_val = 0
         for s_prime in self.trans_dict[s][a].keys():
-            # print(s, a, s_prime, self.trans_dict[s][a][s_prime] * self.reward_func(s, a, s_prime) + self.gamma * self.trans_dict[s][a][s_prime] * self.value_func[s_prime])
             expected_val += self.trans_dict[s][a][s_prime] * self.reward_func(s, a, s_prime) + self.gamma * self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
 
         return expected_val
