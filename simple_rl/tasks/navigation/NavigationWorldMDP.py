@@ -1,11 +1,12 @@
 from __future__ import print_function
 import copy
 import random
+import itertools
 import numpy as np
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib import colors
+from matplotlib import colors as mplotcolors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Other imports.
@@ -13,6 +14,96 @@ from simple_rl.mdp.MDPClass import MDP
 from simple_rl.tasks.navigation.NavigationStateClass import NavigationWorldState
 from simple_rl.planning import ValueIteration
 
+def get_css4_colors(N, shuffled=False):
+
+    colors = list(mplotcolors.CSS4_COLORS.keys())
+
+    if shuffled:
+        np.random.shuffle(colors)
+
+    if N == 0:
+        return None
+    elif N < 0:
+        return colors
+
+    times = int(np.ceil(N / len(colors)))
+
+    if times == 1:
+        return colors[:N]
+    else:
+        colors_tiled = colors * times
+        return colors_tiled[:N]
+
+class RectangularTile(object):
+
+    def __init__(self, x, y, w, h):
+
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.points = [(x+i, y+j) for j in range(h) for i in range(w)]
+
+    def intersects(self, o2):
+
+        x1, y1, w1, h1 = o2.x, o2.y ,o2.w, o2.h
+
+        # check if rect is on the left or right side of another one
+        if self.x + self.w < x1\
+            or self.x > x1 + w1:
+            return False
+
+        # check if rect is on the top or bottom side of another one
+        if self.y + self.h < y1 \
+            or self.y > y1 + h1:
+            return False
+
+        return True
+
+    def __eq__(self, o2):
+        return self.intersects(o2)
+
+    def __call__(self):
+        return self.points
+
+    def __repr__(self):
+        return "Obstacle at (x,y) = ({},{}) of size (w,h) = ({},{})".format(
+            self.x, self.y, self.w, self.h)
+
+def generate_states(grid_w, grid_h, n_states,
+                       obstacle_w_mu=3, obstacle_w_std=3,
+                       obstacle_h_mu=3, obstacle_h_std=3,
+                       buffer_w=0, buffer_h=0,
+                       max_search_tries=100, exclude_tiles=[]):
+
+    obstacle_list = []
+    count = 0
+    search_tries = 0
+
+    while count < n_states:
+        w = int(min(max(int(np.round(np.random.normal(obstacle_w_mu, obstacle_w_std))), 1), grid_w))
+        h = int(min(max(int(np.round(np.random.normal(obstacle_h_mu, obstacle_h_std))), 1), grid_h))
+
+        # Restrict x, y so that obstacle is inside the desired region.
+        # +1 for 1 based indices to low and high limits, and +1 to high limit bc randit high limit is exclusive.
+        x = np.random.randint(1+buffer_w, grid_w-(w+buffer_w)+1+1)
+        y = np.random.randint(1+buffer_h, grid_h-(h+buffer_h)+1+1)
+
+        ob = RectangularTile(x, y, w, h)
+
+        if ob not in obstacle_list and not any(ob.intersects(tile) for tile in exclude_tiles):
+            obstacle_list.append(ob)
+            count += 1
+            search_tries = 0
+        else:
+            search_tries += 1
+            if search_tries < max_search_tries:
+                continue
+            else:
+                print("Couldn't find space for more obstacles, generated: {}. Probably that's okay.".format(count))
+                break
+
+    return obstacle_list
 
 class NavigationWorldMDP(MDP):
     """Class for Navigation MDP from:
@@ -100,7 +191,7 @@ class NavigationWorldMDP(MDP):
                 init_loc = random.randint(1, width), random.randint(1, height)
         self.init_loc = init_loc
         # Construct base class
-        MDP.__init__(self, NavigationWorldMDP.ACTIONS, self._transition_func,
+        MDP.__init__(self, self.ACTIONS, self._transition_func,
                      self._reward_func,
                      init_state=NavigationWorldState(*init_loc),
                      gamma=gamma, step_cost=step_cost)
@@ -569,6 +660,19 @@ class NavigationWorldMDP(MDP):
             self._policy_invalidated = False
         return self.value_iter
 
+    def convert_array_to_grid(self, values_list, states):
+        """Maps 1D values to 2d grid for visualization.
+
+        Returns:
+            2d array of size (height, width)
+        """
+        v_map = np.zeros((self.height, self.width))
+
+        for idx, s in enumerate(states):
+            row, col = self._xy_to_rowcol(s.x, s.y)
+            v_map[row, col] = values_list[idx]
+        return v_map
+
     def get_value_grid(self):
         """Returns value over states space grid.
 
@@ -585,8 +689,14 @@ class NavigationWorldMDP(MDP):
         """Returns all states.
 
         """
-        return [NavigationWorldState(x, y) for x in range(1, self.width + 1)
-                for y in range(1, self.height + 1)]
+        states = []
+        for x in range(1, self.width + 1):
+            for y in range(1, self.height + 1):
+                state = NavigationWorldState(x, y)
+                if self.is_goal(x, y) and self.is_goal_terminal:
+                    state.set_terminal(True)
+                states.append(state)
+        return states
 
     def get_reachable_states(self):
         """Returns all reachable states from @self.init_loc.
@@ -668,7 +778,7 @@ class NavigationWorldMDP(MDP):
     def feature_at_loc(self, x, y, feature_type="indicator",
                        incl_cell_distances=False, incl_goal_indicator=True,
                        incl_goal_distances=False, normalize_distance=False,
-                       dtype=np.float32):
+                       custom_feature_map=None, dtype=np.float32):
         """Returns feature vector at a state corresponding to (x, y) location.
 
         Args:
@@ -686,26 +796,32 @@ class NavigationWorldMDP(MDP):
             normalize_distance (bool): Whether to normalize cell type
                 distances to 0-1 range (only used when
                 "incl_distance_features" is True).
-            dtype (numpy datatype): cast feature vector to dtype
+            dtype (numpy datatype): cast feature vector to dtype.
+            custom_feature_map (dict): Custom feature map: s->phi(s).
+                Defaults to None. To use, set feature_type = "custom".
         """
         row, col = self._xy_to_rowcol(x, y)
         assert feature_type in ["indicator", "cartesian", "rowcol"]
 
         if feature_type == "indicator":
-            ind_feature = self.cell_id_ind_feature(
+            phi = self.cell_id_ind_feature(
                 self.map_state_cell_id[row, col], incl_goal_indicator)
         elif feature_type == "cartesian":
-            ind_feature = np.array([x, y])
+            phi = np.array([x, y])
         elif feature_type == "rowcol":
-            ind_feature = np.array([row, col])
+            phi = np.array([row, col])
+        elif feature_type == "custom":
+            # unless incl_cell_distances or incl_goal_distances is True,
+            # there's no purpose for using this.
+            phi = custom_feature_map[(x, y)]
 
         if incl_cell_distances or incl_goal_distances:
-            return np.hstack((ind_feature,
+            return np.hstack((phi,
                               self.compute_grid_distance_features(
                                   incl_cell_distances, incl_goal_distances,
                                   normalize_distance)[row, col])).astype(dtype)
         else:
-            return ind_feature.astype(dtype)
+            return phi.astype(dtype)
 
     def feature_at_state(self, mdp_state, feature_type="indicator",
                          incl_cell_distances=False, incl_goal_indicator=True,
@@ -758,11 +874,12 @@ class NavigationWorldMDP(MDP):
                        show_rewards_colorbar=False, state_space_cmap=True,
                        init_marker=".k", traj_marker="-k",
                        text_values=None, text_size=10,
-                       traj_linewidth=0.7, init_marker_sz=10,
+                       traj_linewidth=1.5, init_marker_sz=10,
                        goal_marker="*c", goal_marker_sz=10,
                        end_marker="", end_marker_sz=10,
                        axis_tick_font_sz=8, title=None,
-                       vmin=None, vmax=None, fig=None, ax=None, plot=True):
+                       vmin=None, vmax=None, fig=None, ax=None, plot=True,
+                       traj_colors_auto=True):
         """Visualize Navigation World.
 
         Args:
@@ -797,14 +914,14 @@ class NavigationWorldMDP(MDP):
 
         # Colormap
         if cmap is not None and state_space_cmap:
-            norm = colors.Normalize(vmin=0,
+            norm = mplotcolors.Normalize(vmin=0,
                                     vmax=len(self.combined_cell_types)-1)
             # Leave string colors as it is, convert int colors to
             # normalized rgba
             cell_colors = [
                 cmap(norm(cell)) if isinstance(cell, int) else cell
                 for cell in self.combined_cell_types]
-            cmap = colors.ListedColormap(cell_colors, N=self.n_unique_cells)
+            cmap = mplotcolors.ListedColormap(cell_colors, N=self.n_unique_cells)
 
         # Plot values
         im = ax.imshow(values, interpolation='None', cmap=cmap, vmin=vmin, vmax=vmax)
@@ -824,17 +941,32 @@ class NavigationWorldMDP(MDP):
 
         # Plot Trajectories
         if trajectories is not None and len(trajectories) > 0:
-            for state_seq in trajectories:
+
+            traj_color_list = get_css4_colors(len(trajectories))
+            traj_color = None
+            for i, state_seq in enumerate(trajectories):
                 if len(state_seq) == 0:
                     continue
+
                 path_xs = [s.x - 1 for s in state_seq]
                 path_ys = [self.height - (s.y) for s in state_seq]
-                ax.plot(path_xs, path_ys, traj_marker,
-                        linewidth=traj_linewidth)
+
+                if traj_colors_auto:
+                    ax.plot(path_xs, path_ys, traj_marker,
+                            linewidth=traj_linewidth,
+                            color=traj_color_list[i])
+                else:
+                    ax.plot(path_xs, path_ys, traj_marker,
+                            linewidth=traj_linewidth)
+
+                # Mark init state
                 ax.plot(path_xs[0], path_ys[0], init_marker,
-                        markersize=init_marker_sz)  # Mark init state
+                        markersize=init_marker_sz,
+                        color=traj_color)
+                # Mark end state
                 ax.plot(path_xs[-1], path_ys[-1], end_marker,
-                        markersize=end_marker_sz)  # Mark end state
+                        markersize=end_marker_sz,
+                        color=traj_color)
         # Mark goals
         if len(self.goal_cell_locs) != 0:
             for goal_cells in self.goal_cell_locs:
@@ -850,7 +982,7 @@ class NavigationWorldMDP(MDP):
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="3%", pad=0.05)
             if show_rewards_colorbar:
-                cb = fig.colorbar(im, ticks=range(len(self.cell_type_rewards)),
+                cb = plt.colorbar(im, ticks=range(len(self.cell_type_rewards)),
                                   cax=cax)
                 cb.set_ticklabels(self.cell_type_rewards)
             else:
