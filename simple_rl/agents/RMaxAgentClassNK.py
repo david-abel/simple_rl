@@ -18,11 +18,12 @@ class RMaxAgentNew(Agent):
     Implementation for an R-Max Agent [Strehl, Li and Littman 2009]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=3, s_a_threshold=2, epsilon_one = 0.99 max_reward = 1.0, name="RMax-h", custom_q_init=None):
-        name = name + str(horizon) if name[-2:] == "-h" else name
+    def __init__(self, actions, gamma=0.95, s_a_threshold=2, epsilon_one=0.99, max_reward=1.0, name="RMax-n", custom_q_init=None):
+        self.name = name 
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.rmax = max_reward
         self.s_a_threshold = s_a_threshold
+        self.custom_q_init = custom_q_init
         self.reset()
         self.custom_q_init = custom_q_init
         self.gamma = gamma
@@ -38,12 +39,13 @@ class RMaxAgentNew(Agent):
         Summary:
             Resets the agent back to its tabula rasa config.
         '''
-        self.rewards = defaultdict(lambda : defaultdict(float)) # S --> A --> reward
+        self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> reward
         self.transitions = defaultdict(lambda : defaultdict(lambda : defaultdict(int))) # S --> A --> S' --> counts
         self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
         self.t_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #ts
         self.prev_state = None
         self.prev_action = None
+
         if self.custom_q_init:
             self.q_func = self.custom_q_init
         else:
@@ -80,24 +82,33 @@ class RMaxAgentNew(Agent):
             Updates T and R.
         '''
         if state != None and action != None:
-            if self.r_s_a_counts[state][action] < self.s_a_threshold:
+            if self.r_s_a_counts[state][action] <= self.s_a_threshold or self.t_s_a_counts[state][action] <= self.s_a_threshold:
                 # Add new data points if we haven't seen this s-a enough.
-                self.rewards[state][action] += reward
+                self.rewards[state][action] += [reward]
                 self.r_s_a_counts[state][action] += 1
                 self.transitions[state][action][next_state] += 1
+                self.t_s_a_counts[state][action] += 1
 
                 if self.r_s_a_counts[state][action] == self.s_a_threshold:
                     # Start updating Q values for subsequent states
-                    for i in range(1, (np.log(1/self.epsilon_one * (1-self.gamma)) / (1 - self.gamma)):
-                        for curr_state in self.q_func.keys:
+                    lim = int(np.log(1/self.epsilon_one * (1 - self.gamma)) / (1 - self.gamma))
+                    for i in range(1, lim):
+                        print(i)
+                        for curr_state in self.rewards.keys():
                             for curr_action in self.actions:
                                 if self.r_s_a_counts[curr_state][curr_action] >= self.s_a_threshold:
-                                    # How to access the reward function????
-                                    # How to access the transition function?
-                                    # TODO: Write the Q function update
-                                    self.q_func[curr_state][curr_action] = reward_function[curr_state] + (self.gamma * )
+                                    self.q_func[curr_state][curr_action] = self._get_reward(curr_state, curr_action) + (self.gamma * self.get_transition_q_value(curr_state, curr_action))
 
+    def get_transition_q_value(self, state, action):
+        '''
+        Args: 
+            state
+            action 
 
+        Returns:
+            empirical transition probability 
+        '''
+        return sum([(self._get_transition(state, action, next_state) * self.get_max_q_value(next_state)) for next_state in self.q_func.keys])
 
 
     def get_value(self, state):
@@ -123,7 +134,7 @@ class RMaxAgentNew(Agent):
         best_action = random.choice(self.actions)
         max_q_val = self.get_q_value(state, best_action)
 
-        # Find best action (action w/ current max predicted Q value)
+        # Find best action (action w/ current max predicted Q value) 
         for action in self.actions:
             q_s_a = self.get_q_value(state, action)
             if q_s_a > max_q_val:
@@ -206,3 +217,19 @@ class RMaxAgentNew(Agent):
         else:
             # Otherwise return rmax.
             return self.rmax
+    
+    def _get_transition(self, state, action, next_state):
+        '''
+        Args: 
+            state (State)
+            action (str)
+            next_state (str)
+
+            Returns:
+                Empirical probability of transition n(s,a,s')/n(s,a) 
+        '''
+
+        return self.transitions[state][action][next_state] / self.t_s_a_counts[state][action]
+
+
+

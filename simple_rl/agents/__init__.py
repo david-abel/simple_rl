@@ -18,6 +18,7 @@ from simple_rl.agents.DelayedQAgentClass import DelayedQAgent
 from simple_rl.agents.PolicyGradientAgentClass import PolicyGradientAgent
 from simple_rl.agents.RandomAgentClass import RandomAgent
 from simple_rl.agents.RMaxAgentClass import RMaxAgent
+from simple_rl.agents.RMaxAgentClassNK import RMaxAgentNew
 from simple_rl.agents.func_approx.LinearQAgentClass import LinearQAgent
 try:
 	from simple_rl.agents.func_approx.DQNAgentClass import DQNAgent
