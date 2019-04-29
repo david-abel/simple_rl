@@ -109,7 +109,6 @@ class RMaxAgent(Agent):
 
         # Find best action (action w/ current max predicted Q value)
         for action in self.actions:
-            print(self.actions)
             q_s_a = self.get_q_value(state, action, horizon)
             if q_s_a > max_q_val:
                 max_q_val = q_s_a
