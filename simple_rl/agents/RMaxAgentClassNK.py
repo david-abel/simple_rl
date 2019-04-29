@@ -91,9 +91,8 @@ class RMaxAgentNew(Agent):
 
                 if self.r_s_a_counts[state][action] == self.s_a_threshold:
                     # Start updating Q values for subsequent states
-                    lim = int(np.log(1/self.epsilon_one * (1 - self.gamma)) / (1 - self.gamma))
+                    lim = int(np.log(1/(self.epsilon_one * (1 - self.gamma))) / (1 - self.gamma))
                     for i in range(1, lim):
-                        print(i)
                         for curr_state in self.rewards.keys():
                             for curr_action in self.actions:
                                 if self.r_s_a_counts[curr_state][curr_action] >= self.s_a_threshold:
@@ -108,7 +107,7 @@ class RMaxAgentNew(Agent):
         Returns:
             empirical transition probability 
         '''
-        return sum([(self._get_transition(state, action, next_state) * self.get_max_q_value(next_state)) for next_state in self.q_func.keys])
+        return sum([(self._get_transition(state, action, next_state) * self.get_max_q_value(next_state)) for next_state in self.q_func.keys()])
 
 
     def get_value(self, state):
