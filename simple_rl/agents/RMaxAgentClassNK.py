@@ -1,5 +1,5 @@
 '''
-RMaxAgentClass.py: Class for an RMaxAgent from [Brafman and Tennenholtz 2003].
+RMaxAgentClass.py: Class for an RMaxAgent from [Strehl, Li and Littman 2009].
 
 Notes:
     - Assumes WLOG reward function codomain is [0,1] (so RMAX is 1.0)
@@ -7,38 +7,47 @@ Notes:
 
 # Python imports.
 import random
+import numpy as np
 from collections import defaultdict
 
 # Local classes.
 from simple_rl.agents.AgentClass import Agent
 
-class RMaxAgent(Agent):
+class RMaxAgentNew(Agent):
     '''
-    Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
+    Implementation for an R-Max Agent [Strehl, Li and Littman 2009]
     '''
 
-    def __init__(self, actions, gamma=0.95, horizon=3, s_a_threshold=2, name="RMax-h", viz_table=None):
+    def __init__(self, actions, gamma=0.95, horizon=3, s_a_threshold=2, epsilon_one = 0.99 max_reward = 1.0, name="RMax-h", custom_q_init=None):
         name = name + str(horizon) if name[-2:] == "-h" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
-        self.rmax = 1.0
-        self.horizon = horizon
+        self.rmax = max_reward
         self.s_a_threshold = s_a_threshold
         self.reset()
+        self.custom_q_init = custom_q_init
+        self.gamma = gamma
+        self.epsilon_one = epsilon_one
 
-        if viz_table:
-            self.viz_table = viz_table
+        if self.custom_q_init:
+            self.q_func = self.custom_q_init
+        else:
+            self.q_func = defaultdict(lambda: defaultdict(lambda: self.rmax))
 
     def reset(self):
         '''
         Summary:
             Resets the agent back to its tabula rasa config.
         '''
-        self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
+        self.rewards = defaultdict(lambda : defaultdict(float)) # S --> A --> reward
         self.transitions = defaultdict(lambda : defaultdict(lambda : defaultdict(int))) # S --> A --> S' --> counts
         self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
         self.t_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #ts
         self.prev_state = None
         self.prev_action = None
+        if self.custom_q_init:
+            self.q_func = self.custom_q_init
+        else:
+            self.q_func = defaultdict(lambda: defaultdict(lambda: self.rmax))
 
     def get_num_known_sa(self):
         return sum([self.is_known(s,a) for s,a in self.r_s_a_counts.keys()])
@@ -50,7 +59,7 @@ class RMaxAgent(Agent):
         # Update given s, a, r, s' : self.prev_state, self.prev_action, reward, state
         self.update(self.prev_state, self.prev_action, reward, state)
 
-        # Compute best action.
+        # Compute best action by argmaxing over Q values of all possible s,a pairs
         action = self.get_max_q_action(state)
 
         # Update pointers.
@@ -71,14 +80,25 @@ class RMaxAgent(Agent):
             Updates T and R.
         '''
         if state != None and action != None:
-            if self.r_s_a_counts[state][action] <= self.s_a_threshold:
+            if self.r_s_a_counts[state][action] < self.s_a_threshold:
                 # Add new data points if we haven't seen this s-a enough.
-                self.rewards[state][action] += [reward]
+                self.rewards[state][action] += reward
                 self.r_s_a_counts[state][action] += 1
-
-            if self.t_s_a_counts[state][action] <= self.s_a_threshold:
                 self.transitions[state][action][next_state] += 1
-                self.t_s_a_counts[state][action] += 1
+
+                if self.r_s_a_counts[state][action] == self.s_a_threshold:
+                    # Start updating Q values for subsequent states
+                    for i in range(1, (np.log(1/self.epsilon_one * (1-self.gamma)) / (1 - self.gamma)):
+                        for curr_state in self.q_func.keys:
+                            for curr_action in self.actions:
+                                if self.r_s_a_counts[curr_state][curr_action] >= self.s_a_threshold:
+                                    # How to access the reward function????
+                                    # How to access the transition function?
+                                    # TODO: Write the Q function update
+                                    self.q_func[curr_state][curr_action] = reward_function[curr_state] + (self.gamma * )
+
+
+
 
     def get_value(self, state):
         '''
@@ -90,7 +110,7 @@ class RMaxAgent(Agent):
         '''
         return self.get_max_q_value(state)
 
-    def _compute_max_qval_action_pair(self, state, horizon=None):
+    def _compute_max_qval_action_pair(self, state):
         '''
         Args:
             state (State)
@@ -99,23 +119,19 @@ class RMaxAgent(Agent):
         Returns:
             (tuple) --> (float, str): where the float is the Qval, str is the action.
         '''
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon
-
         # Grab random initial action in case all equal
         best_action = random.choice(self.actions)
-        max_q_val = self.get_q_value(state, best_action, horizon)
+        max_q_val = self.get_q_value(state, best_action)
 
         # Find best action (action w/ current max predicted Q value)
         for action in self.actions:
-            q_s_a = self.get_q_value(state, action, horizon)
+            q_s_a = self.get_q_value(state, action)
             if q_s_a > max_q_val:
                 max_q_val = q_s_a
                 best_action = action
         return max_q_val, best_action
 
-    def get_max_q_action(self, state, horizon=None):
+    def get_max_q_action(self, state):
         '''
         Args:
             state (State)
@@ -124,11 +140,7 @@ class RMaxAgent(Agent):
         Returns:
             (str): The string associated with the action with highest Q value.
         '''
-
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon 
-        return self._compute_max_qval_action_pair(state, horizon)[1]
+        return self._compute_max_qval_action_pair(state)[1]
 
     def get_max_q_value(self, state, horizon=None):
         '''
@@ -139,65 +151,42 @@ class RMaxAgent(Agent):
         Returns:
             (float): The Q value of the best action in this state.
         '''
+        return self._compute_max_qval_action_pair(state)[0]
 
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon 
-        return self._compute_max_qval_action_pair(state, horizon)[0]
-
-    def get_q_value(self, state, action, horizon=None):
+    def get_q_value(self, state, action):
         '''
         Args:
             state (State)
             action (str)
-            horizon (int): Indicates the level of recursion depth for computing Q.
-
+        
         Returns:
             (float)
         '''
 
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon
+        return self.q_func[state][action]
 
-        if horizon <= 0 or state.is_terminal():
-            # If we're not looking any further.
-            return self._get_reward(state, action)
+    # def _compute_exp_future_return(self, state, action):
+    #     '''
+    #     Args:
+    #         state (State)
+    #         action (str)
+    #         horizon (int): Recursion depth to compute Q
 
-        # Compute future return.
-        expected_future_return = self.gamma*self._compute_exp_future_return(state, action, horizon)
-        q_val = self._get_reward(state, action) + expected_future_return# self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
+    #     Return:
+    #         (float): Discounted expected future return from applying @action in @state.
+    #     '''
 
-        return q_val
+    #     next_state_dict = self.transitions[state][action]
 
-    def _compute_exp_future_return(self, state, action, horizon=None):
-        '''
-        Args:
-            state (State)
-            action (str)
-            horizon (int): Recursion depth to compute Q
+    #     denominator = float(sum(next_state_dict.values()))
+    #     state_weights = defaultdict(float)
+    #     for next_state in next_state_dict.keys():
+    #         count = next_state_dict[next_state]
+    #         state_weights[next_state] = (count / denominator)
 
-        Return:
-            (float): Discounted expected future return from applying @action in @state.
-        '''
+    #     weighted_future_returns = [self.get_max_q_value(next_state, horizon-1) * state_weights[next_state] for next_state in next_state_dict.keys()]
 
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon
-
-        next_state_dict = self.transitions[state][action]
-
-        denominator = float(sum(next_state_dict.values()))
-        state_weights = defaultdict(float)
-        for next_state in next_state_dict.keys():
-            count = next_state_dict[next_state]
-            state_weights[next_state] = (count / denominator)
-
-        weighted_future_returns = [self.get_max_q_value(next_state, horizon-1) * state_weights[next_state] for next_state in next_state_dict.keys()]
-
-        #print(weighted_future_returns)
-
-        return sum(weighted_future_returns)
+    #     return sum(weighted_future_returns)
 
     def _get_reward(self, state, action):
         '''
