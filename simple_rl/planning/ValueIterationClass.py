@@ -40,7 +40,7 @@ class ValueIteration(Planner):
             self._compute_reachable_state_space()
             # We've already run this, just return.
             return
-        
+
             # K: state
                 # K: a
                     # K: s_prime
@@ -60,7 +60,7 @@ class ValueIteration(Planner):
     def get_num_states(self):
         if not self.reachability_done:
             self._compute_reachable_state_space()
-        return len(self.states)      
+        return len(self.states)
 
     def get_states(self):
         if self.reachability_done:
@@ -128,7 +128,7 @@ class ValueIteration(Planner):
                 1. (int): num iterations taken.
                 2. (float): value.
         Summary:
-            Runs ValueIteration and fills in the self.value_func.           
+            Runs ValueIteration and fills in the self.value_func.
         '''
         # Algorithm bookkeeping params.
         iterations = 0
@@ -200,7 +200,7 @@ class ValueIteration(Planner):
             steps += 1
 
         return action_seq, state_seq
-    
+
     def _get_max_q_action(self, state):
         '''
         Args:
