@@ -211,7 +211,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                 agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
 
     else:
-        #print(num_ep)
         # Main loop.
         i = 0
         while i < num_ep:
@@ -229,24 +228,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                         mdp.goal_locs = [(default_goal_x, default_goal_y)]
                         mdp.reset()
 
-                    # elif event.type == pygame.MOUSEBUTTONUP:
-                    #     pos = pygame.mouse.get_pos()
-                    #     x, y = pos[0], pos[1]
-                    #     width_buffer = scr_width / 10.0
-                    #     height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
-                    #     cell_x, cell_y = convert_x_y_to_grid_cell(x, y, scr_width, scr_height, mdp.width, mdp.height)
-
-                    #     if event.button == 1:
-                    #         # Left clicked a cell, move the goal.
-                    #         mdp.goal_locs = [(cell_x, cell_y)]
-                    #         mdp.reset()
-                    #     elif event.button == 3:
-                    #         # Right clicked a cell, move the lava location.
-                    #         if (cell_x, cell_y) in mdp.lava_locs:
-                    #             mdp.lava_locs.remove((cell_x, cell_y))
-                    #         else:
-                    #             mdp.lava_locs += [(cell_x, cell_y)]
-
                 # Move agent.
                 action = agent.act(cur_state, reward)
                 reward, cur_state = mdp.execute_agent_action(action)
@@ -261,7 +242,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                 j+=1
 
                 if cur_state.is_terminal():
-                    # score += 1
                     cur_state = mdp.get_init_state()
                     mdp.reset()
                     agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
@@ -271,7 +251,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
             cur_state = mdp.get_init_state()
             mdp.reset()
             agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
-        #print(rpl)
 
 
 

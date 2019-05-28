@@ -42,7 +42,7 @@ def _draw_state(screen,
         if agent is not None:
             # Use agent value estimates.
             if "RMax" in agent.name:
-                for s in agent.viz_table.keys():
+                for s in agent.q_func.keys():
                     val_text_dict[s.x][s.y] = agent.get_value(s)
             else:
                 for s in agent.q_func.keys():

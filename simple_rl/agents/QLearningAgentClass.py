@@ -21,6 +21,8 @@ class QLearningAgent(Agent):
             gamma (float): Discount factor.
             epsilon (float): Exploration term.
             explore (str): One of {softmax, uniform}. Denotes explore policy.
+            custom_q_init (defaultdict{state, defaultdict{action, float}}): a dictionary of dictionaries storing the initial q-values. Can be used for potential shaping (Wiewiora, 2003)
+            default_q (float): the default value to initialize every entry in the q-table with [by default, set to 0.0]
         '''
         name_ext = "-" + explore if explore != "uniform" else ""
         Agent.__init__(self, name=name + name_ext, actions=actions, gamma=gamma)
