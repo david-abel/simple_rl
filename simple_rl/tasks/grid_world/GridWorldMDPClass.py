@@ -4,6 +4,7 @@
 from __future__ import print_function
 import random
 import sys, os
+import copy
 import numpy as np
 from collections import defaultdict
 
@@ -115,7 +116,6 @@ class GridWorldMDP(MDP):
         if self._is_goal_state_action(state, action):
             return 1.0 - self.step_cost
         elif self._is_lava_state_action(state, action):
-            #print("Lava reward = {}".format(-self.lava_cost))
             return -self.lava_cost
         else:
             return 0 - self.step_cost
@@ -357,15 +357,14 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
 
     def reset(self):
         if self.rand_init:
-            init_loc = random.randint(1, width), random.randint(1, height)
+            init_loc = random.randint(1, num_cols), random.randint(1, num_rows)
             self.cur_state = GridWorldState(init_loc[0], init_loc[1])
         else:
             self.cur_state = copy.deepcopy(self.init_state)
 
 def main():
     grid_world = GridWorldMDP(5, 10, (1, 1), (6, 7))
-
-    grid_world.visualize()
+    grid_world.visualize_policy()
 
 if __name__ == "__main__":
     main()
