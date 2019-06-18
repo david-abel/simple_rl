@@ -15,7 +15,7 @@ from simple_rl.planning import ValueIteration
 def parse_args():
     # Add all arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", type=str, default="value", nargs='?', help="Choose the visualization type (one of {value, policy, agent}).")
+    parser.add_argument("-v", type=str, default="learning", nargs='?', help="Choose the visualization type (one of {value, policy, agent, learning or interactive}).")
     args = parser.parse_args()
     return args.v
 
@@ -47,12 +47,11 @@ def main():
         mdp.visualize_agent(ql_agent)
     elif viz == "learning":
         # --> Press <r> to reset.
-        # Run experiment and make plot.
-        mdp.visualize_learning(ql_agent, delay=0.1)
+        # Show agent's interaction with the environment.
+        mdp.visualize_learning(ql_agent, delay=0.005, num_ep=500, num_steps=200)
     elif viz == "interactive":
         # Press <1>, <2>, <3>, and so on to execute action 1, action 2, etc.
     	mdp.visualize_interaction()
-
 
 if __name__ == "__main__":
     main()

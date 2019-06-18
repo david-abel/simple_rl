@@ -2,6 +2,7 @@
 from __future__ import print_function
 from collections import defaultdict
 import random
+import copy 
 
 # Check python version for queue module.
 import sys
@@ -30,6 +31,7 @@ class ValueIteration(Planner):
         self.max_iterations = max_iterations
         self.sample_rate = sample_rate
         self.value_func = defaultdict(float)
+        self.max_q_act_histories = defaultdict(str)
         self.reachability_done = False
         self.has_computed_matrix = False
         self.bellman_backups = 0
@@ -91,7 +93,8 @@ class ValueIteration(Planner):
         # Compute expected value.
         expected_val = 0
         for s_prime in self.trans_dict[s][a].keys():
-            expected_val += self.trans_dict[s][a][s_prime] * self.reward_func(s, a, s_prime) + self.gamma * self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
+            if not s_prime.is_terminal():
+                expected_future_val += self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
 
         return expected_val
 
@@ -143,6 +146,10 @@ class ValueIteration(Planner):
             for s in state_space:
                 self.bellman_backups += 1
                 if s.is_terminal():
+                    # terminal_reward = self.reward_func(s, self.actions[0])
+                    # print("s: {}\t terminal_reward: {}".format(s, terminal_reward))
+                    # self.value_func[s] = terminal_reward
+                    # self.value_func[s] = max_q
                     continue
 
                 max_q = float("-inf")
@@ -161,6 +168,55 @@ class ValueIteration(Planner):
         self.has_planned = True
 
         return iterations, value_of_init_state
+
+    def run_vi_histories(self):
+        '''
+        Returns:
+            (tuple):
+                1. (int): num iterations taken.
+                2. (float): value.
+                3. (list of dict of state and float): 
+                    histories of the previous iterations.
+        Summary:
+            Runs ValueIteration and fills in the self.value_func and returns histories        
+        '''
+        # Algorithm bookkeeping params.
+        iterations = 0
+        max_diff = float("inf")
+        self._compute_matrix_from_trans_func()
+        state_space = self.get_states()
+        self.bellman_backups = 0
+
+        histories = []
+
+        # Main loop.
+        while max_diff > self.delta and iterations < self.max_iterations:
+            max_diff = 0
+            for s in state_space:
+                self.bellman_backups += 1
+                if s.is_terminal():                    
+                    continue
+
+                max_q = float("-inf")
+                for a in self.actions:
+                    q_s_a = self.get_q_value(s, a)
+                    if(q_s_a > max_q):
+                        max_q = q_s_a
+                        self.max_q_act_histories[s] = a
+
+                # Check terminating condition.
+                max_diff = max(abs(self.value_func[s] - max_q), max_diff)
+
+                # Update value.
+                self.value_func[s] = max_q
+
+            histories.append(copy.deepcopy(self.max_q_act_histories))
+            iterations += 1
+
+        value_of_init_state = self._compute_max_qval_action_pair(self.init_state)[0]
+        self.has_planned = True
+
+        return iterations, value_of_init_state, histories
 
     def get_num_backups_in_recent_run(self):
         if self.has_planned:

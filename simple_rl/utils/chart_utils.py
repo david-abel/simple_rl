@@ -31,10 +31,10 @@ import matplotlib.pyplot as pyplot
 import numpy as np
 import subprocess
 import argparse
-
-color_ls = [[118, 167, 125], [102, 120, 173],\
-            [198, 113, 113], [94, 94, 94],\
-            [169, 193, 213], [230, 169, 132],\
+#, [94, 94, 94],
+color_ls = [[102, 120, 173],[118, 167, 125], \
+            [198, 113, 113], \
+            [230, 169, 132], [169, 193, 213],\
             [192, 197, 182], [210, 180, 226]]
 
 # Set font.
@@ -50,6 +50,7 @@ X_AXIS_START_VAL = 0
 X_AXIS_INCREMENT = 1
 Y_AXIS_END_VAL = None
 COLOR_SHIFT = 0
+
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -274,7 +275,10 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     # Axis labels.
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
-
+    
+    if not Y_AXIS_END_VAL in [0, None]:
+        pyplot.ylim((0, Y_AXIS_END_VAL))
+    
     # Pyplot calls.
     pyplot.xlabel(x_axis_label)
     if EVERY_OTHER_X:
@@ -391,7 +395,10 @@ def _get_agent_names(data_dir):
         if "Params" in line:
             agent_flag = False
         if agent_flag:
-            agent_names.append(line.split(",")[0].strip())
+            split_index = line.rfind(",")
+            agent_name = line[:split_index].strip()
+            # print("a:",agent_name)
+            agent_names.append(agent_name)
 
     return agent_names
 
