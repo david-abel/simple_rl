@@ -19,7 +19,7 @@ from simple_rl.tasks import GridWorldMDP
 from simple_rl.run_experiments import run_agents_on_mdp
 from collections import defaultdict
 
-def main():
+def main(open_plot=True):
     
     # Setup MDP.
 
@@ -54,7 +54,7 @@ def main():
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
-    run_agents_on_mdp([ql_agent, ql_agent_pot, rand_agent], mdp, instances=2, episodes=60, steps=200, open_plot=True, verbose=True)
+    run_agents_on_mdp([ql_agent, ql_agent_pot, rand_agent], mdp, instances=2, episodes=60, steps=200, open_plot=open_plot, verbose=True)
 
 if __name__ == "__main__":
-    main()
+    main(open_plot=not sys.argv[-1] == "no_plot")

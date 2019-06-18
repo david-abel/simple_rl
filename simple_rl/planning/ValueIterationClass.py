@@ -91,12 +91,12 @@ class ValueIteration(Planner):
             (float): The Q estimate given the current value function @self.value_func.
         '''
         # Compute expected value.
-        expected_val = 0
+        expected_future_val = 0
         for s_prime in self.trans_dict[s][a].keys():
             if not s_prime.is_terminal():
                 expected_future_val += self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
 
-        return expected_val
+        return expected_future_val
 
     def _compute_reachable_state_space(self):
         '''
