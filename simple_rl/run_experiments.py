@@ -283,6 +283,7 @@ def run_agents_on_mdp(agents,
             run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment, verbose, track_disc_reward, reset_at_terminal=reset_at_terminal)
             if "fixed" in agent.name:
                 break
+
             # Reset the agent.
             agent.reset()
             mdp.end_of_instance()
@@ -369,7 +370,6 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             if experiment is not None:
                 reward_to_track = mdp.get_gamma()**(step + 1 + episode*steps) * reward if track_disc_reward else reward
                 reward_to_track = round(reward_to_track, 5)
-
                 experiment.add_experience(agent, state, action, reward_to_track, next_state, time_taken=time.clock() - step_start)
 
             if next_state.is_terminal():
@@ -384,12 +384,10 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
             # Update pointer.
             state = next_state
 
-        # A final update.
-        action = agent.act(state, reward)
-
         # Process experiment info at end of episode.
         if experiment is not None:
             experiment.end_of_episode(agent)
+            print
 
         # Reset the MDP, tell the agent the episode is over.
         mdp.reset()
@@ -403,7 +401,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, verbos
         experiment.end_of_instance(agent)
 
     # Only print if our experiment isn't trivially short.
-    if steps >= 2000:
+    if verbose:
         print("\tLast episode reward:", cumulative_episodic_reward)
 
     return False, steps, value_per_episode
