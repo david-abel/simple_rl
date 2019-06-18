@@ -195,7 +195,7 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
         # Move agent.
         action = agent.act(cur_state, reward)
         reward, cur_state = mdp.execute_agent_action(action)
-        agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
+        agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=False, draw_statics=True,agent_shape=agent_shape)
 
         score += int(reward)
 

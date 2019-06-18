@@ -240,6 +240,7 @@ class QLearningAgent(Agent):
     def reset(self):
         self.step_number = 0
         self.episode_number = 0
+
         self.q_func = defaultdict(lambda : defaultdict(lambda: self.default_q))
         Agent.reset(self)
 
@@ -252,12 +253,19 @@ class QLearningAgent(Agent):
             self._anneal()
         Agent.end_of_episode(self)
 
+    def print_v_func(self):
+        '''
+        Summary:
+            Prints the V function.
+        '''
+        for state in self.q_func.keys():
+            print(state, self.get_value(state))
+
     def print_q_func(self):
         '''
         Summary:
             Prints the Q function.
         '''
         for state in self.q_func.keys():
-            print(state)
-            for action in self.actions:
+            for action in self.q_func[state]:
                 print("    ", action, self.q_func[state][action])

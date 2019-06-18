@@ -32,6 +32,7 @@ class GridWorldMDP(MDP):
                 lava_locs=[()],
                 walls=[],
                 is_goal_terminal=True,
+                is_lava_terminal=False,
                 gamma=0.99,
                 slip_prob=0.0,
                 step_cost=0.0,
@@ -69,6 +70,7 @@ class GridWorldMDP(MDP):
         self.goal_locs = goal_locs
         self.cur_state = GridWorldState(init_loc[0], init_loc[1])
         self.is_goal_terminal = is_goal_terminal
+        self.is_lava_terminal = is_lava_terminal
         self.slip_prob = slip_prob
         self.name = name
         self.lava_locs = lava_locs
@@ -179,7 +181,10 @@ class GridWorldMDP(MDP):
         else:
             next_state = GridWorldState(state.x, state.y)
 
-        if (next_state.x, next_state.y) in self.goal_locs and self.is_goal_terminal:
+
+        landed_in_term_goal = (next_state.x, next_state.y) in self.goal_locs and self.is_goal_terminal
+        landed_in_term_lava = (next_state.x, next_state.y) in self.lava_locs and self.is_lava_terminal
+        if landed_in_term_goal or landed_in_term_lava:
             next_state.set_terminal(True)
 
         return next_state
@@ -273,6 +278,7 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
             'w' --> wall
             'a' --> agent
             'g' --> goal
+            'l' --> lava
             '-' --> empty
     '''
 
