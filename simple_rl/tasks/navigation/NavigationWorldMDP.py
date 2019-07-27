@@ -523,6 +523,7 @@ class NavigationWorldMDP(MDP):
             state_seq.append(state)
             steps += 1
 
+        action_seq += [None]
         return action_seq, state_seq
 
     def set_traj_init_cell_types(self, cell_types):
