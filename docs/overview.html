@@ -1,0 +1,346 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simple_rl package &#8212; simple_rl v0.801 documentation</title>
+    <link rel="stylesheet" href="static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="static/documentation_options.js"></script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="simple_rl.agents package" href="agents.html" />
+    <link rel="prev" title="Auto Generated Documentation" href="code.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="agents.html" title="simple_rl.agents package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Auto Generated Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">simple_rl v0.801 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="code.html" accesskey="U">Auto Generated Documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="simple-rl-package">
+<h1>simple_rl package<a class="headerlink" href="#simple-rl-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-simple_rl.run_experiments">
+<span id="simple-rl-run-experiments-module"></span><h2>simple_rl.run_experiments module<a class="headerlink" href="#module-simple_rl.run_experiments" title="Permalink to this headline">¶</a></h2>
+<p>Code for running experiments where RL agents interact with an MDP.</p>
+<dl class="docutils">
+<dt>Instructions:</dt>
+<dd><ol class="first arabic simple">
+<li>Create an MDP.</li>
+<li>Create agents.</li>
+<li>Set experiment parameters (instances, episodes, steps).</li>
+<li>Call run_agents_on_mdp(agents, mdp) (or the lifelong/markov game equivalents).</li>
+</ol>
+<p class="last">-&gt; Runs all experiments and will open a plot with results when finished.</p>
+</dd>
+</dl>
+<p>Author: David Abel (cs.brown.edu/~dabel/)</p>
+<dl class="function">
+<dt id="simple_rl.run_experiments.choose_mdp">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">choose_mdp</code><span class="sig-paren">(</span><em>mdp_name</em>, <em>env_name='Asteroids-v0'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#choose_mdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.choose_mdp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>mdp_name (str): one of {gym, grid, chain, taxi, ...}
+gym_env_name (str): gym environment name, like 'CartPole-v0'</dd>
+<dt>Returns:</dt>
+<dd>(MDP)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.evaluate_agent">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">evaluate_agent</code><span class="sig-paren">(</span><em>agent</em>, <em>mdp</em>, <em>instances=10</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#evaluate_agent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.evaluate_agent" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>agent (simple_rl.Agent)
+mdp (simple_rl.MDP)
+instances (int)</dd>
+<dt>Returns:</dt>
+<dd>(float): Avg. cumulative discounted reward.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.main">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.parse_args">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#parse_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.play_markov_game">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">play_markov_game</code><span class="sig-paren">(</span><em>agent_ls</em>, <em>markov_game_mdp</em>, <em>instances=10</em>, <em>episodes=100</em>, <em>steps=30</em>, <em>verbose=False</em>, <em>open_plot=True</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#play_markov_game"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.play_markov_game" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>agent_list (list of Agents): See agents/AgentClass.py (and friends).
+markov_game_mdp (MarkovGameMDP): See mdp/markov_games/MarkovGameMDPClass.py.
+instances (int): Number of times to run each agent (for confidence intervals).
+episodes (int): Number of episodes for each learning instance.
+steps (int): Number of times to run each agent (for confidence intervals).
+verbose (bool)
+open_plot (bool): If true opens plot.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.reproduce_from_exp_file">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">reproduce_from_exp_file</code><span class="sig-paren">(</span><em>exp_name</em>, <em>results_dir_name='results'</em>, <em>open_plot=True</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#reproduce_from_exp_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.reproduce_from_exp_file" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>exp_name (str)
+results_dir_name (str)
+open_plot (bool)</dd>
+<dt>Summary:</dt>
+<dd>Extracts the agents, MDP, and parameters from the file and runs the experiment.
+Stores data in &quot;results_dir_name/exp_name/reproduce_i/<a href="#id1"><span class="problematic" id="id2">*</span></a>&quot;, where &quot;i&quot; is determined
+based on the existence of earlier &quot;reproduce&quot; files.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.run_agents_lifelong">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">run_agents_lifelong</code><span class="sig-paren">(</span><em>agents</em>, <em>mdp_distr</em>, <em>samples=5</em>, <em>episodes=1</em>, <em>steps=100</em>, <em>clear_old_results=True</em>, <em>open_plot=True</em>, <em>verbose=False</em>, <em>track_disc_reward=False</em>, <em>reset_at_terminal=False</em>, <em>resample_at_terminal=False</em>, <em>cumulative_plot=True</em>, <em>dir_for_plot='results'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#run_agents_lifelong"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.run_agents_lifelong" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">agents (list)
+mdp_distr (MDPDistribution)
+samples (int)
+episodes (int)
+steps (int)
+clear_old_results (bool)
+open_plot (bool)
+verbose (bool)
+track_disc_reward (bool): If true records and plots discounted reward, discounted over episodes. So, if</p>
+<blockquote>
+<div>each episode is 100 steps, then episode 2 will start discounting as though it's step 101.</div></blockquote>
+<p class="last">reset_at_terminal (bool)
+resample_at_terminal (bool)
+cumulative_plot (bool)
+dir_for_plot (str)</p>
+</dd>
+<dt>Summary:</dt>
+<dd>Runs each agent on the MDP distribution according to the given parameters.
+If &#64;mdp_distr has a non-zero horizon, then gamma is set to 1 and &#64;steps is ignored.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.run_agents_on_mdp">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">run_agents_on_mdp</code><span class="sig-paren">(</span><em>agents</em>, <em>mdp</em>, <em>instances=5</em>, <em>episodes=100</em>, <em>steps=200</em>, <em>clear_old_results=True</em>, <em>rew_step_count=1</em>, <em>track_disc_reward=False</em>, <em>open_plot=True</em>, <em>verbose=False</em>, <em>reset_at_terminal=False</em>, <em>cumulative_plot=True</em>, <em>dir_for_plot='results'</em>, <em>experiment_name_prefix=''</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#run_agents_on_mdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.run_agents_on_mdp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>agents (list of Agents): See agents/AgentClass.py (and friends).
+mdp (MDP): See mdp/MDPClass.py for the abstract class. Specific MDPs in tasks/<a href="#id3"><span class="problematic" id="id4">*</span></a>.
+instances (int): Number of times to run each agent (for confidence intervals).
+episodes (int): Number of episodes for each learning instance.
+steps (int): Number of steps per episode.
+clear_old_results (bool): If true, removes all results files in the relevant results dir.
+rew_step_count (int): Number of steps before recording reward.
+track_disc_reward (bool): If true, track (and plot) discounted reward.
+open_plot (bool): If true opens the plot at the end.
+verbose (bool): If true, prints status bars per episode/instance.
+reset_at_terminal (bool): If true sends the agent to the start state after terminal.
+cumulative_plot (bool): If true makes a cumulative plot, otherwise plots avg. reward per timestep.
+dir_for_plot (str): Path
+experiment_name_prefix (str): Adds this to the end of the usual experiment name.</dd>
+<dt>Summary:</dt>
+<dd>Runs each agent on the given mdp according to the given parameters.
+Stores results in results/&lt;agent_name&gt;.csv and automatically
+generates a plot and opens it.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.run_single_agent_on_mdp">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">run_single_agent_on_mdp</code><span class="sig-paren">(</span><em>agent</em>, <em>mdp</em>, <em>episodes</em>, <em>steps</em>, <em>experiment=None</em>, <em>verbose=False</em>, <em>track_disc_reward=False</em>, <em>reset_at_terminal=False</em>, <em>resample_at_terminal=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#run_single_agent_on_mdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.run_single_agent_on_mdp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Summary:</dt>
+<dd>Main loop of a single MDP experiment.</dd>
+<dt>Returns:</dt>
+<dd>(tuple): (bool:reached terminal, int: num steps taken, float: cumulative discounted reward)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.run_experiments.run_single_belief_agent_on_pomdp">
+<code class="descclassname">simple_rl.run_experiments.</code><code class="descname">run_single_belief_agent_on_pomdp</code><span class="sig-paren">(</span><em>belief_agent</em>, <em>pomdp</em>, <em>episodes</em>, <em>steps</em>, <em>experiment=None</em>, <em>verbose=False</em>, <em>track_disc_reward=False</em>, <em>reset_at_terminal=False</em>, <em>resample_at_terminal=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/run_experiments.html#run_single_belief_agent_on_pomdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.run_experiments.run_single_belief_agent_on_pomdp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>belief_agent:
+pomdp:
+episodes:
+steps:
+experiment:
+verbose:
+track_disc_reward:
+reset_at_terminal:
+resample_at_terminal:</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-simple_rl">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-simple_rl" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>simple_rl</dt>
+<dd><dl class="first docutils">
+<dt>abstraction/</dt>
+<dd>action_abs/
+state_abs/
+...</dd>
+<dt>agents/</dt>
+<dd>AgentClass.py
+QLearningAgentClass.py
+RandomAgentClass.py
+RMaxAgentClass.py
+...</dd>
+<dt>experiments/</dt>
+<dd>ExperimentClass.py
+ExperimentParameters.py</dd>
+<dt>mdp/</dt>
+<dd>MDPClass.py
+StateClass.py</dd>
+<dt>planning/</dt>
+<dd>BeliefSparseSamplingClass.py
+MCTSClass.py
+PlannerClass.py
+ValueIterationClass.py</dd>
+<dt>pomdp/</dt>
+<dd>BeliefMDPClass.py
+BeliefStateClass.py
+BeliefUpdaterClass.py
+POMDPClass.py</dd>
+<dt>tasks/</dt>
+<dd><dl class="first docutils">
+<dt>chain/</dt>
+<dd>ChainMDPClass.py
+ChainStateClass.py</dd>
+<dt>grid_world/</dt>
+<dd>GridWorldMPDClass.py
+GridWorldStateClass.py</dd>
+</dl>
+<p class="last">...</p>
+</dd>
+<dt>utils/</dt>
+<dd>chart_utils.py
+make_mdp.py</dd>
+</dl>
+<p class="last">run_experiments.py</p>
+</dd>
+</dl>
+<p>Author and Maintainer: David Abel (david_abel.github.io)
+Last Updated: August 27th, 2018
+Contact: <a class="reference external" href="mailto:david_abel&#37;&#52;&#48;brown&#46;edu">david_abel<span>&#64;</span>brown<span>&#46;</span>edu</a>
+License: Apache</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">simple_rl package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-simple_rl.run_experiments">simple_rl.run_experiments module</a></li>
+<li><a class="reference internal" href="#module-simple_rl">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="code.html"
+                        title="previous chapter">Auto Generated Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="agents.html"
+                        title="next chapter">simple_rl.agents package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="sources/overview.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="agents.html" title="simple_rl.agents package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Auto Generated Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">simple_rl v0.801 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="code.html" >Auto Generated Documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, David Abel.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
+    </div>
+  </body>
+</html>

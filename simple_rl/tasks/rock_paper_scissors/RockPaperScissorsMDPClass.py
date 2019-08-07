@@ -16,7 +16,7 @@ class RockPaperScissorsMDP(MarkovGameMDP):
     def __init__(self):
         MarkovGameMDP.__init__(self, RockPaperScissorsMDP.ACTIONS, self._transition_func, self._reward_func, init_state=State())
 
-    def _reward_func(self, state, action_dict):
+    def _reward_func(self, state, action_dict, next_state=None):
         '''
         Args:
             state (State)

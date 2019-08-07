@@ -9,9 +9,9 @@ Functions:
     _format_title()
     plot: Creates (and opens) a single plot using matplotlib.pyplot
     make_plots: Puts everything in order to create the plot.
-    _get_agent_names: Grabs the agent names from parameters.txt.
+    _get_agent_names: Grabs the agent names the experiment parameter file, named @Experiment.EXP_PARAM_FILE_NAME
     _get_agent_colors: Determines the relevant colors/markers for the plot.
-    _is_episodic: Determines if the experiment was episodic from parameters.txt.
+    _is_episodic: Determines if the experiment was episodic from the experiment parameter file, named @Experiment.EXP_PARAM_FILE_NAME
     _is_disc_reward()
     parse_args: Parse command line arguments.
     main: Loads data from a given path and creates plot.
@@ -31,25 +31,26 @@ import matplotlib.pyplot as pyplot
 import numpy as np
 import subprocess
 import argparse
-
-color_ls = [[118, 167, 125], [102, 120, 173],\
-            [210, 180, 226], [94, 94, 94],\
-            [230, 169, 132], [184, 221, 255],\
-            [198, 113, 113], [192, 197, 182]]
+#, [94, 94, 94],
+color_ls = [[102, 120, 173],[118, 167, 125], \
+            [198, 113, 113], \
+            [230, 169, 132], [169, 193, 213],\
+            [192, 197, 182], [210, 180, 226]]
 
 # Set font.
 font = {'size':14}
 matplotlib.rc('font', **font)
 matplotlib.rcParams['pdf.fonttype'] = 42
-# matplotlib.rcParams['text.usetex'] = True
-fig = matplotlib.pyplot.gcf()
 
+EVERY_OTHER_X = False
 CUSTOM_TITLE = None
 X_AXIS_LABEL = None
 Y_AXIS_LABEL = None
 X_AXIS_START_VAL = 0
 X_AXIS_INCREMENT = 1
 Y_AXIS_END_VAL = None
+COLOR_SHIFT = 0
+
 
 def load_data(experiment_dir, experiment_agents):
     '''
@@ -174,7 +175,7 @@ def _format_title(plot_title):
 
     return plot_title_final
 
-def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False):
+def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False, add_legend=True):
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -187,6 +188,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         open_plot (bool)
         track_disc_reward (bool): If true, plots discounted reward.
+        add_legend (bool)
 
     Summary:
         Makes (and opens) a single reward chart plotting all of the data in @data.
@@ -204,6 +206,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
     # Map them to floats in [0:1].
     colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
+    colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
 
     # Puts the legend into the best location in the plot and use a tight layout.
     pyplot.rcParams['legend.loc'] = 'best'
@@ -242,9 +245,10 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
             pyplot.fill_between(x_axis, top, bot, facecolor=series_color, edgecolor=series_color, alpha=0.25)
         print("\t" + str(agents[i]) + ":", round(y_axis[-1], 5) , "(conf_interv:", round(alg_conf_interv[-1], 2), ")")
 
-        marker_every = max(len(y_axis) / 30,1)
+        marker_every = max(int(len(y_axis) / 30), 1)
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
-        pyplot.legend()
+        if add_legend:
+            pyplot.legend()
     print()
     
     # Configure plot naming information.
@@ -262,8 +266,8 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     else:
         exp_name = exp_dir_split_list[0]
-    experiment_dir = experiment_dir + "/" if experiment_dir[-1] != "/" else experiment_dir
-    plot_file_name = plot_file_name if plot_file_name != "" else experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
+    experiment_dir = os.path.join(experiment_dir, "")
+    plot_file_name = os.path.join(experiment_dir, plot_file_name + ".pdf") if plot_file_name != "" else experiment_dir + plot_label.lower() + "_" + unit.lower() + ".pdf"
     plot_title = CUSTOM_TITLE if CUSTOM_TITLE is not None else plot_label + " " + disc_ext + unit + ": " + exp_name
     if CUSTOM_TITLE is None:
         plot_title = _format_title(plot_title)
@@ -271,9 +275,15 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     # Axis labels.
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
-
+    
+    if not Y_AXIS_END_VAL in [0, None]:
+        pyplot.ylim((0, Y_AXIS_END_VAL))
+    
     # Pyplot calls.
     pyplot.xlabel(x_axis_label)
+    if EVERY_OTHER_X:
+        pyplot.xticks(range(X_AXIS_START_VAL, len(x_axis) * X_AXIS_INCREMENT + X_AXIS_START_VAL, X_AXIS_INCREMENT * 2))
+
     pyplot.ylabel(y_axis_label)
     pyplot.title(plot_title)
     pyplot.grid(True)
@@ -291,7 +301,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     pyplot.cla()
     pyplot.close()
 
-def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False):
+def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False, new_title=None, new_x_label=None, new_y_label=None, add_legend=True):
     '''
     Args:
         experiment_dir (str): path to results.
@@ -301,11 +311,24 @@ def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=
         use_cost (bool): If true, plots are in terms of cost. Otherwise, plots are in terms of reward.
         episodic (bool): If true, labels the x-axis "Episode Number". Otherwise, "Step Number". 
         track_disc_reward (bool): If true, plots discounted reward (changes plot title, too).
-
+        new_title (str): Sets the title of the plot.
+        new_x_label (str): Sets the x axis label of the plot.
+        new_y_label (str): Sets the y axis label of the plot.
+        add_legend (bool)
+    
     Summary:
         Creates plots for all agents run under the experiment.
         Stores the plot in results/<experiment_name>/<plot_name>.pdf
     '''
+
+    # Update plot labels if needed.
+    global CUSTOM_TITLE, X_AXIS_LABEL, Y_AXIS_LABEL
+    if new_title is not None:
+        CUSTOM_TITLE = new_title
+    if new_x_label is not None:
+        X_AXIS_LABEL = new_x_label
+    if new_y_label is not None:
+        Y_AXIS_LABEL = new_y_label
 
     # Load the data.
     data = load_data(experiment_dir, experiment_agents) # [alg][instance][episode]
@@ -324,7 +347,8 @@ def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=
                 cumulative=cumulative,
                 episodic=episodic,
                 open_plot=open_plot,
-                track_disc_reward=track_disc_reward)
+                track_disc_reward=track_disc_reward,
+                add_legend=add_legend)
 
 def drange(x_min, x_max, x_increment):
     '''
@@ -353,8 +377,10 @@ def _get_agent_names(data_dir):
     Returns:
         (list)
     '''
+    from simple_rl.experiments import Experiment
+
     try:
-        params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+        params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
     except IOError:
         # No param file.
         return [agent_file.replace(".csv", "") for agent_file in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, agent_file)) and ".csv" in agent_file]
@@ -369,7 +395,10 @@ def _get_agent_names(data_dir):
         if "Params" in line:
             agent_flag = False
         if agent_flag:
-            agent_names.append(line.split(",")[0].strip())
+            split_index = line.rfind(",")
+            agent_name = line[:split_index].strip()
+            # print("a:",agent_name)
+            agent_names.append(agent_name)
 
     return agent_names
 
@@ -382,8 +411,10 @@ def _get_agent_colors(data_dir, agents):
     Returns:
         (list)
     '''
+    from simple_rl.experiments import Experiment
+
     try:
-        params_file = open(os.path.join(data_dir, "parameters.txt"), "r")
+        params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
     except IOError:
         # No param file.
         return {agent : i for i, agent in enumerate(agents)}
@@ -403,13 +434,14 @@ def _is_episodic(data_dir):
     Returns:
         (bool) True iff the experiment was episodic.
     '''
+    from simple_rl.experiments import Experiment
 
     # Open param file for the experiment.
-    if not os.path.exists(data_dir + "parameters.txt"):
-        print("Warning: no parameters file found for experiment. Assuming non-episodic.")
+    if not os.path.exists(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
+        print("Warning: no experiment parameters file found for experiment. Assuming non-episodic.")
         return False
 
-    params_file = open(data_dir + "parameters.txt", "r")
+    params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
 
     # Check if episodes > 1.
     for line in params_file.readlines():
@@ -422,13 +454,14 @@ def _is_disc_reward(data_dir):
     Returns:
         (bool) True iff the experiment recorded discounted reward.
     '''
+    from simple_rl.experiments import Experiment
 
     # Open param file for the experiment.
-    if not os.path.exists(data_dir + "parameters.txt"):
-        print("Warning: no parameters file found for experiment. Assuming non-episodic.")
+    if not os.path.exists(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME)):
+        print("Warning: no experiment parameters file found for experiment. Assuming non-episodic.")
         return False
 
-    params_file = open(data_dir + "parameters.txt", "r")
+    params_file = open(os.path.join(data_dir, Experiment.EXP_PARAM_FILE_NAME), "r")
 
     # Check if episodes > 1.
     for line in params_file.readlines():
@@ -450,6 +483,39 @@ def parse_args():
     return parser.parse_args()
 
 
+def format_and_make_plot(data_dir, avg_plot=False, add_legend=True):
+    '''
+    Args:
+        data_dir (str)
+        avg_plot (bool)
+        add_legend (bool)
+    '''
+
+    # Grab agents.
+    agent_names = _get_agent_names(data_dir)
+    if len(agent_names) == 0:
+        raise ValueError("Error: no csv files found.")
+
+    if data_dir[-1] != "/":
+        data_dir = data_dir + "/"
+
+    cumulative = not(avg_plot)
+    episodic = _is_episodic(data_dir)
+    track_disc_reward = _is_disc_reward(data_dir)
+    plot_file_name = ""
+
+    # Success plot.
+    if "success" in data_dir:
+        global X_AXIS_LABEL, Y_AXIS_LABEL, CUSTOM_TITLE
+        plot_file_name = "Success_Rate"
+        CUSTOM_TITLE = "Success Rate:"
+        X_AXIS_LABEL = "Episode"
+        Y_AXIS_LABEL = "Avg. % Success"
+        cumulative = False
+
+    # Plot.
+    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, plot_file_name=plot_file_name, track_disc_reward=track_disc_reward, add_legend=add_legend)
+
 def main():
     '''
     Summary:
@@ -459,21 +525,8 @@ def main():
     # Parse args.
     args = parse_args()
 
-    # Grab agents.
-    data_dir = args.dir
-    agent_names = _get_agent_names(data_dir)
-    if len(agent_names) == 0:
-        raise ValueError("Error: no csv files found.")
-
-    if data_dir[-1] != "/":
-        data_dir = data_dir + "/"
-
-    cumulative = not(args.a)
-    episodic = _is_episodic(data_dir)
-    track_disc_reward = _is_disc_reward(data_dir)
-
-    # Plot.
-    make_plots(data_dir, agent_names, cumulative=cumulative, episodic=episodic, track_disc_reward=track_disc_reward)
+    # Run.
+    format_and_make_plot(data_dir=args.dir, avg_plot=args.a)
 
 if __name__ == "__main__":
     main()

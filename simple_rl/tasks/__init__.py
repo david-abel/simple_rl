@@ -3,6 +3,8 @@ from __future__ import print_function
 
 # Grab classes.
 from simple_rl.tasks.bandit.BanditMDPClass import BanditMDP
+from simple_rl.tasks.cart_pole.CartPoleMDPClass import CartPoleMDP
+from simple_rl.tasks.cart_pole.CartPoleStateClass import CartPoleState
 from simple_rl.tasks.chain.ChainMDPClass import ChainMDP
 from simple_rl.tasks.chain.ChainStateClass import ChainState
 from simple_rl.tasks.combo_lock.ComboLockMDPClass import ComboLockMDP
@@ -13,7 +15,7 @@ from simple_rl.tasks.grid_game.GridGameMDPClass import GridGameMDP
 from simple_rl.tasks.grid_world.GridWorldMDPClass import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 from simple_rl.tasks.hanoi.HanoiMDPClass import HanoiMDP
-from simple_rl.tasks.navigation.NavigationMDP import NavigationMDP
+from simple_rl.tasks.navigation.NavigationWorldMDP import NavigationWorldMDP
 from simple_rl.tasks.prisoners.PrisonersDilemmaMDPClass import PrisonersDilemmaMDP
 from simple_rl.tasks.puddle.PuddleMDPClass import PuddleMDP
 from simple_rl.tasks.random.RandomMDPClass import RandomMDP

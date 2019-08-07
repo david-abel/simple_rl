@@ -1,0 +1,72 @@
+{
+    "MISC": {
+        "instances": 10, 
+        "episodes": 50, 
+        "steps": 10, 
+        "track_disc_reward": false
+    }, 
+    "MDP": {
+        "params": {
+            "step_cost": 0.0, 
+            "lava_cost": 0.01, 
+            "slip_prob": 0.05, 
+            "is_goal_terminal": true, 
+            "rand_init": false, 
+            "init_loc": {
+                "items": [
+                    1, 
+                    1
+                ], 
+                "__tuple__": true
+            }, 
+            "walls": [
+                {
+                    "items": [
+                        2, 
+                        2
+                    ], 
+                    "__tuple__": true
+                }
+            ], 
+            "lava_locs": [
+                {
+                    "items": [
+                        4, 
+                        2
+                    ], 
+                    "__tuple__": true
+                }
+            ], 
+            "goal_locs": [
+                {
+                    "items": [
+                        4, 
+                        3
+                    ], 
+                    "__tuple__": true
+                }
+            ], 
+            "height": 3, 
+            "width": 4, 
+            "gamma": 0.95
+        }, 
+        "name": "<class 'simple_rl.tasks.grid_world.GridWorldMDPClass.GridWorldMDP'>"
+    }, 
+    "AGENTS": {
+        "<class 'simple_rl.agents.RandomAgentClass.RandomAgent'>": {
+            "index": 1, 
+            "params": {}
+        }, 
+        "<class 'simple_rl.agents.QLearningAgentClass.QLearningAgent'>": {
+            "index": 0, 
+            "params": {
+                "alpha": 0.1, 
+                "explore": "uniform", 
+                "anneal": false, 
+                "gamma": 0.99, 
+                "epsilon": 0.1
+            }
+        }
+    }, 
+    "FUNC": "run_agents_on_mdp"
+}

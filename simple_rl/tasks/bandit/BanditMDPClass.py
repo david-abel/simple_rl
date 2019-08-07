@@ -33,6 +33,18 @@ class BanditMDP(MDP):
         self.distr_family = distr_family
         self.distr_params = self.init_distr_params() if distr_params is None else distr_params    
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["num_arms"] = self.num_arms
+        param_dict["distr_family"] = self.distr_family
+        param_dict["distr_params"] = self.distr_params
+   
+        return param_dict
+
     def init_distr_params(self):
         '''
         Summary:
@@ -52,12 +64,12 @@ class BanditMDP(MDP):
 
         return distr_params
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state=None):
         '''
         Args:
             state (State)
             action (str)
-            statePrime
+            next_state (State)
 
         Returns
             (float)

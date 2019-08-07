@@ -1,0 +1,25 @@
+.. simple_rl documentation master file, created by
+   sphinx-quickstart on Wed Aug 29 15:19:35 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to simple_rl's (work in progress) documentation!
+========================================================
+
+simple_rl is a library for Reinforcement Learning in Python 2 and 3. Full documentation will be coming soon.
+
+Requirements:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   tutorial
+   code
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

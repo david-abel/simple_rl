@@ -17,8 +17,8 @@ def main(open_plot=True):
 
     # Setup agents and run.
     rand_agent = RandomAgent(gym_mdp.get_actions())
-    dqn_agent = LinearQAgent(gym_mdp.get_actions(), num_feats)
-    run_agents_on_mdp([dqn_agent, rand_agent], gym_mdp, instances=3, episodes=20, steps=200, open_plot=open_plot, verbose=True)
+    lin_q_agent = LinearQAgent(gym_mdp.get_actions(), num_feats)
+    run_agents_on_mdp([lin_q_agent, rand_agent], gym_mdp, instances=5, episodes=50000, steps=200, open_plot=open_plot, verbose=False)
 
 if __name__ == "__main__":
     LOGGER = logging.getLogger(__name__)

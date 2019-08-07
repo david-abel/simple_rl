@@ -23,11 +23,26 @@ class GridGameMDP(MarkovGameMDP):
         self.width = width
         MarkovGameMDP.__init__(self, GridGameMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state)
 
-    def _reward_func(self, state, action_dict):
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["width"] = self.width
+        param_dict["height"] = self.height
+        param_dict["init_a_x"] = self.init_a_x
+        param_dict["init_a_y"] = self.init_a_y
+        param_dict["init_b_x"] = self.init_b_x
+        param_dict["init_b_y"] = self.init_b_y
+   
+        return param_dict
+    def _reward_func(self, state, action_dict, next_state=None):
         '''
         Args:
             state (State)
             action (dict of actions)
+            next_state (State)
 
         Returns
             (float)

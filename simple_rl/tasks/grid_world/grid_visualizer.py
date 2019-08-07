@@ -19,7 +19,7 @@ def _draw_state(screen,
                 state,
                 policy=None,
                 action_char_dict={},
-                show_value=False,
+                show_value=True,
                 agent=None,
                 draw_statics=False,
                 agent_shape=None):
@@ -45,7 +45,7 @@ def _draw_state(screen,
                 val_text_dict[s.x][s.y] = agent.get_value(s)
         else:
             # Use Value Iteration to compute value.
-            vi = ValueIteration(grid_mdp)
+            vi = ValueIteration(grid_mdp, sample_rate=10)
             vi.run_vi()
             for s in vi.get_states():
                 val_text_dict[s.x][s.y] = vi.get_value(s)
@@ -62,7 +62,7 @@ def _draw_state(screen,
     scr_width, scr_height = screen.get_width(), screen.get_height()
     width_buffer = scr_width / 10.0
     height_buffer = 30 + (scr_height / 10.0) # Add 30 for title.
-    cell_width = (scr_width - width_buffer * 2) / grid_mdp.width
+    cell_width = (scr_width - width_buffer * 2) / grid_mdp.width 
     cell_height = (scr_height - height_buffer * 2) / grid_mdp.height
     goal_locs = grid_mdp.get_goal_locs()
     lava_locs = grid_mdp.get_lava_locs()
@@ -113,8 +113,15 @@ def _draw_state(screen,
                     circler_color = (224, 145, 157)
                     pygame.draw.circle(screen, circler_color, circle_center, int(min(cell_width, cell_height) / 4.0))
 
+                if show_value and not grid_mdp.is_wall(i+1, grid_mdp.height - j):
+                    # Write value text to each state.
+                    value_text = reg_font.render(str(round(val, 2)), True, (46, 49, 49))
+                    text_center_point = int(top_left_point[0] + cell_width/2.0 - 10), int(top_left_point[1] + cell_height/3.0)
+                    screen.blit(value_text, text_center_point)
+
+
                 # Current state.
-                if not show_value and (i+1,grid_mdp.height - j) == (state.x, state.y) and agent_shape is None:
+                if show_value and (i+1,grid_mdp.height - j) == (state.x, state.y) and agent_shape is None:
                     tri_center = int(top_left_point[0] + cell_width/2.0), int(top_left_point[1] + cell_height/2.0)
                     agent_shape = _draw_agent(tri_center, screen, base_size=min(cell_width, cell_height)/2.5 - 8)
 

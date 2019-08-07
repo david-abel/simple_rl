@@ -17,6 +17,10 @@ from simple_rl.utils import chart_utils
 from simple_rl.experiments.ExperimentParametersClass import ExperimentParameters
 
 class Experiment(object):
+
+    FULL_EXP_FILE_NAME = "full_experiment_data.json"
+    EXP_PARAM_FILE_NAME = "readable_experiment_data.txt"
+
     ''' Experiment Class for RL Experiments '''
 
     # Dumps the results in a directory called "results" in the current working dir.
@@ -33,7 +37,12 @@ class Experiment(object):
                     track_disc_reward=False,
                     clear_old_results=True,
                     count_r_per_n_timestep=1,
-                    cumulative_plot=True):
+                    cumulative_plot=True,
+                    exp_function="run_agents_on_mdp",
+                    dir_for_plot="",
+                    experiment_name_prefix="",
+                    track_success=False,
+                    success_reward=None):
         '''
         Args:
             agents (list)
@@ -46,12 +55,16 @@ class Experiment(object):
             clear_old_results (bool)
             count_r_per_n_timestep (int)
             cumulative_plot (bool)
+            exp_function (lambda): tracks with run_experiments.py function was called.
+            dir_for_plot (str)
+            experiment_name_prefix (str)
+            track_success (bool)
+            success_reward (int)
         '''
         # Store all relevant bools.
         self.agents = agents
         self.agent_colors = range(len(self.agents)) if agent_colors == [] else agent_colors
         params["track_disc_reward"] = track_disc_reward
-        params["is_lifelong"] = is_lifelong
         self.parameters = ExperimentParameters(params)
         self.mdp = mdp
         self.track_disc_reward = track_disc_reward
@@ -62,10 +75,85 @@ class Experiment(object):
         self.name = str(self.mdp)
         self.rewards = defaultdict(list)
         self.times = defaultdict(list)
-        self.exp_directory = Experiment.RESULTS_DIR + self.name
+        if dir_for_plot == "":
+            self.exp_directory = os.path.join(Experiment.RESULTS_DIR, self.name)
+        else:
+            self.exp_directory = os.path.join(os.getcwd(), dir_for_plot, self.name)
+
+        self.experiment_name_prefix = experiment_name_prefix
         self.is_episodic = is_episodic
         self.is_markov_game = is_markov_game
+        self.track_success = track_success
+        self.success_reward = success_reward
         self._setup_files(clear_old_results)
+
+        # Write experiment reproduction file.
+        self._make_and_write_agent_and_mdp_params(agents, mdp, self.parameters.params, exp_function)
+
+    def _make_and_write_agent_and_mdp_params(self, agents, mdp, parameters, exp_function):
+        '''
+        Args:
+            agents
+            mdp
+            parameters
+
+        Summary:
+            Writes enough detail about @agents, @mdp, and @parameters to the file results/<exp_name>/params.txt 
+            so that the function simple_rl.run_experiments.reproduce_from_exp_file can rerun the experiment.
+        '''
+        import json
+
+        out_file = open(os.path.join(self.exp_directory, Experiment.FULL_EXP_FILE_NAME), "w")
+
+        if not self._is_valid_mdp_type(mdp):
+            print("Warning (simple_rl): Cannot track and reproduce experiments for MDPs of type `" + str(type(mdp)) + "'.")
+            return
+
+        # Dict to hold all experiment info to write to json.
+        all_exp_info_dict = {}
+
+        # MDP.
+        mdp_class = str(type(mdp))
+        mdp_params = mdp.get_parameters()
+        all_exp_info_dict["MDP"] = {"name":mdp_class, "params":mdp_params}
+
+        # Get agents and their parameters.
+        all_exp_info_dict["AGENTS"] = defaultdict(lambda: defaultdict(str))
+        for i, agent in enumerate(agents):
+            agent_params = agent.get_parameters()
+            agent_class = str(type(agent))
+            all_exp_info_dict["AGENTS"][agent_class]["params"] = agent_params
+            all_exp_info_dict["AGENTS"][agent_class]["index"] = i
+
+        # Misc. Params.
+        all_exp_info_dict["MISC"] = parameters
+
+        # Function called.
+        all_exp_info_dict["FUNC"] = exp_function
+
+        # Encode and store.
+        from simple_rl.utils.additional_datastructures import TupleEncoder
+        encoder = TupleEncoder()
+        data_to_store = encoder.encode(all_exp_info_dict)
+        load_enc = json.loads(data_to_store)
+        json.dump(load_enc, out_file, indent=4)
+        out_file.close()
+        return
+
+    def _is_valid_mdp_type(self, mdp):
+        from simple_rl.mdp import OOMDP, MDPDistribution
+        from simple_rl.pomdp.POMDPClass import POMDP
+        from simple_rl.mdp.markov_game.MarkovGameMDPClass import MarkovGameMDP
+        from simple_rl.tasks import BanditMDP
+
+        if isinstance(mdp, OOMDP) \
+            or isinstance(mdp, POMDP) \
+            or isinstance(mdp, MarkovGameMDP) \
+            or isinstance(mdp, MDPDistribution) \
+            or isinstance(mdp, BanditMDP):
+            return False
+
+        return True
 
     def _setup_files(self, clear_old_results=True):
         '''
@@ -78,6 +166,10 @@ class Experiment(object):
             for agent in self.agents:
                 if os.path.exists(os.path.join(self.exp_directory, str(agent)) + ".csv"):
                     os.remove(os.path.join(self.exp_directory, str(agent)) + ".csv")
+                if os.path.exists(os.path.join(self.exp_directory, "times", str(agent)) + ".csv"):
+                    os.remove(os.path.join(self.exp_directory, "times", str(agent)) + ".csv")
+                if os.path.exists(os.path.join(self.exp_directory, "success", str(agent)) + ".csv"):
+                    os.remove(os.path.join(self.exp_directory, "success", str(agent)) + ".csv")
         self.write_exp_info_to_file()
 
     def make_plots(self, open_plot=True):
@@ -90,12 +182,28 @@ class Experiment(object):
         else:
             agent_name_ls = [a.get_name() for a in self.agents]
             
-        chart_utils.make_plots(self.exp_directory,
-                                agent_name_ls,
+        if self.experiment_name_prefix != "":
+            plot_file_name = self.experiment_name_prefix + str(self.mdp)
+        else:
+            plot_file_name = ""
+
+        chart_utils.make_plots(self.exp_directory, agent_name_ls,
                                 episodic=self.is_episodic,
+                                plot_file_name=plot_file_name,
                                 cumulative=self.cumulative_plot,
                                 track_disc_reward=self.track_disc_reward,
                                 open_plot=open_plot)
+
+        if self.track_success:
+            chart_utils.make_plots(os.path.join(self.exp_directory, "success"), agent_name_ls,
+                                episodic=True,
+                                plot_file_name="success_rate",
+                                cumulative=False,
+                                track_disc_reward=False,
+                                open_plot=open_plot,
+                                new_title="Success Rate",
+                                new_x_label="Episode Number",
+                                new_y_label="Avg. Success %")
 
     def _write_extra_datum_to_file(self, mdp_name, agent, datum, datum_name):
         out_file = open(os.path.join(self.exp_directory, str(agent)) + "-" + datum_name + ".csv", "a+")
@@ -155,6 +263,8 @@ class Experiment(object):
             for x in range(num_times_to_write):
                 self.write_datum_to_file(agent, sum(self.rewards[agent]))
                 self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
+                if self.track_success:
+                    self.write_datum_to_file(agent, int(self.rewards[agent][-1] >= self.success_reward), extra_dir="success/")
         else:
             for x in range(num_times_to_write):
                 for step_reward in self.rewards[agent]:
@@ -170,6 +280,11 @@ class Experiment(object):
         out_file = open(os.path.join(self.exp_directory, str(agent)) + ".csv", "a+")
         out_file.write("\n")
         out_file.close()
+
+        if self.track_success:
+            out_file = open(os.path.join(self.exp_directory, "success", str(agent)) + ".csv", "a+")
+            out_file.write("\n")
+            out_file.close()
 
         if os.path.isdir(os.path.join(self.exp_directory, "times", "")):
             out_file = open(os.path.join(self.exp_directory, "times", str(agent)) + ".csv", "a+")
@@ -192,7 +307,7 @@ class Experiment(object):
         Summary:
             Writes relevant experiment information to a file for reproducibility.
         '''
-        out_file = open(self.exp_directory + "/parameters.txt", "w+")
+        out_file = open(os.path.join(self.exp_directory, Experiment.EXP_PARAM_FILE_NAME), "w+")
         to_write_to_file = self._get_exp_file_string()
         out_file.write(to_write_to_file)
         out_file.close()

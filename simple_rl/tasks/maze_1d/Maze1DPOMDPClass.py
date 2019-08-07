@@ -54,8 +54,8 @@ class Maze1DPOMDP(POMDP):
         next_state = self._transition_func(state, action)
         return 'goal' if next_state.name == 'goal' else 'nothing'
 
-    def _reward_func(self, state, action):
-        next_state = self._transition_func(state, action)
+    def _reward_func(self, state, action, next_state):
+        # next_state = self._transition_func(state, action)
         observation = self._observation_func(state, action)
         return (1. - self.step_cost) if (next_state.name == observation == 'goal') else (0. - self.step_cost)
 

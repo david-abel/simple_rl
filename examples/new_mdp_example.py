@@ -29,9 +29,9 @@ class ColoredGridWorldMDP(GridWorldMDP):
                               width,
                               height,
                               init_loc=init_loc,
-                              goal_locs=goal_locs,
-                              init_state=ColoredGridWorldState(init_loc[0], init_loc[1], col_sq_locs_dict[init_loc[0]][init_loc[1]]))
+                              goal_locs=goal_locs)
 
+        self.init_state = ColoredGridWorldState(init_loc[0], init_loc[1], col_sq_locs_dict[init_loc[0]][init_loc[1]])
         self.col_sq_locs_dict = col_sq_locs_dict
 
     def _transition_func(self, state, action):

@@ -28,7 +28,7 @@ class State(object):
         return len(self.features())
 
     def is_terminal(self):
-    	return self._is_terminal
+        return self._is_terminal
 
     def set_terminal(self, is_term=True):
         self._is_terminal = is_term
@@ -46,7 +46,9 @@ class State(object):
         return "s." + str(self.data)
 
     def __eq__(self, other):
-        return self.data == other.data
+        if isinstance(other, State):
+            return self.data == other.data
+        return False
 
     def __getitem__(self, index):
         return self.data[index]

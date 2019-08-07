@@ -68,11 +68,12 @@ class TaxiOOMDP(OOMDP):
 
         return TaxiState(objects)
 
-    def _taxi_reward_func(self, state, action):
+    def _taxi_reward_func(self, state, action, next_state=None):
         '''
         Args:
             state (OOMDP State)
             action (str)
+            next_state (OOMDP State)
 
         Returns
             (float)

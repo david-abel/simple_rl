@@ -217,10 +217,17 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
         state_dict[s.x][s.y] = s
 
     # Grab colors.
-    from simple_rl.utils.chart_utils import first_five, color_ls
-    sa_colors = first_five + color_ls
-    while state_abstr.get_num_abstr_states() > len(sa_colors):
-        sa_colors.append((random.randint(0,255), random.randint(0,255), random.randint(0,255)))
+    from simple_rl.utils.chart_utils import color_ls
+    sa_colors = color_ls
+    abstr_states = state_abstr.get_abs_states()
+    non_singleton_abstr_states = [s_phi for s_phi in abstr_states if len(state_abstr.get_ground_states_in_abs_state(s_phi)) > 1]
+    new_color_index = 0
+    while len(non_singleton_abstr_states) > len(sa_colors):
+        next_new_color_variant = color_ls[new_color_index]
+        rand_color = [min(max(color_channel + random.randint(-30,30), 0), 255) for color_channel in next_new_color_variant]
+        sa_colors.append(rand_color)
+        new_color_index += 1
+
     color_index = 0
     abstr_state_color_dict = {}
 
@@ -238,15 +245,22 @@ def visualize_state_abstr_grid(grid_mdp, state_abstr, scr_width=720, scr_height=
             s = state_dict[i+1][grid_mdp.height - j]
             abs_state = state_abstr.phi(s)
             cluster_num = abs_state.data
+            is_singleton = abs_state not in non_singleton_abstr_states
 
             # Grab next color if we haven't assigned a color yet.
-            if abs_state.data not in abstr_state_color_dict.keys():
+            if not is_singleton and abs_state.data not in abstr_state_color_dict.keys():
                 abstr_state_color_dict[abs_state.data] = color_index
                 color_index += 1
 
-            abstr_state_color = sa_colors[abstr_state_color_dict[abs_state.data] % len(sa_colors)]
-            r = pygame.draw.rect(screen, abstr_state_color, (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width-10, cell_height-10), 0)
             r = pygame.draw.rect(screen, (46, 49, 49), top_left_point + (cell_width, cell_height), 3)
+            if not is_singleton:
+                abstr_state_color = sa_colors[abstr_state_color_dict[abs_state.data] % len(sa_colors)]
+                r = pygame.draw.rect(screen, abstr_state_color, (top_left_point[0] + 5, top_left_point[1] + 5) + (cell_width-10, cell_height-10), 0)
+
+            # else:
+                # top_left_point = width_buffer + cell_width*i, height_buffer + cell_height*j
+                # r = pygame.draw.rect(screen, (46, 49, 49), top_left_point + (cell_width, cell_height), 3)
+
 
             if grid_mdp.is_wall(i+1, grid_mdp.height - j):
                 # Draw the walls.

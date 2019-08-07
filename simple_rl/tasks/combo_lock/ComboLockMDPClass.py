@@ -29,12 +29,25 @@ class ComboLockMDP(MDP):
 
         MDP.__init__(self, ComboLockMDP.ACTIONS, self._transition_func, self._reward_func, init_state=ChainState(1), gamma=gamma)
 
-    def _reward_func(self, state, action):
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["combo"] = self.combo
+        param_dict["num_actions"] = self.num_actions
+        param_dict["num_states"] = self.num_states
+        param_dict["reset_val"] = self.reset_val
+   
+        return param_dict
+
+    def _reward_func(self, state, action, next_state=None):
         '''
         Args:
             state (State)
             action (str)
-            statePrime
+            next_state (State)
 
         Returns
             (float)

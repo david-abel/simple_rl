@@ -1,0 +1,14 @@
+Auto Generated Documentation
+============================
+
+.. toctree::
+	:maxdepth: 2
+	:caption: simple_rl:
+
+	overview
+	agents
+	experiments
+	mdp
+	planning
+	tasks
+	utils

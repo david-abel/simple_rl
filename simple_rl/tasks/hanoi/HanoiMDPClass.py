@@ -33,19 +33,31 @@ class HanoiMDP(MDP):
 
         MDP.__init__(self, HanoiMDP.ACTIONS, self._transition_func, self._reward_func, init_state=init_state, gamma=gamma)
 
-    def _reward_func(self, state, action):
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        param_dict["num_pegs"] = self.num_pegs
+        param_dict["num_discs"] = self.num_discs
+   
+        return param_dict
+
+    def _reward_func(self, state, action, next_state):
         '''
         Args:
             state (State)
             action (str)
+            next_state (State)
 
         Returns
             (float)
         '''
-        source_index = int(action[0])
-        dest_index = int(action[1])
+        if state.is_terminal():
+            return 0
 
-        return int(self._transition_func(state, action).is_terminal())
+        return int(next_state.is_terminal())
 
     def _transition_func(self, state, action):
         '''

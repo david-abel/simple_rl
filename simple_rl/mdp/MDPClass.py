@@ -19,6 +19,17 @@ class MDP(object):
     # -- Accessors --
     # ---------------
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = {}
+        param_dict["gamma"] = self.gamma
+        param_dict["step_cost"] = self.step_cost
+
+        return param_dict
+
     def get_init_state(self):
         return self.init_state
 
@@ -43,6 +54,9 @@ class MDP(object):
     def get_slip_prob(self):
         pass
 
+    def get_name(self):
+        return str(self)
+
     # --------------
     # -- Mutators --
     # --------------
@@ -55,6 +69,9 @@ class MDP(object):
 
     def set_slip_prob(self, slip_prob):
         pass
+
+    def set_init_state(self, new_init_state):
+        self.init_state = copy.deepcopy(new_init_state)
 
     # ----------
     # -- Core --
@@ -72,8 +89,8 @@ class MDP(object):
             Core method of all of simple_rl. Facilitates interaction
             between the MDP and an agent.
         '''
-        reward = self.reward_func(self.cur_state, action)
         next_state = self.transition_func(self.cur_state, action)
+        reward = self.reward_func(self.cur_state, action, next_state)
         self.cur_state = next_state
 
         return reward, next_state

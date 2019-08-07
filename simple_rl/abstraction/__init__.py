@@ -9,8 +9,13 @@ from simple_rl.abstraction.action_abs.OptionClass import Option
 from simple_rl.abstraction.action_abs.PolicyClass import Policy
 from simple_rl.abstraction.action_abs.PolicyFromDictClass import PolicyFromDict
 from simple_rl.abstraction.action_abs.PredicateClass import Predicate
+from simple_rl.abstraction.features.FeatureWrapperClass import FeatureWrapper
+from simple_rl.abstraction.features.TileCodingClass import TileCoding
+from simple_rl.abstraction.features.BucketCodingClass import BucketCoding
+from simple_rl.abstraction.features.RBFCodingClass import RBFCoding
 
 # Scripts.
 from simple_rl.abstraction.state_abs import sa_helpers, indicator_funcs
 from simple_rl.abstraction.action_abs import aa_helpers
-from simple_rl.abstraction.abstr_mdp import abstr_mdp_funcs
+from simple_rl.abstraction.state_action_abstr_mdp import abstr_mdp_funcs
+

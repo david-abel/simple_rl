@@ -39,9 +39,9 @@ simple_rl
 		make_mdp.py
 	run_experiments.py
 
-Author and Maintainer: David Abel (cs.brown.edu/~dabel/)
-Last Updated: April 23rd, 2018
-Contact: dabel@cs.brown.edu
+Author and Maintainer: David Abel (david_abel.github.io)
+Last Updated: March 27th, 2019
+Contact: david_abel@brown.edu
 License: Apache
 '''
 # Fix xrange to cooperate with python 2 and 3.

@@ -16,11 +16,12 @@ class PrisonersDilemmaMDP(MarkovGameMDP):
     def __init__(self):
         MarkovGameMDP.__init__(self, PrisonersDilemmaMDP.ACTIONS, self._transition_func, self._reward_func, init_state=State())
 
-    def _reward_func(self, state, action_dict):
+    def _reward_func(self, state, action_dict, next_state=None):
         '''
         Args:
             state (State)
             action (dict of actions)
+            next_state (State)
 
         Returns
             (float)
@@ -42,7 +43,6 @@ class PrisonersDilemmaMDP(MarkovGameMDP):
             reward_dict[agent_b] = 0
 
         return reward_dict
-
 
 
     def _transition_func(self, state, action):

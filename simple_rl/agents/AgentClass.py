@@ -14,6 +14,13 @@ class Agent(object):
         self.prev_state = None
         self.prev_action = None
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        return {}
+
     def act(self, state, reward):
         '''
         Args:

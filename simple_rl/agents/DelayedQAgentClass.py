@@ -59,6 +59,19 @@ class DelayedQAgent(Agent):
         self.epsilon1 = epsilon1
         
         self.tstar = 0  # time of most recent action value change
+    
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        
+        param_dict["gamma"] = self.gamma
+        param_dict["m"] = self.m
+        param_dict["epsilon1"] = self.epsilon1
+
+        return param_dict
 
     # --------------------------------
     # ---- CENTRAL ACTION METHODS ----

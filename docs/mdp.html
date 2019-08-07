@@ -1,0 +1,403 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simple_rl.mdp package &#8212; simple_rl v0.801 documentation</title>
+    <link rel="stylesheet" href="static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="static/documentation_options.js"></script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="simple_rl.planning package" href="planning.html" />
+    <link rel="prev" title="simple_rl.experiments package" href="experiments.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="planning.html" title="simple_rl.planning package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experiments.html" title="simple_rl.experiments package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">simple_rl v0.801 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="code.html" accesskey="U">Auto Generated Documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="simple-rl-mdp-package">
+<h1>simple_rl.mdp package<a class="headerlink" href="#simple-rl-mdp-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-simple_rl.mdp.MDPClass">
+<span id="simple-rl-mdp-mdpclass-module"></span><h2>simple_rl.mdp.MDPClass module<a class="headerlink" href="#module-simple_rl.mdp.MDPClass" title="Permalink to this headline">¶</a></h2>
+<p>MDPClass.py: Contains the MDP Class.</p>
+<dl class="class">
+<dt id="simple_rl.mdp.MDPClass.MDP">
+<em class="property">class </em><code class="descclassname">simple_rl.mdp.MDPClass.</code><code class="descname">MDP</code><span class="sig-paren">(</span><em>actions</em>, <em>transition_func</em>, <em>reward_func</em>, <em>init_state</em>, <em>gamma=0.99</em>, <em>step_cost=0</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Abstract class for a Markov Decision Process.</p>
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.end_of_instance">
+<code class="descname">end_of_instance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.end_of_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.end_of_instance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.execute_agent_action">
+<code class="descname">execute_agent_action</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.execute_agent_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.execute_agent_action" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>action (str)</dd>
+<dt>Returns:</dt>
+<dd>(tuple: &lt;float,State&gt;): reward, State</dd>
+<dt>Summary:</dt>
+<dd>Core method of all of simple_rl. Facilitates interaction
+between the MDP and an agent.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_actions">
+<code class="descname">get_actions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_curr_state">
+<code class="descname">get_curr_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_curr_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_curr_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_gamma">
+<code class="descname">get_gamma</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_gamma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_init_state">
+<code class="descname">get_init_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_init_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_init_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_num_state_feats">
+<code class="descname">get_num_state_feats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_num_state_feats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_num_state_feats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_parameters">
+<code class="descname">get_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns:</dt>
+<dd>(dict) key=param_name (str) --&gt; val=param_val (object).</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_reward_func">
+<code class="descname">get_reward_func</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_reward_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_reward_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_slip_prob">
+<code class="descname">get_slip_prob</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_slip_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_slip_prob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.get_transition_func">
+<code class="descname">get_transition_func</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.get_transition_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.get_transition_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.set_gamma">
+<code class="descname">set_gamma</code><span class="sig-paren">(</span><em>new_gamma</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.set_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.set_gamma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.set_slip_prob">
+<code class="descname">set_slip_prob</code><span class="sig-paren">(</span><em>slip_prob</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.set_slip_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.set_slip_prob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPClass.MDP.set_step_cost">
+<code class="descname">set_step_cost</code><span class="sig-paren">(</span><em>new_step_cost</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPClass.html#MDP.set_step_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPClass.MDP.set_step_cost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simple_rl.mdp.MDPDistributionClass">
+<span id="simple-rl-mdp-mdpdistributionclass-module"></span><h2>simple_rl.mdp.MDPDistributionClass module<a class="headerlink" href="#module-simple_rl.mdp.MDPDistributionClass" title="Permalink to this headline">¶</a></h2>
+<p>MDPDistributionClass.py: Contains the MDP Distribution Class.</p>
+<dl class="class">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution">
+<em class="property">class </em><code class="descclassname">simple_rl.mdp.MDPDistributionClass.</code><code class="descname">MDPDistribution</code><span class="sig-paren">(</span><em>mdp_prob_dict</em>, <em>horizon=0</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for distributions over MDPs.</p>
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_actions">
+<code class="descname">get_actions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_all_mdps">
+<code class="descname">get_all_mdps</code><span class="sig-paren">(</span><em>prob_threshold=0</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_all_mdps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_all_mdps" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>prob_threshold (float)</dd>
+<dt>Returns:</dt>
+<dd>(list): Contains all mdps in the distribution with Pr. &gt; &#64;prob_threshold.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_average_reward_func">
+<code class="descname">get_average_reward_func</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_average_reward_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_average_reward_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_gamma">
+<code class="descname">get_gamma</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_gamma" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Notes:</dt>
+<dd>Not all MDPs in the distribution are guaranteed to share gamma.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_horizon">
+<code class="descname">get_horizon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_horizon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_horizon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_init_state">
+<code class="descname">get_init_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_init_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_init_state" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Notes:</dt>
+<dd>Not all MDPs in the distribution are guaranteed to share init states.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_mdps">
+<code class="descname">get_mdps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_mdps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_mdps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_num_mdps">
+<code class="descname">get_num_mdps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_num_mdps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_num_mdps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_parameters">
+<code class="descname">get_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns:</dt>
+<dd>(dict) key=param_name (str) --&gt; val=param_val (object).</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_prob_of_mdp">
+<code class="descname">get_prob_of_mdp</code><span class="sig-paren">(</span><em>mdp</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_prob_of_mdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_prob_of_mdp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_reward_func">
+<code class="descname">get_reward_func</code><span class="sig-paren">(</span><em>avg=True</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.get_reward_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.get_reward_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.remove_mdp">
+<code class="descname">remove_mdp</code><span class="sig-paren">(</span><em>mdp</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.remove_mdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.remove_mdp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>(MDP)</dd>
+<dt>Summary:</dt>
+<dd>Removes &#64;mdp from self.mdp_prob_dict and recomputes the distribution.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.remove_mdps">
+<code class="descname">remove_mdps</code><span class="sig-paren">(</span><em>mdp_list</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.remove_mdps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.remove_mdps" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>(list): Contains MDP instances.</dd>
+<dt>Summary:</dt>
+<dd>Removes each mdp in &#64;mdp_list from self.mdp_prob_dict and recomputes the distribution.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>k=1</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.sample" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Args:</dt>
+<dd>k (int)</dd>
+<dt>Returns:</dt>
+<dd>(List of MDP): Samples &#64;k mdps without replacement.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.MDPDistributionClass.MDPDistribution.set_gamma">
+<code class="descname">set_gamma</code><span class="sig-paren">(</span><em>new_gamma</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#MDPDistribution.set_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.MDPDistribution.set_gamma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="simple_rl.mdp.MDPDistributionClass.main">
+<code class="descclassname">simple_rl.mdp.MDPDistributionClass.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/MDPDistributionClass.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.MDPDistributionClass.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-simple_rl.mdp.StateClass">
+<span id="simple-rl-mdp-stateclass-module"></span><h2>simple_rl.mdp.StateClass module<a class="headerlink" href="#module-simple_rl.mdp.StateClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simple_rl.mdp.StateClass.State">
+<em class="property">class </em><code class="descclassname">simple_rl.mdp.StateClass.</code><code class="descname">State</code><span class="sig-paren">(</span><em>data=[]</em>, <em>is_terminal=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/StateClass.html#State"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.StateClass.State" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Abstract State class</p>
+<dl class="method">
+<dt id="simple_rl.mdp.StateClass.State.features">
+<code class="descname">features</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/StateClass.html#State.features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.StateClass.State.features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Summary</dt>
+<dd>Used by function approximators to represent the state.
+Override this method in State subclasses to have functiona
+approximators use a different set of features.</dd>
+<dt>Returns:</dt>
+<dd>(iterable)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.StateClass.State.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/StateClass.html#State.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.StateClass.State.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.StateClass.State.get_num_feats">
+<code class="descname">get_num_feats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/StateClass.html#State.get_num_feats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.StateClass.State.get_num_feats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.StateClass.State.is_terminal">
+<code class="descname">is_terminal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/StateClass.html#State.is_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.StateClass.State.is_terminal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="simple_rl.mdp.StateClass.State.set_terminal">
+<code class="descname">set_terminal</code><span class="sig-paren">(</span><em>is_term=True</em><span class="sig-paren">)</span><a class="reference internal" href="modules/simple_rl/mdp/StateClass.html#State.set_terminal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simple_rl.mdp.StateClass.State.set_terminal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-simple_rl.mdp">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-simple_rl.mdp" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">simple_rl.mdp package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-simple_rl.mdp.MDPClass">simple_rl.mdp.MDPClass module</a></li>
+<li><a class="reference internal" href="#module-simple_rl.mdp.MDPDistributionClass">simple_rl.mdp.MDPDistributionClass module</a></li>
+<li><a class="reference internal" href="#module-simple_rl.mdp.StateClass">simple_rl.mdp.StateClass module</a></li>
+<li><a class="reference internal" href="#module-simple_rl.mdp">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experiments.html"
+                        title="previous chapter">simple_rl.experiments package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="planning.html"
+                        title="next chapter">simple_rl.planning package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="sources/mdp.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="planning.html" title="simple_rl.planning package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experiments.html" title="simple_rl.experiments package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">simple_rl v0.801 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="code.html" >Auto Generated Documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, David Abel.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
+    </div>
+  </body>
+</html>

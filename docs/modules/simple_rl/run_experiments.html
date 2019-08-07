@@ -1,0 +1,742 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="Python">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>simple_rl.run_experiments &#8212; simple_rl v0.801 documentation</title>
+    <link rel="stylesheet" href="../../static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">simple_rl v0.801 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for simple_rl.run_experiments</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Code for running experiments where RL agents interact with an MDP.</span>
+
+<span class="sd">Instructions:</span>
+<span class="sd">    (1) Create an MDP.</span>
+<span class="sd">    (2) Create agents.</span>
+<span class="sd">    (3) Set experiment parameters (instances, episodes, steps).</span>
+<span class="sd">    (4) Call run_agents_on_mdp(agents, mdp) (or the lifelong/markov game equivalents).</span>
+
+<span class="sd">    -&gt; Runs all experiments and will open a plot with results when finished.</span>
+
+<span class="sd">Author: David Abel (cs.brown.edu/~dabel/)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1"># Python imports.</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+<span class="c1"># Non-standard imports.</span>
+<span class="kn">from</span> <span class="nn">simple_rl.planning</span> <span class="k">import</span> <span class="n">ValueIteration</span>
+<span class="kn">from</span> <span class="nn">simple_rl.experiments</span> <span class="k">import</span> <span class="n">Experiment</span>
+<span class="kn">from</span> <span class="nn">simple_rl.mdp</span> <span class="k">import</span> <span class="n">MarkovGameMDP</span>
+<span class="kn">from</span> <span class="nn">simple_rl.utils</span> <span class="k">import</span> <span class="n">chart_utils</span>
+<span class="kn">from</span> <span class="nn">simple_rl.agents</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">simple_rl.tasks</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="play_markov_game"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.play_markov_game">[docs]</a><span class="k">def</span> <span class="nf">play_markov_game</span><span class="p">(</span><span class="n">agent_ls</span><span class="p">,</span> <span class="n">markov_game_mdp</span><span class="p">,</span> <span class="n">instances</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">episodes</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">open_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        agent_list (list of Agents): See agents/AgentClass.py (and friends).</span>
+<span class="sd">        markov_game_mdp (MarkovGameMDP): See mdp/markov_games/MarkovGameMDPClass.py.</span>
+<span class="sd">        instances (int): Number of times to run each agent (for confidence intervals).</span>
+<span class="sd">        episodes (int): Number of episodes for each learning instance.</span>
+<span class="sd">        steps (int): Number of times to run each agent (for confidence intervals).</span>
+<span class="sd">        verbose (bool)</span>
+<span class="sd">        open_plot (bool): If true opens plot.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Put into dict.</span>
+    <span class="n">agent_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">agent_ls</span><span class="p">:</span>
+        <span class="n">agent_dict</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+
+    <span class="c1"># Experiment (for reproducibility, plotting).</span>
+    <span class="n">exp_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instances&quot;</span><span class="p">:</span><span class="n">instances</span><span class="p">,</span> <span class="s2">&quot;episodes&quot;</span><span class="p">:</span><span class="n">episodes</span><span class="p">,</span> <span class="s2">&quot;steps&quot;</span><span class="p">:</span><span class="n">steps</span><span class="p">}</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">agents</span><span class="o">=</span><span class="n">agent_dict</span><span class="p">,</span> <span class="n">mdp</span><span class="o">=</span><span class="n">markov_game_mdp</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">exp_params</span><span class="p">,</span> <span class="n">is_episodic</span><span class="o">=</span><span class="n">episodes</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">is_markov_game</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Record how long each agent spends learning.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running experiment: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">experiment</span><span class="p">))</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
+    <span class="c1"># For each instance of the agent.</span>
+    <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">instances</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Instance &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; of &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">instances</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+        <span class="n">reward_dict</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">action_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">episodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Episode </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">episode</span><span class="p">,</span> <span class="n">episodes</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Episode </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">episode</span><span class="p">,</span> <span class="n">episodes</span><span class="p">)))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+            <span class="c1"># Compute initial state/reward.</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">markov_game_mdp</span><span class="o">.</span><span class="n">get_init_state</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+
+                <span class="c1"># Compute each agent&#39;s policy.</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">agent_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">agent_reward</span> <span class="o">=</span> <span class="n">reward_dict</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                    <span class="n">agent_action</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">agent_reward</span><span class="p">)</span>
+                    <span class="n">action_dict</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">agent_action</span>
+
+                <span class="c1"># Terminal check.</span>
+                <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">():</span>
+                    <span class="n">experiment</span><span class="o">.</span><span class="n">add_experience</span><span class="p">(</span><span class="n">agent_dict</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">action_dict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">state</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Execute in MDP.</span>
+                <span class="n">reward_dict</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="n">markov_game_mdp</span><span class="o">.</span><span class="n">execute_agent_action</span><span class="p">(</span><span class="n">action_dict</span><span class="p">)</span>
+
+                <span class="c1"># Record the experience.</span>
+                <span class="n">experiment</span><span class="o">.</span><span class="n">add_experience</span><span class="p">(</span><span class="n">agent_dict</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">action_dict</span><span class="p">,</span> <span class="n">reward_dict</span><span class="p">,</span> <span class="n">next_state</span><span class="p">)</span>
+
+                <span class="c1"># Update pointer.</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">next_state</span>
+
+            <span class="c1"># A final update.</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">agent_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">agent_reward</span> <span class="o">=</span> <span class="n">reward_dict</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">agent_action</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">agent_reward</span><span class="p">)</span>
+                <span class="n">action_dict</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">agent_action</span>
+
+                <span class="c1"># Process that learning instance&#39;s info at end of learning.</span>
+                <span class="n">experiment</span><span class="o">.</span><span class="n">end_of_episode</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="c1"># Reset the MDP, tell the agent the episode is over.</span>
+            <span class="n">markov_game_mdp</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="c1"># A final update.</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">agent_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># Reset the agent and track experiment info.</span>
+            <span class="n">experiment</span><span class="o">.</span><span class="n">end_of_instance</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="c1"># Time stuff.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Experiment took &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; seconds.&quot;</span><span class="p">)</span>
+
+    <span class="n">experiment</span><span class="o">.</span><span class="n">make_plots</span><span class="p">(</span><span class="n">open_plot</span><span class="o">=</span><span class="n">open_plot</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="run_agents_lifelong"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.run_agents_lifelong">[docs]</a><span class="k">def</span> <span class="nf">run_agents_lifelong</span><span class="p">(</span><span class="n">agents</span><span class="p">,</span>
+                            <span class="n">mdp_distr</span><span class="p">,</span>
+                            <span class="n">samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                            <span class="n">episodes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                            <span class="n">clear_old_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">open_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">track_disc_reward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">reset_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">resample_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">cumulative_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">dir_for_plot</span><span class="o">=</span><span class="s2">&quot;results&quot;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        agents (list)</span>
+<span class="sd">        mdp_distr (MDPDistribution)</span>
+<span class="sd">        samples (int)</span>
+<span class="sd">        episodes (int)</span>
+<span class="sd">        steps (int)</span>
+<span class="sd">        clear_old_results (bool)</span>
+<span class="sd">        open_plot (bool)</span>
+<span class="sd">        verbose (bool)</span>
+<span class="sd">        track_disc_reward (bool): If true records and plots discounted reward, discounted over episodes. So, if</span>
+<span class="sd">            each episode is 100 steps, then episode 2 will start discounting as though it&#39;s step 101.</span>
+<span class="sd">        reset_at_terminal (bool)</span>
+<span class="sd">        resample_at_terminal (bool)</span>
+<span class="sd">        cumulative_plot (bool)</span>
+<span class="sd">        dir_for_plot (str)</span>
+
+<span class="sd">    Summary:</span>
+<span class="sd">        Runs each agent on the MDP distribution according to the given parameters.</span>
+<span class="sd">        If @mdp_distr has a non-zero horizon, then gamma is set to 1 and @steps is ignored.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Experiment (for reproducibility, plotting).</span>
+    <span class="n">exp_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;samples&quot;</span><span class="p">:</span><span class="n">samples</span><span class="p">,</span> <span class="s2">&quot;episodes&quot;</span><span class="p">:</span><span class="n">episodes</span><span class="p">,</span> <span class="s2">&quot;steps&quot;</span><span class="p">:</span><span class="n">steps</span><span class="p">}</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">agents</span><span class="o">=</span><span class="n">agents</span><span class="p">,</span>
+                    <span class="n">mdp</span><span class="o">=</span><span class="n">mdp_distr</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">exp_params</span><span class="p">,</span>
+                    <span class="n">is_episodic</span><span class="o">=</span><span class="n">episodes</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">is_lifelong</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">clear_old_results</span><span class="o">=</span><span class="n">clear_old_results</span><span class="p">,</span>
+                    <span class="n">track_disc_reward</span><span class="o">=</span><span class="n">track_disc_reward</span><span class="p">,</span>
+                    <span class="n">cumulative_plot</span><span class="o">=</span><span class="n">cumulative_plot</span><span class="p">,</span>
+                    <span class="n">dir_for_plot</span><span class="o">=</span><span class="n">dir_for_plot</span><span class="p">)</span>
+
+    <span class="c1"># Record how long each agent spends learning.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running experiment: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">experiment</span><span class="p">))</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Learn.</span>
+    <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is learning.&quot;</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
+        <span class="c1"># --- SAMPLE NEW MDP ---</span>
+        <span class="k">for</span> <span class="n">new_task</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Sample &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_task</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; of &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Sample the MDP.</span>
+            <span class="n">mdp</span> <span class="o">=</span> <span class="n">mdp_distr</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+
+            <span class="c1"># Run the agent.</span>
+            <span class="n">hit_terminal</span><span class="p">,</span> <span class="n">total_steps_taken</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">run_single_agent_on_mdp</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">track_disc_reward</span><span class="p">,</span> <span class="n">reset_at_terminal</span><span class="p">,</span> <span class="n">resample_at_terminal</span><span class="p">)</span>
+
+            <span class="c1"># If we resample at terminal, keep grabbing MDPs until we&#39;re done.</span>
+            <span class="k">while</span> <span class="n">resample_at_terminal</span> <span class="ow">and</span> <span class="n">hit_terminal</span> <span class="ow">and</span> <span class="n">total_steps_taken</span> <span class="o">&lt;</span> <span class="n">steps</span><span class="p">:</span>
+                <span class="n">mdp</span> <span class="o">=</span> <span class="n">mdp_distr</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+                <span class="n">hit_terminal</span><span class="p">,</span> <span class="n">steps_taken</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">run_single_agent_on_mdp</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">steps</span> <span class="o">-</span> <span class="n">total_steps_taken</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">track_disc_reward</span><span class="p">,</span> <span class="n">reset_at_terminal</span><span class="p">,</span> <span class="n">resample_at_terminal</span><span class="p">)</span>
+                <span class="n">total_steps_taken</span> <span class="o">+=</span> <span class="n">steps_taken</span>
+
+            <span class="c1"># Reset the agent.</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="c1"># Track how much time this agent took.</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="n">times</span><span class="p">[</span><span class="n">agent</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+
+    <span class="c1"># Time stuff.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- TIMES ---&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">times</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; agent took &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">agent</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; seconds.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">experiment</span><span class="o">.</span><span class="n">make_plots</span><span class="p">(</span><span class="n">open_plot</span><span class="o">=</span><span class="n">open_plot</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="run_agents_on_mdp"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.run_agents_on_mdp">[docs]</a><span class="k">def</span> <span class="nf">run_agents_on_mdp</span><span class="p">(</span><span class="n">agents</span><span class="p">,</span>
+                        <span class="n">mdp</span><span class="p">,</span>
+                        <span class="n">instances</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                        <span class="n">episodes</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                        <span class="n">steps</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+                        <span class="n">clear_old_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">rew_step_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">track_disc_reward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">open_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">reset_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">cumulative_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">dir_for_plot</span><span class="o">=</span><span class="s2">&quot;results&quot;</span><span class="p">,</span>
+                        <span class="n">experiment_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        agents (list of Agents): See agents/AgentClass.py (and friends).</span>
+<span class="sd">        mdp (MDP): See mdp/MDPClass.py for the abstract class. Specific MDPs in tasks/*.</span>
+<span class="sd">        instances (int): Number of times to run each agent (for confidence intervals).</span>
+<span class="sd">        episodes (int): Number of episodes for each learning instance.</span>
+<span class="sd">        steps (int): Number of steps per episode.</span>
+<span class="sd">        clear_old_results (bool): If true, removes all results files in the relevant results dir.</span>
+<span class="sd">        rew_step_count (int): Number of steps before recording reward.</span>
+<span class="sd">        track_disc_reward (bool): If true, track (and plot) discounted reward.</span>
+<span class="sd">        open_plot (bool): If true opens the plot at the end.</span>
+<span class="sd">        verbose (bool): If true, prints status bars per episode/instance.</span>
+<span class="sd">        reset_at_terminal (bool): If true sends the agent to the start state after terminal.</span>
+<span class="sd">        cumulative_plot (bool): If true makes a cumulative plot, otherwise plots avg. reward per timestep.</span>
+<span class="sd">        dir_for_plot (str): Path</span>
+<span class="sd">        experiment_name_prefix (str): Adds this to the end of the usual experiment name.</span>
+
+<span class="sd">    Summary:</span>
+<span class="sd">        Runs each agent on the given mdp according to the given parameters.</span>
+<span class="sd">        Stores results in results/&lt;agent_name&gt;.csv and automatically</span>
+<span class="sd">        generates a plot and opens it.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Experiment (for reproducibility, plotting).</span>
+    <span class="n">exp_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instances&quot;</span><span class="p">:</span><span class="n">instances</span><span class="p">,</span> <span class="s2">&quot;episodes&quot;</span><span class="p">:</span><span class="n">episodes</span><span class="p">,</span> <span class="s2">&quot;steps&quot;</span><span class="p">:</span><span class="n">steps</span><span class="p">}</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">agents</span><span class="o">=</span><span class="n">agents</span><span class="p">,</span>
+                            <span class="n">mdp</span><span class="o">=</span><span class="n">mdp</span><span class="p">,</span>
+                            <span class="n">params</span><span class="o">=</span><span class="n">exp_params</span><span class="p">,</span>
+                            <span class="n">is_episodic</span><span class="o">=</span> <span class="n">episodes</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="n">clear_old_results</span><span class="o">=</span><span class="n">clear_old_results</span><span class="p">,</span>
+                            <span class="n">track_disc_reward</span><span class="o">=</span><span class="n">track_disc_reward</span><span class="p">,</span>
+                            <span class="n">count_r_per_n_timestep</span><span class="o">=</span><span class="n">rew_step_count</span><span class="p">,</span>
+                            <span class="n">cumulative_plot</span><span class="o">=</span><span class="n">cumulative_plot</span><span class="p">,</span>
+                            <span class="n">dir_for_plot</span><span class="o">=</span><span class="n">dir_for_plot</span><span class="p">,</span>
+                            <span class="n">experiment_name_prefix</span><span class="o">=</span><span class="n">experiment_name_prefix</span><span class="p">)</span>
+
+    <span class="c1"># Record how long each agent spends learning.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running experiment: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">experiment</span><span class="p">))</span>
+    <span class="n">time_dict</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># Learn.</span>
+    <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is learning.&quot;</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
+        <span class="c1"># For each instance.</span>
+        <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">instances</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Instance &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; of &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">run_single_agent_on_mdp</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">track_disc_reward</span><span class="p">,</span> <span class="n">reset_at_terminal</span><span class="o">=</span><span class="n">reset_at_terminal</span><span class="p">)</span>
+            
+            <span class="c1"># Reset the agent.</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">mdp</span><span class="o">.</span><span class="n">end_of_instance</span><span class="p">()</span>
+
+        <span class="c1"># Track how much time this agent took.</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="n">time_dict</span><span class="p">[</span><span class="n">agent</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+    <span class="c1"># Time stuff.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- TIMES ---&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">time_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; agent took &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time_dict</span><span class="p">[</span><span class="n">agent</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; seconds.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">experiment</span><span class="o">.</span><span class="n">make_plots</span><span class="p">(</span><span class="n">open_plot</span><span class="o">=</span><span class="n">open_plot</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="run_single_agent_on_mdp"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.run_single_agent_on_mdp">[docs]</a><span class="k">def</span> <span class="nf">run_single_agent_on_mdp</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">track_disc_reward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reset_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resample_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Summary:</span>
+<span class="sd">        Main loop of a single MDP experiment.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (tuple): (bool:reached terminal, int: num steps taken, float: cumulative discounted reward)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">reset_at_terminal</span> <span class="ow">and</span> <span class="n">resample_at_terminal</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;(simple_rl) ExperimentError: Can&#39;t have reset_at_terminal and resample_at_terminal set to True.&quot;</span><span class="p">)</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_gamma</span><span class="p">()</span>
+
+    <span class="c1"># For each episode.</span>
+    <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">episodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="c1"># Print episode numbers out nicely.</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Episode </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">episode</span><span class="p">,</span> <span class="n">episodes</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Episode </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">episode</span><span class="p">,</span> <span class="n">episodes</span><span class="p">)))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="c1"># Compute initial state/reward.</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_init_state</span><span class="p">()</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">episode_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
+        <span class="c1"># Extra printing if verbose.</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">prog_bar_len</span> <span class="o">=</span> <span class="n">_make_step_progress_bar</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">prog_bar_len</span><span class="o">*</span><span class="nb">float</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="o">/</span> <span class="n">steps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">prog_bar_len</span><span class="o">*</span><span class="nb">float</span><span class="p">(</span><span class="n">step</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">steps</span><span class="p">):</span>
+                <span class="n">_increment_bar</span><span class="p">()</span>
+
+            <span class="c1"># step time</span>
+            <span class="n">step_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
+            <span class="c1"># Compute the agent&#39;s policy.</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">reward</span><span class="p">)</span>
+
+            <span class="c1"># Terminal check.</span>
+            <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">episodes</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reset_at_terminal</span> <span class="ow">and</span> <span class="n">experiment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">action</span> <span class="o">!=</span> <span class="s2">&quot;terminate&quot;</span><span class="p">:</span>
+                    <span class="c1"># Self loop if we&#39;re not episodic or resetting and in a terminal state.</span>
+                    <span class="n">experiment</span><span class="o">.</span><span class="n">add_experience</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">time_taken</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">step_start</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">break</span>
+
+            <span class="c1"># Execute in MDP.</span>
+            <span class="n">reward</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">execute_agent_action</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+            <span class="c1"># Track value.</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="n">reward</span> <span class="o">*</span> <span class="n">gamma</span> <span class="o">**</span> <span class="n">step</span>
+
+            <span class="c1"># Record the experience.</span>
+            <span class="k">if</span> <span class="n">experiment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">reward_to_track</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_gamma</span><span class="p">()</span><span class="o">**</span><span class="p">(</span><span class="n">step</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">episode</span><span class="o">*</span><span class="n">steps</span><span class="p">)</span> <span class="o">*</span> <span class="n">reward</span> <span class="k">if</span> <span class="n">track_disc_reward</span> <span class="k">else</span> <span class="n">reward</span>
+                <span class="n">reward_to_track</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">reward_to_track</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">experiment</span><span class="o">.</span><span class="n">add_experience</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">reward_to_track</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">time_taken</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">step_start</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">next_state</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">reset_at_terminal</span><span class="p">:</span>
+                    <span class="c1"># Reset the MDP.</span>
+                    <span class="n">next_state</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_init_state</span><span class="p">()</span>
+                    <span class="n">mdp</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">resample_at_terminal</span> <span class="ow">and</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="n">steps</span><span class="p">:</span>
+                    <span class="n">mdp</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">value</span>
+
+            <span class="c1"># Update pointer.</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">next_state</span>
+
+        <span class="c1"># A final update.</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">reward</span><span class="p">)</span>
+
+        <span class="c1"># Process experiment info at end of episode.</span>
+        <span class="k">if</span> <span class="n">experiment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">experiment</span><span class="o">.</span><span class="n">end_of_episode</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+
+        <span class="c1"># Reset the MDP, tell the agent the episode is over.</span>
+        <span class="n">mdp</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">end_of_episode</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Process that learning instance&#39;s info at end of learning.</span>
+    <span class="k">if</span> <span class="n">experiment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">experiment</span><span class="o">.</span><span class="n">end_of_instance</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="run_single_belief_agent_on_pomdp"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.run_single_belief_agent_on_pomdp">[docs]</a><span class="k">def</span> <span class="nf">run_single_belief_agent_on_pomdp</span><span class="p">(</span><span class="n">belief_agent</span><span class="p">,</span> <span class="n">pomdp</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">track_disc_reward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reset_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resample_at_terminal</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        belief_agent:</span>
+<span class="sd">        pomdp:</span>
+<span class="sd">        episodes:</span>
+<span class="sd">        steps:</span>
+<span class="sd">        experiment:</span>
+<span class="sd">        verbose:</span>
+<span class="sd">        track_disc_reward:</span>
+<span class="sd">        reset_at_terminal:</span>
+<span class="sd">        resample_at_terminal:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">pass</span></div>
+
+<span class="k">def</span> <span class="nf">_make_step_progress_bar</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Summary:</span>
+<span class="sd">        Prints a step progress bar for experiments.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (int): Length of the progress bar (in characters).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">progress_bar_width</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">progress_bar_width</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">progress_bar_width</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># return to start of line, after &#39;[&#39;</span>
+    <span class="k">return</span> <span class="n">progress_bar_width</span>
+
+<span class="k">def</span> <span class="nf">_increment_bar</span><span class="p">():</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+<div class="viewcode-block" id="evaluate_agent"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.evaluate_agent">[docs]</a><span class="k">def</span> <span class="nf">evaluate_agent</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">instances</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        agent (simple_rl.Agent)</span>
+<span class="sd">        mdp (simple_rl.MDP)</span>
+<span class="sd">        instances (int)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (float): Avg. cumulative discounted reward.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_gamma</span><span class="p">()))</span> <span class="o">*</span> <span class="mi">10</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">instances</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">run_single_agent_on_mdp</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">episodes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">val</span>
+
+        <span class="c1"># Reset the agent.</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">mdp</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">mdp</span><span class="o">.</span><span class="n">end_of_instance</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">total</span> <span class="o">/</span> <span class="n">instances</span></div>
+
+<div class="viewcode-block" id="reproduce_from_exp_file"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.reproduce_from_exp_file">[docs]</a><span class="k">def</span> <span class="nf">reproduce_from_exp_file</span><span class="p">(</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">results_dir_name</span><span class="o">=</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">open_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        exp_name (str)</span>
+<span class="sd">        results_dir_name (str)</span>
+<span class="sd">        open_plot (bool)</span>
+
+<span class="sd">    Summary:</span>
+<span class="sd">        Extracts the agents, MDP, and parameters from the file and runs the experiment.</span>
+<span class="sd">        Stores data in &quot;results_dir_name/exp_name/reproduce_i/*&quot;, where &quot;i&quot; is determined</span>
+<span class="sd">        based on the existence of earlier &quot;reproduce&quot; files.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Get dir and file.</span>
+    <span class="n">exp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_dir_name</span><span class="p">,</span> <span class="n">exp_name</span><span class="p">)</span>
+    <span class="n">exp_file</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">FULL_EXP_FILE_NAME</span>
+    <span class="n">full_exp_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">exp_dir</span><span class="p">,</span> <span class="n">exp_file</span><span class="p">)</span>
+
+    <span class="c1"># Check to make sure the file exists.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_exp_file</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;(simple_rl): no such experiment: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_exp_file</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Open the file.</span>
+    <span class="n">exp_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_exp_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Placeholders.</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mdp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">experiment_param_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">experiment_func</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Read the file in.</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">exp_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="s2">&quot;OOMDP&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s2">&quot;POMDP&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;(simple_rl): reproduction not yet implemented for OOMDPs and POMDPs.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;MDP:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">mdp_class_str</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mdp_param_dict</span> <span class="o">=</span> <span class="n">_get_params_from_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_index</span><span class="o">=</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">MDPClass</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">mdp_class_str</span><span class="p">)</span>
+            <span class="n">mdp</span> <span class="o">=</span> <span class="n">MDPClass</span><span class="p">(</span><span class="o">**</span><span class="n">mdp_param_dict</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;AGENT:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="c1"># Get class and make agent.</span>
+            <span class="n">agent_class_str</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">agent_param_dict</span> <span class="o">=</span> <span class="n">_get_params_from_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_index</span><span class="o">=</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">AgentClass</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">agent_class_str</span><span class="p">)</span>
+
+            <span class="n">agent_param_dict</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_actions</span><span class="p">()</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="n">AgentClass</span><span class="p">(</span><span class="o">**</span><span class="n">agent_param_dict</span><span class="p">)</span>
+            <span class="n">agents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;MISC&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">experiment_param_dict</span> <span class="o">=</span> <span class="n">_get_params_from_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_index</span><span class="o">=</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s2">&quot;FUNC&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">experiment_func</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+
+    <span class="c1"># Prints.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">17</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Reproducing&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">17</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MDP:&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mdp</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Agents:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">17</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">17</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Reproduce.</span>
+    <span class="n">chart_utils</span><span class="o">.</span><span class="n">CUSTOM_TITLE</span> <span class="o">=</span> <span class="s2">&quot;Reproduce: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mdp</span><span class="p">)</span>
+    <span class="n">experiment_func</span><span class="p">(</span><span class="n">agents</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">dir_for_plot</span><span class="o">=</span><span class="n">results_dir_name</span><span class="p">,</span> <span class="n">experiment_name_prefix</span><span class="o">=</span><span class="s2">&quot;reproduce_&quot;</span><span class="p">,</span> <span class="n">open_plot</span><span class="o">=</span><span class="n">open_plot</span><span class="p">,</span> <span class="o">**</span><span class="n">experiment_param_dict</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">22</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Done Reproducing&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="o">*</span><span class="mi">22</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">exp_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="k">def</span> <span class="nf">_get_params_from_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_index</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        lines (list)</span>
+<span class="sd">        start_index (int)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict)</span>
+
+<span class="sd">    Summary:</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span> <span class="k">as</span> <span class="n">make_tuple</span>
+    <span class="kn">import</span> <span class="nn">ast</span>
+    <span class="n">agent_param_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Get the class.</span>
+
+    <span class="n">hit_next_agent</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">start_index</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">hit_next_agent</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Grab param name, value, and type.</span>
+        <span class="n">next_line</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)]</span>
+        <span class="n">param_name</span><span class="p">,</span> <span class="n">param_val</span><span class="p">,</span> <span class="n">param_type</span> <span class="o">=</span> <span class="n">next_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">next_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">next_line</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">next_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">next_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)]</span>
+        
+        <span class="k">if</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
+            <span class="n">param_val</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">param_val</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;tuple&quot;</span><span class="p">:</span>
+            <span class="n">param_val</span> <span class="o">=</span> <span class="n">make_tuple</span><span class="p">(</span><span class="n">param_val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;list&quot;</span><span class="p">:</span>
+            <span class="n">param_val</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">param_val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>         
+            <span class="n">param_val</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">param_type</span><span class="p">)(</span><span class="n">param_val</span><span class="p">)</span>
+        <span class="n">agent_param_dict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_val</span>
+
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">agent_param_dict</span>
+
+<span class="k">def</span> <span class="nf">_parse_tuple_string</span><span class="p">(</span><span class="n">tup_str</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tup (tuple)</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="choose_mdp"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.choose_mdp">[docs]</a><span class="k">def</span> <span class="nf">choose_mdp</span><span class="p">(</span><span class="n">mdp_name</span><span class="p">,</span> <span class="n">env_name</span><span class="o">=</span><span class="s2">&quot;Asteroids-v0&quot;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        mdp_name (str): one of {gym, grid, chain, taxi, ...}</span>
+<span class="sd">        gym_env_name (str): gym environment name, like &#39;CartPole-v0&#39;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (MDP)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Other imports</span>
+    <span class="kn">from</span> <span class="nn">simple_rl.tasks</span> <span class="k">import</span> <span class="n">ChainMDP</span><span class="p">,</span> <span class="n">GridWorldMDP</span><span class="p">,</span> <span class="n">FourRoomMDP</span><span class="p">,</span> <span class="n">TaxiOOMDP</span><span class="p">,</span> <span class="n">RandomMDP</span><span class="p">,</span> <span class="n">PrisonersDilemmaMDP</span><span class="p">,</span> <span class="n">RockPaperScissorsMDP</span><span class="p">,</span> <span class="n">GridGameMDP</span>
+
+    <span class="c1"># Taxi MDP.</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;has_passenger&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
+    <span class="n">passengers</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;dest_x&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;dest_y&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;in_taxi&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">}]</span>
+    <span class="n">walls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">mdp_name</span> <span class="o">==</span> <span class="s2">&quot;gym&quot;</span><span class="p">:</span>
+        <span class="c1"># OpenAI Gym MDP.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">simple_rl.tasks.gym.GymMDPClass</span> <span class="k">import</span> <span class="n">GymMDP</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;(simple_rl) Error: OpenAI gym not installed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">GymMDP</span><span class="p">(</span><span class="n">env_name</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;grid&quot;</span><span class="p">:</span><span class="n">GridWorldMDP</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">goal_locs</span><span class="o">=</span><span class="p">[(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">)]),</span>
+                <span class="s2">&quot;four_room&quot;</span><span class="p">:</span><span class="n">FourRoomMDP</span><span class="p">(),</span>
+                <span class="s2">&quot;chain&quot;</span><span class="p">:</span><span class="n">ChainMDP</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+                <span class="s2">&quot;taxi&quot;</span><span class="p">:</span><span class="n">TaxiOOMDP</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">slip_prob</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">walls</span><span class="o">=</span><span class="n">walls</span><span class="p">,</span> <span class="n">passengers</span><span class="o">=</span><span class="n">passengers</span><span class="p">),</span>
+                <span class="s2">&quot;random&quot;</span><span class="p">:</span><span class="n">RandomMDP</span><span class="p">(</span><span class="n">num_states</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">num_rand_trans</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+                <span class="s2">&quot;prison&quot;</span><span class="p">:</span><span class="n">PrisonersDilemmaMDP</span><span class="p">(),</span>
+                <span class="s2">&quot;rps&quot;</span><span class="p">:</span><span class="n">RockPaperScissorsMDP</span><span class="p">(),</span>
+                <span class="s2">&quot;grid_game&quot;</span><span class="p">:</span><span class="n">GridGameMDP</span><span class="p">(),</span>
+                <span class="s2">&quot;multi&quot;</span><span class="p">:{</span><span class="mf">0.5</span><span class="p">:</span><span class="n">RandomMDP</span><span class="p">(</span><span class="n">num_states</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">num_rand_trans</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">:</span><span class="n">RandomMDP</span><span class="p">(</span><span class="n">num_states</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">num_rand_trans</span><span class="o">=</span><span class="mi">5</span><span class="p">)}}[</span><span class="n">mdp_name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="parse_args"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.parse_args">[docs]</a><span class="k">def</span> <span class="nf">parse_args</span><span class="p">():</span>
+    <span class="c1"># Add all arguments</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-mdp&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nargs</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s2">&quot;Select the mdp. Options: {atari, grid, chain, taxi}&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-env&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nargs</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s2">&quot;Select the Gym environment.&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="c1"># Fix variables based on options.</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">mdp</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">mdp</span> <span class="k">else</span> <span class="s2">&quot;grid&quot;</span>
+    <span class="n">env_name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">env</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">env</span> <span class="k">else</span> <span class="s2">&quot;CartPole-v0&quot;</span>
+
+    <span class="k">return</span> <span class="n">task</span><span class="p">,</span> <span class="n">env_name</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../overview.html#simple_rl.run_experiments.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Command line args.</span>
+    <span class="n">task</span><span class="p">,</span> <span class="n">rom</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="c1"># Setup the MDP.</span>
+    <span class="n">mdp</span> <span class="o">=</span> <span class="n">choose_mdp</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">rom</span><span class="p">)</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_actions</span><span class="p">()</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">mdp</span><span class="o">.</span><span class="n">get_gamma</span><span class="p">()</span>
+
+    <span class="c1"># Setup agents.</span>
+    <span class="kn">from</span> <span class="nn">simple_rl.agents</span> <span class="k">import</span> <span class="n">RandomAgent</span><span class="p">,</span> <span class="n">QLearningAgent</span>
+    
+    <span class="n">random_agent</span> <span class="o">=</span> <span class="n">RandomAgent</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+    <span class="n">qlearner_agent</span> <span class="o">=</span> <span class="n">QLearningAgent</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span> <span class="n">explore</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">)</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="p">[</span><span class="n">qlearner_agent</span><span class="p">,</span> <span class="n">random_agent</span><span class="p">]</span>
+
+    <span class="c1"># Run Agents.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mdp</span><span class="p">,</span> <span class="n">MarkovGameMDP</span><span class="p">):</span>
+        <span class="c1"># Markov Game.</span>
+        <span class="n">agents</span> <span class="o">=</span> <span class="p">{</span><span class="n">qlearner_agent</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">qlearner_agent</span><span class="p">,</span> <span class="n">random_agent</span><span class="o">.</span><span class="n">name</span><span class="p">:</span><span class="n">random_agent</span><span class="p">}</span>
+        <span class="n">play_markov_game</span><span class="p">(</span><span class="n">agents</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">instances</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">episodes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Regular experiment.</span>
+        <span class="n">run_agents_on_mdp</span><span class="p">(</span><span class="n">agents</span><span class="p">,</span> <span class="n">mdp</span><span class="p">,</span> <span class="n">instances</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">episodes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">simple_rl v0.801 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, David Abel.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
+    </div>
+  </body>
+</html>

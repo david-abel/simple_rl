@@ -4,6 +4,7 @@ Basic LinUCB implementation.
 
 # Python imports.
 import numpy as np
+from collections import defaultdict
 
 # Other imports.
 from simple_rl.agents.AgentClass import Agent
@@ -29,7 +30,22 @@ class LinUCBAgent(Agent):
         self.context_size = context_size
         self.prev_context = None
         self.step_number = 0
+        self.rand_init = rand_init
         self._init_action_model(rand_init)
+
+
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        
+        param_dict["rand_init"] = self.rand_init
+        param_dict["context_size"] = self.context_size
+        param_dict["alpha"] = self.alpha
+
+        return param_dict
 
     def _init_action_model(self, rand_init=True):
         '''

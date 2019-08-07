@@ -7,7 +7,7 @@ from simple_rl.mdp.StateClass import State
 
 class Option(object):
 
-	def __init__(self, init_predicate, term_predicate, policy, name="o", term_prob=0.01):
+	def __init__(self, init_predicate, term_predicate, policy, name="o", term_prob=0.00):
 		'''
 		Args:
 			init_func (S --> {0,1})
@@ -53,10 +53,17 @@ class Option(object):
 
 		return cur_state
 
-	def rollout(self, cur_state, reward_func, transition_func, step_cost=0):
+	def rollout(self, cur_state, reward_func, transition_func, max_rollout_depth, step_cost=0):
 		'''
 		Summary:
 			Executes the option until termination.
+
+		Args:
+			cur_state (simple_rl.State)
+			reward_func (lambda)
+			transition_func (lambda)
+			max_rollout_depth (int)
+			step_cost (float)
 
 		Returns:
 			(tuple):
@@ -64,15 +71,17 @@ class Option(object):
 				2. (float): Reward from the trajectory.
 		'''
 		total_reward = 0
+		rollout_depth = 0
+
 		if self.is_init_true(cur_state):
 			# First step.
 			total_reward += reward_func(cur_state, self.act(cur_state)) - step_cost
 			cur_state = transition_func(cur_state, self.act(cur_state))
-
 			# Act until terminal.
-			while not self.is_term_true(cur_state):
-				cur_state = transition_func(cur_state, self.act(cur_state))
+			while not self.is_term_true(cur_state) and not cur_state.is_terminal():
 				total_reward += reward_func(cur_state, self.act(cur_state)) - step_cost
+				cur_state = transition_func(cur_state, self.act(cur_state))
+				rollout_depth += 1
 
 		return cur_state, total_reward
 

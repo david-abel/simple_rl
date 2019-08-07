@@ -7,6 +7,7 @@ Contains implementation for a Q Learner with a Linear Function Approximator.
 # Python imports.
 import numpy as np
 import math
+from collections import defaultdict
 
 # Other imports.
 from simple_rl.agents import Agent, QLearningAgent
@@ -16,17 +17,33 @@ class LinearQAgent(QLearningAgent):
     QLearningAgent with a linear function approximator for the Q Function.
     '''
 
-    def __init__(self, actions, num_features, rand_init=True, name="Linear-Q", alpha=0.2, gamma=0.99, epsilon=0.2, explore="uniform", rbf=False, anneal=True):
-        name = name + "-rbf" if rbf else name
+    def __init__(self, actions, num_features, rand_init=True, name="Linear-Q", alpha=0.2, gamma=0.99, epsilon=0.2, explore="uniform", anneal=True):
         QLearningAgent.__init__(self, actions=list(actions), name=name, alpha=alpha, gamma=gamma, epsilon=epsilon, explore=explore, anneal=anneal)
         self.num_features = num_features
+        self.rand_init = rand_init
+        
         # Add a basis feature.
         if rand_init:
             self.weights = np.random.random(self.num_features*len(self.actions))
         else:
             self.weights = np.zeros(self.num_features*len(self.actions))
 
-        self.rbf = rbf
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        param_dict = defaultdict(int)
+        
+        param_dict["num_features"] = self.num_features
+        param_dict["rand_init"] = self.rand_init
+        param_dict["alpha"] = self.alpha
+        param_dict["gamma"] = self.gamma
+        param_dict["epsilon"] = self.epsilon
+        param_dict["anneal"] = self.anneal
+        param_dict["explore"] = self.explore
+
+        return param_dict
 
     def update(self, state, action, reward, next_state):
         '''
@@ -60,13 +77,7 @@ class LinearQAgent(QLearningAgent):
         '''
         result = np.zeros(self.num_features * len(self.actions))
         act_index = self.actions.index(action)
-
-        basis_feats = state.features()
-
-        if self.rbf:
-            basis_feats = [_rbf(f) for f in basis_feats]
-
-        result[act_index*self.num_features:(act_index + 1)*self.num_features] = basis_feats
+        result[act_index*self.num_features:(act_index + 1)*self.num_features] = state.features()
 
         return result
 
@@ -118,7 +129,3 @@ class LinearQAgent(QLearningAgent):
     def reset(self):
         self.weights = np.zeros(self.num_features*len(self.actions))
         QLearningAgent.reset(self)
-
-
-def _rbf(x):
-    return math.exp(-(x)**2)

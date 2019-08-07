@@ -45,6 +45,13 @@ class CleanUpMDP(MDP):
         self.height = max(self.legal_states, key=lambda tup: tup[1])[1] + 1
         # TODO CREATE A DICTIONARY FROM ROOMS TO LEGAL STATES IN ROOMS WITHOUT DOORS
 
+    def get_parameters(self):
+        '''
+        Returns:
+            (dict) key=param_name (str) --> val=param_val (object).
+        '''
+        raise TypeError("(simple_rl): Reproduction of results not implemented for CleanUpMDP".)
+
     def _transition_func(self, state, action):
         '''
         :param state: The state
@@ -179,14 +186,15 @@ class CleanUpMDP(MDP):
             dy = 0
         return dx, dy
 
-    def _reward_func(self, state, action):
+    def _reward_func(self, state, action, next_state):
         '''
         :param state: The state you are in before performing the action
         :param action: The action you would like to perform in the state
+        :param next_state: next state.
         :return: A double indicating how much reward to assign to that state.
                  1000.0 for the terminal state.  -1.0 for every other state.
         '''
-        next_state = self.transition_func(state, action)
+        # next_state = self.transition_func(state, action)
         if self.is_terminal(self.task, state):
             return 0.0
         return 1000.0 if self.is_terminal(self.task, next_state) else -1.0
