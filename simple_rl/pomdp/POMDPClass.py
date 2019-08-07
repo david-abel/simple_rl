@@ -31,11 +31,13 @@ class POMDP(MDP):
         self.curr_belief = init_belief
 
         # init_belief_state = BeliefState(data=init_belief.values())
-        sampled_init_state = max(init_belief, key=init_belief.get)
+        # sampled_init_state = max(init_belief, key=init_belief.get)
+        sampled_init_state = init_belief.sample(sampling_method='max')
         MDP.__init__(self, actions, transition_func, reward_func, sampled_init_state, gamma, step_cost)
 
-        self.belief_updater = BeliefUpdater(self, transition_func, reward_func, observation_func, belief_updater_type)
-        self.belief_updater_func = self.belief_updater.updater
+        if belief_updater_type is not None:
+            self.belief_updater = BeliefUpdater(self, transition_func, reward_func, observation_func, belief_updater_type)
+            self.belief_updater_func = self.belief_updater.updater
 
     def get_curr_belief(self):
         return self.curr_belief
@@ -64,8 +66,9 @@ class POMDP(MDP):
             next_belief (defaultdict)
         '''
         observation = self.observation_func(self.cur_state, action)
-        new_belief = self.belief_updater_func(self.curr_belief, action, observation)
-        self.curr_belief = new_belief
+        ### NO BELIEF UPDATE HAPPENS. Belief maintained by the Planner.
+        # new_belief = self.belief_updater_func(self.curr_belief, action, observation)
+        # self.curr_belief = new_belief
 
         reward, next_state = super(POMDP, self).execute_agent_action(action)
 

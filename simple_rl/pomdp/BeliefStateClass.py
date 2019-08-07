@@ -15,7 +15,7 @@ class BeliefState(State):
             belief_distribution (defaultdict)
         '''
         self.distribution = belief_distribution
-        State.__init__(self, data=belief_distribution.values())
+        State.__init__(self, data=belief_distribution)
 
     def __repr__(self):
         return self.__str__()
@@ -40,5 +40,5 @@ class BeliefState(State):
         if sampling_method == 'max':
             return max(self.distribution, key=self.distribution.get)
         if sampling_method == 'random':
-            return random.choice(self.distribution.keys())
+            return random.choice(list(self.distribution.keys()))
         raise NotImplementedError('Sampling method {} not implemented yet'.format(sampling_method))

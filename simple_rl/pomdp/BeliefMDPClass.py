@@ -48,7 +48,8 @@ class BeliefMDP(MDP):
         belief = belief_state.distribution
         reward = 0.
         for state in belief:
-            reward += belief[state] * self.state_reward_func(state, action)
+            next_state = self.state_transition_func(state, action)
+            reward += belief[state] * self.state_reward_func(state, action, next_state)
         return reward
 
     def _get_observation_from_environment(self, action):

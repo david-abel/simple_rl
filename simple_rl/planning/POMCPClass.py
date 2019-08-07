@@ -4,6 +4,7 @@ from collections import defaultdict
 import random
 import numpy as np
 import pdb
+import time
 
 # Other imports.
 from simple_rl.planning.PlannerClass import Planner
@@ -23,7 +24,7 @@ class POMCP(Planner):
             init_visits (int)
             init_value (float)
         '''
-        self.initial_belief = BeliefState(pomdp.init_belief)
+        self.initial_belief = pomdp.init_belief
 
         self.search_tree = defaultdict()
 
@@ -45,13 +46,34 @@ class POMCP(Planner):
         while not self.mdp.is_in_goal_state():
             print('Calling _search() from history = {}'.format(history))
             action = self._search(history)
-            reward, observation, _ = self.mdp.execute_agent_action(action)
+            reward, observation = self.mdp.execute_agent_action(action)
             policy[history] = action
             if verbose: print('From history {}, took action {}'.format(history, action))
             history = history + ((action, observation),)
             discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
             num_iter += 1
         return discounted_sum_rewards, policy
+
+    def enable_online_mode(self):
+        self._history = ()
+        self._policy = defaultdict()
+        self._discounted_sum_rewards = 0
+        self._num_iter = 0
+        self.mdp.reset()
+        self._online_mode = True
+
+    def plan_and_execute_next_action(self):
+        """This function is supposed to plan an action, execute that action,
+        and update the belief"""
+        if hasattr(self, "_online_mode") and self._online_mode is True:
+            action = self._search(self._history)
+
+            reward, observation = self.mdp.execute_agent_action(action)
+            self._policy[self._history] = action
+            self._history = self._history + ((action, observation),)
+            self._discounted_sum_rewards += ((self.gamma ** self._num_iter) * reward)
+            self._num_iter += 1
+            return action, reward, observation
 
     def belief(self, state, history):
         '''
@@ -102,7 +124,8 @@ class POMCP(Planner):
                 return random.choice(actions)
             return _random_rollout_policy(available_actions)
 
-        if self.gamma ** depth < self.epsilon or state.is_terminal():
+        if self.gamma ** depth < self.epsilon\
+           or (isinstance(state, State) and state.is_terminal()):
             return 0.
 
         action = _rollout_policy(history, self.mdp.actions)
@@ -210,7 +233,7 @@ class POMCP(Planner):
         '''
         next_state = self.mdp.transition_func(state, action)
         observation = self.mdp.observation_func(state, action)
-        reward = self.mdp.reward_func(state, action)
+        reward = self.mdp.reward_func(state, action, next_state)
 
         return next_state, observation, reward
 
