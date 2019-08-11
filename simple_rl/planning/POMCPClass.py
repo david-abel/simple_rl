@@ -1,245 +1,175 @@
-# Python imports.
-from __future__ import print_function
 from collections import defaultdict
-import random
-import numpy as np
-import pdb
-import time
-
-# Other imports.
 from simple_rl.planning.PlannerClass import Planner
-from simple_rl.mdp.StateClass import State
-from simple_rl.pomdp.BeliefStateClass import BeliefState
-from simple_rl.pomdp.POMDPClass import POMDP
+
+# from simple_rl.planning.POMCPClass import POMCP
+import sys
+import time
+import random
+import math
 
 class POMCP(Planner):
-    def __init__(self, pomdp, max_time_duration=3., max_rollout_depth=20, exploration_param=np.sqrt(2),
-                 init_visits=0, init_value=0.):
-        '''
-        Args:
-            pomdp (POMDP)
-            max_time_duration (float)
-            max_rollout_depth (int)
-            exploration_param (float)
-            init_visits (int)
-            init_value (float)
-        '''
-        self.initial_belief = pomdp.init_belief
 
-        self.search_tree = defaultdict()
+    def print_tree_helper(self, root, depth, max_depth=None):
+        if max_depth is not None and depth >= max_depth:
+            return
+        print("%s%s" % ("    "*depth, str(root)))
+        for c in root.children:
+            self.print_tree_helper(root[c], depth+1)
+            
+    def print_tree(self, max_depth=None):
+        self.print_tree_helper(self._tree, 0, max_depth=max_depth)
 
-        self.epsilon = 0.01
-        self.max_time_duration = max_time_duration
-        self.max_rollout_depth = max_rollout_depth
-        self.exploration_param = exploration_param
-        self.init_visits = init_visits
-        self.init_value = init_value
 
-        Planner.__init__(self, pomdp, name='pomcp')
+    class TreeNode:
+        def __init__(self):
+            self.children = {}
+        def __getitem__(self, key):
+            return self.children.get(key,None)
+        def __setitem__(self, key, value):
+            self.children[key] = value
+        def __contains__(self, key):
+            return key in self.children
 
-    def run(self, verbose=True):
-        discounted_sum_rewards = 0.0
-        num_iter = 0
-        history = ()
-        policy = defaultdict()
-        self.mdp.reset()
-        while not self.mdp.is_in_goal_state():
-            print('Calling _search() from history = {}'.format(history))
-            action = self._search(history)
-            reward, observation = self.mdp.execute_agent_action(action)
-            policy[history] = action
-            if verbose: print('From history {}, took action {}'.format(history, action))
-            history = history + ((action, observation),)
-            discounted_sum_rewards += ((self.gamma ** num_iter) * reward)
-            num_iter += 1
-        return discounted_sum_rewards, policy
+    class QNode(TreeNode):
+        def __init__(self, action, num_visits, value):
+            self.num_visits = num_visits
+            self.value = value
+            self.action = action
+            self.children = {}  # o -> VNode
+        def __str__(self):
+            return "QNode(%.3f, %.3f | %s)->%s" % (self.num_visits, self.value, str(self.children.keys()), str(self.action))
+        def __repr__(self):
+            return self.__str__()
 
-    def enable_online_mode(self):
+    class VNode(TreeNode):
+        def __init__(self, num_visits, value, belief):
+            self.num_visits = num_visits
+            self.value = value
+            self.belief = belief
+            self.children = {}  # a -> QNode
+            self.parent_ao = None  # (action, observation)
+        def __str__(self):
+            return "VNode(%.3f, %.3f, %d | %s)" % (self.num_visits, self.value, len(self.belief),
+                                              str(self.children.keys()))
+        def __repr__(self):
+            return self.__str__()
+    
+    def __init__(self, pomdp,
+                 max_depth=5, max_time=3., gamma=0.99, exploration_const=math.sqrt(2),
+                 num_visits_init=1, value_init=0, rollout_policy=None):
+        # The tree is a chained
+        self._pomdp = pomdp
+        self._tree = None
+        # keep track of the index in the history which points to a real observation just received;
+        # all history before this index can be discarded.
+        self._current_observation_index = 0  
+        self._max_depth = max_depth
+        self._max_time = max_time
+        self._num_visits_init = num_visits_init
+        self._value_init = value_init
+        self._rollout_policy = rollout_policy
+        self._gamma = gamma
+        self._exploration_const = exploration_const
         self._history = ()
-        self._policy = defaultdict()
-        self._discounted_sum_rewards = 0
-        self._num_iter = 0
-        self.mdp.reset()
-        self._online_mode = True
+
+    @property
+    def gamma(self):
+        return self._gamma
 
     def plan_and_execute_next_action(self):
         """This function is supposed to plan an action, execute that action,
         and update the belief"""
-        if hasattr(self, "_online_mode") and self._online_mode is True:
-            action = self._search(self._history)
+        action = self.search(self._history)
+        reward, observation = self._pomdp.execute_agent_action(action)
+        self._history += ((action, observation),)
+        # Truncate the tree
+        self._tree = self._tree[action][observation]
+        return action, reward, observation
 
-            reward, observation = self.mdp.execute_agent_action(action)
-            self._policy[self._history] = action
-            self._history = self._history + ((action, observation),)
-            self._discounted_sum_rewards += ((self.gamma ** self._num_iter) * reward)
-            self._num_iter += 1
-            return action, reward, observation
+    def _expand_vnode(self, vnode):
+        for action in self._pomdp.actions:
+            if vnode[action] is None:
+                history_action_node = POMCP.QNode(action, self._num_visits_init, self._value_init)
+                vnode[action] = history_action_node
 
-    def belief(self, state, history):
-        '''
-        bel_hat(s, h) = (1/K) * sum_(i=1, K){KroneckerDelta(s, B_i)}
-        POMCP tracks the belief state by aggregating over the set of particles associated with the current history
-        Args:
-            state (State): the state over which we want to compute the belief probability
-            history (tuple): the (action, observation) sequence observed so far
-
-        Returns:
-            belief_state (float): probability that we are in `state` given that we have seen `history`
-        '''
-        particles = self.search_tree[history][2] # type: list
-        return particles.count(state) / float(len(particles))
-
-    def _search(self, history):
-        '''
-        Main method in the POMCP algorithm.
-        Args:
-            history (tuple)
-
-        Returns:
-            action (str)
-        '''
-        start_time = time.time()
-        while time.time() - start_time < self.max_time_duration:
-            if len(history) == 0:
-                state = self.initial_belief.sample(sampling_method='random')
+    def _simulate(self, state, root, parent, observation, depth):
+        if depth > self._max_depth:
+            return 0
+        if root is None:
+            root = POMCP.VNode(self._num_visits_init, self._value_init, [])
+            if self._tree is None:
+                self._tree = root
             else:
-                particles = self.search_tree[history][2]
-                state = random.choice(particles)
-            self._simulate(state, history, 0)
+                if parent is not None:
+                    parent[observation] = root
+            self._expand_vnode(root)
 
-        return self._greedy_action(history)
-
-    def _rollout(self, state, history, depth):
-        '''
-        Args:
-            state (State)
-            history (tuple)
-            depth (int)
-
-        Returns:
-            value (float): Resulting discounted rewards from running MC simulations from state
-        '''
-        def _rollout_policy(h, available_actions):
-            def _random_rollout_policy(actions):
-                return random.choice(actions)
-            return _random_rollout_policy(available_actions)
-
-        if self.gamma ** depth < self.epsilon\
-           or (isinstance(state, State) and state.is_terminal()):
-            return 0.
-
-        action = _rollout_policy(history, self.mdp.actions)
+            return self._rollout(state, root, depth)
+        action = self._ucb(root)
         next_state, observation, reward = self._sample_generative_model(state, action)
-
-        new_history = history + ((action, observation),)
-        return reward + (self.gamma * self._rollout(next_state, new_history, depth+1))
-
-    def _simulate(self, state, history, depth):
-        '''
-        Conduct an MC simulation from (state, history) until we reach some terminal state/condition.
-        Args:
-            state (State)
-            history (tuple)
-            depth (int)
-
-        Returns:
-            value (float): Resulting discounted rewards from running MC simulations from state
-        '''
-        if self.gamma ** depth < self.epsilon or depth >= self.max_rollout_depth:
-            return 0.
-
-        if history not in self.search_tree:
-            # T(h) --> <N(h), V(h), B(h)>
-            self.search_tree[history] = [self.init_visits, self.init_value, list()]
-            for action in self.mdp.actions:
-                history_action = history + ((action,),)
-                # T(ha) --> <N(ha), Q(ha)>
-                self.search_tree[history_action] = [self.init_visits, self.init_value]
-            return self._rollout(state, history, depth)
-
-        action = self._ucb_action(history)
+        R = reward + self._gamma*self._simulate(next_state, root[action][observation], root[action], observation, depth+1)
+        root.belief.append(state)
+        root.num_visits += 1
+        root[action].num_visits += 1
+        root[action].value = root[action].value + (R - root[action].value) / (root[action].num_visits)
+        return R
+        
+    def _rollout(self, state, root, depth):
+        if depth > self._max_depth:
+            return 0
+        if self._rollout_policy is None:
+            action = random.choice(self._pomdp.actions)
+        else:
+            action = self._rollout_policy(root, self._pomdp.actions)
         next_state, observation, reward = self._sample_generative_model(state, action)
+        if root[action] is None:
+            history_action_node = POMCP.QNode(action, self._num_visits_init, self._value_init)
+            root[action] = history_action_node
+        if observation not in root[action]:
+            root[action][observation] = POMCP.VNode(self._num_visits_init, self._value_init, [])
+            root[action][observation].parent_ao = (action, observation)
+            self._expand_vnode(root[action][observation])
+        return reward + self._gamma * self._rollout(next_state, root[action][observation], depth+1)
 
-        history_action = history + ((action,),)
-        next_history = history + ((action, observation),)
-        discounted_reward = reward + (self.gamma * self._simulate(next_state, next_history, depth+1))
+    def _ucb(self, root):
+        best_action, best_value = None, float('-inf')
+        for action in self._pomdp.actions:
+            if action in root:
+                val = root[action].value + \
+                    self._exploration_const * math.sqrt(math.log(root.num_visits) / root[action].num_visits)
+                if val > best_value:
+                    best_action = action
+                    best_value = val
+        return best_action
 
-        self.search_tree[history][2].append(state)
-        self.search_tree[history][0] += 1
-        self.search_tree[history_action][0] += 1
-        self.search_tree[history_action][1] += (discounted_reward - self.search_tree[history_action][1]) / self.search_tree[history_action][0]
-
-        return discounted_reward
-
-    def _prune_search_tree(self, history, new_action, new_observation):
-        '''
-        Using _search(), we have determined the action to take from `history`. Copy over the tree starting from
-        (history, (new_action, new_observation)) and ignore everything else
-        Args:
-            history (tuple)
-            new_action (str)
-            new_observation (str)
-        '''
-        pass
-
-    def _ucb_action(self, history):
-        '''
-        Choose action based on the UCB algorithm.
-        Args:
-            history (tuple)
-
-        Returns:
-            action (str)
-        '''
-        augmented_qvalues = defaultdict()
-        for action in self.mdp.actions:
-            history_action = history + ((action,),)
-            if self.search_tree[history_action][0] == 0:
-                return action
-            exploration_part = np.sqrt(np.log(self.search_tree[history][0]) / self.search_tree[history_action][0])
-            augmented_qvalues[action] = self.search_tree[history_action][1] + (self.exploration_param * exploration_part)
-        return max(augmented_qvalues, key=augmented_qvalues.get)
-
-    def _greedy_action(self, history):
-        '''
-        Return action with the highest qvalue in the current history state
-        Args:
-            history (tuple)
-
-        Returns:
-            action (str)
-        '''
-        max_val = 0.
-        best_action = self.mdp.actions[0]
-        for action in self.mdp.actions:
-            history_action = history + ((action,),)
-            current_value = self.search_tree[history_action][1]
-            if current_value > max_val:
-                max_val = current_value
-                best_action = action
+    def search(self, history):
+        """It is assumed that the given history corresponds to self._tree.
+        Meaning that self._tree is updated (i.e. tree truncated) as history
+        progresses."""
+        start_time = time.time()
+        while time.time() - start_time < self._max_time:
+            if len(history) == 0:
+                state = self._pomdp.init_belief.sample(sampling_method='max')
+            else:
+                if len(self._tree.belief) == 0:
+                    # all states have 0 probability under current history. Something went wrong.
+                    raise Value("Belief is empty. Particle depletion.")
+                state = random.choice(self._tree.belief)
+            self._simulate(state, self._tree, None, None, 0)
+            
+        best_action, best_value = None, float('-inf')            
+        for action in self._pomdp.actions:
+            if self._tree[action] is not None:
+                if self._tree[action].value > best_value:
+                    best_value = self._tree[action].value
+                    best_action = action
         return best_action
 
     def _sample_generative_model(self, state, action):
         '''
         (s', o, r) ~ G(s, a)
-        Args:
-            state (State)
-            action (str)
-
-        Returns:
-            next_state (State)
-            observation (str)
-            reward (float)
         '''
-        next_state = self.mdp.transition_func(state, action)
-        observation = self.mdp.observation_func(state, action)
-        reward = self.mdp.reward_func(state, action, next_state)
-
+        next_state = self._pomdp.transition_func(state, action)
+        observation = self._pomdp.observation_func(next_state, action)
+        reward = self._pomdp.reward_func(state, action, next_state)
         return next_state, observation, reward
-
-if __name__ == '__main__':
-    from simple_rl.tasks.maze_1d.Maze1DPOMDPClass import Maze1DPOMDP
-    import time
-    maze = Maze1DPOMDP()
-    p = POMCP(maze, max_time_duration=3., max_rollout_depth=20)
-    r, pi = p.run(verbose=True)
