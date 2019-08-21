@@ -523,6 +523,7 @@ class NavigationWorldMDP(MDP):
             state_seq.append(state)
             steps += 1
 
+        action_seq += [None]
         return action_seq, state_seq
 
     def set_traj_init_cell_types(self, cell_types):
@@ -943,7 +944,6 @@ class NavigationWorldMDP(MDP):
         if trajectories is not None and len(trajectories) > 0:
 
             traj_color_list = get_css4_colors(len(trajectories))
-            traj_color = None
             for i, state_seq in enumerate(trajectories):
                 if len(state_seq) == 0:
                     continue
@@ -952,10 +952,12 @@ class NavigationWorldMDP(MDP):
                 path_ys = [self.height - (s.y) for s in state_seq]
 
                 if traj_colors_auto:
+                    traj_color = traj_color_list[i]
                     ax.plot(path_xs, path_ys, traj_marker,
                             linewidth=traj_linewidth,
                             color=traj_color_list[i])
                 else:
+                    traj_color = None
                     ax.plot(path_xs, path_ys, traj_marker,
                             linewidth=traj_linewidth)
 

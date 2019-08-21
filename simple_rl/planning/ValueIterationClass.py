@@ -93,9 +93,10 @@ class ValueIteration(Planner):
         # Compute expected value.
         expected_future_val = 0
         for s_prime in self.trans_dict[s][a].keys():
-            if not s_prime.is_terminal():
-                expected_future_val += self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
-
+            if not s.is_terminal():
+                expected_future_val += self.trans_dict[s][a][s_prime] * self.reward_func(s, a, s_prime) + \
+                                       self.gamma * self.trans_dict[s][a][s_prime] * self.value_func[s_prime]
+                
         return expected_future_val
 
     def _compute_reachable_state_space(self):
