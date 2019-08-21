@@ -26,7 +26,6 @@ import decimal
 import sys
 import os
 import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as pyplot
 import numpy as np
 import subprocess
