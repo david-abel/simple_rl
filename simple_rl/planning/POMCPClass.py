@@ -1,4 +1,4 @@
-# POMCP implementation (kaiyu zheng)
+# POMCP implementation
 
 from collections import defaultdict
 from simple_rl.planning.PlannerClass import Planner
@@ -55,7 +55,7 @@ class BeliefDistribution_Particles(BeliefDistribution):
                 belief += 1
         return belief / len(self._particles)
     
-    def __setitem(self, state, value):
+    def __setitem__(self, state, value):
         """Assume that value is between 0 and 1"""
         particles = [s for s in self._particles if s != state]
         len_not_state = len(particles)

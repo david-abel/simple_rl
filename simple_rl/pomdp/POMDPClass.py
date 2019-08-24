@@ -13,7 +13,12 @@ class POMDP(MDP):
         '''
         In addition to the input parameters needed to define an MDP, the POMDP
         definition requires an observation function, a way to update the belief
-        state and an initial belief.
+        state and an initial belief. Note that the `reward_func` should be the
+        function that can be used by the planner, that is, it computes reward
+        by the agent internally. This is different from the reward provided by
+        the environment after the agent executes a real action; this reward should
+        be specified in the `env_reward_func` under `execute_agent_action_update_belief`.
+        
         Args:
             actions (list)
             observations (list)
@@ -43,21 +48,12 @@ class POMDP(MDP):
             observation_function: O(s, a) -> o
         '''
         return self.observation_func
-
-    def execute_agent_action(self, action):
-        '''
-        Args:
-            action (str)
-
-        Returns:
-            reward (float)
-            next_belief (defaultdict)
-        '''
-        observation = self.observation_func(self.cur_state, action)
-        ### NO BELIEF UPDATE HAPPENS. Belief maintained by the Planner.
-        # new_belief = self.belief_updater_func(self.cur_belief, action, observation)
-        # self.cur_belief = new_belief
-
-        reward, next_state = super(POMDP, self).execute_agent_action(action)
-
-        return reward, observation, new_belief
+        
+    def execute_agent_action_update_belief(self, action, **kwargs):
+        # Execute agent action AND update the current belief. This function is used
+        # by planners (e.g. POMCP) and it combines the two steps to ensure flexibility
+        # of how the reward is computed in the POMDP.
+        def env_reward_func(*params):
+            """reward provided by the environment after the agent executes a real action"""
+            raise NotImplemented
+        raise NotImplemented

@@ -42,3 +42,6 @@ class BeliefState(State):
         if sampling_method == 'random':
             return random.choice(list(self.distribution.keys()))
         raise NotImplementedError('Sampling method {} not implemented yet'.format(sampling_method))
+
+    def update(self, *params):
+        self.distribution = self.distribution.update(*params)    
