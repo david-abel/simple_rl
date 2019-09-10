@@ -1,15 +1,16 @@
-# Test POMCP on an POMDP  (kaiyu zheng)
+# Test POMCP on a POMDP
 from maze2d import GridWorld, Environment, dist
-from simple_rl.planning.POMCPClass import POMCP, POMCP_Particles
+from simple_rl.pomdp.POMCPClass import POMCP, POMCP_Particles
 from simple_rl.pomdp.POMDPClass import POMDP
+from simple_rl.pomdp.shared import BeliefState
 from simple_rl.mdp.StateClass import State
-from simple_rl.pomdp.BeliefStateClass import BeliefState
 
 import pygame
 import cv2
 import math
-import random
 import numpy as np
+# import numpy.random as random
+import random
 import sys
 import time
 from collections import defaultdict
@@ -53,8 +54,8 @@ class Maze2D_BeliefState(BeliefState):
             return self.distribution.mpe()
         raise NotImplementedError('Sampling method {} not implemented yet'.format(sampling_method))
 
-    def update(self, *params):
-        self.distribution.update(*params)
+    def update(self, *params, **kwargs):
+        self.distribution = self.distribution.update(*params, **kwargs)
 
     def __iter__(self):
         # We want to get a robot pose from current distribution, not the current world.
@@ -80,19 +81,18 @@ class Maze2D_POMDP(POMDP):
     target. This differs from the MDP case, where the goal is to reach the
     target."""
     
-    def __init__(self, gridworld, sensor_params, init_belief):
+    def __init__(self, gridworld, sensor_params, init_belief, init_true_state):
         self._gridworld = gridworld
         self._sensor_params = sensor_params
 
-        init_true_state = Maze2D_State(self._gridworld.robot_pose, self._gridworld.target_pose)
+        actions = list(Environment.ACTIONS.keys())# + ["detect"]
         
-        super().__init__(list(Environment.ACTIONS.keys()),
+        super().__init__(actions,
                          self._transition_func,
                          self._reward_func,
                          self._observation_func,
                          init_belief,
-                         init_true_state,
-                         belief_updater_type=None)  # forget about belief updater.
+                         init_true_state)
         
         self._mpe_target_pose = self.cur_belief.distribution.mpe().target_pose        
 
@@ -102,12 +102,39 @@ class Maze2D_POMDP(POMDP):
 
     def _transition_func(self, state, action):
         state_robot = state.robot_pose
-        action = Environment.ACTIONS[action]
-        next_state_robot = self.gridworld.if_move_by(state_robot, action[0], action[1])
-        next_state_target = state.target_pose
+        if action != "detect":
+            action = Environment.ACTIONS[action]
+            next_state_robot = self.gridworld.if_move_by(state_robot, action[0], action[1])
+        else:
+            next_state_robot = state_robot
+        next_state_target = state.target_pose  # the targets are static
         return Maze2D_State(next_state_robot, next_state_target)
+    
+    def _reward_func(self, state, action, next_state):
+        """The reward function used to estimate values of states by the planner. That is,
+        this reward function is used by the agent internally when planning."""
+        # NOTE: This reward function computes reward based on true information & it's used in the 
+        # generator for POMCP - which is not acceptable for a real application. But for the purpose
+        # of checking whether the planning algorithm works, it is ok to assume that the "generator"
+        # is perfect, meaning that the agent somehow learned a perfect model of the reward in the
+        # environment. This shouldn't affect the correctness of the planner.
+        if next_state.robot_pose == state.robot_pose:
+            return -10
+        rx, ry, rth = next_state.robot_pose
+        observation = self._observation_func(next_state, action)
+        if len(observation[0]) > 0:
+            d, th = observation[0][0]  # z -> z for the first target (there's only 1 target so just [0])
+            target_x = rx + int(round(d * math.cos(rth + th)))
+            target_y = ry + int(round(d * math.sin(rth + th)))
+            reward = math.exp(-dist((target_x, target_y), self.gridworld.target_pose))
+            return reward - 0.05 # there's a reward if observed a target
+        else:
+            return 0 - 0.05  # no reward if otherwise.
 
     def _observation_func(self, next_state, action):
+        # Same for the observation function; the planning agent shouldn't be able
+        # to sample real observations. But, at this stage, let's do what David Silver
+        # did and assume there's a perfect observation model of the world on the agent.
         next_state_robot = next_state.robot_pose
         observation = tuple(map(tuple,
                                 self.gridworld.if_observe_at(next_state_robot,
@@ -115,40 +142,39 @@ class Maze2D_POMDP(POMDP):
                                                              target_pose=next_state.target_pose,
                                                              known_correspondence=True)))
         return observation
-    
-    def _reward_func(self, state, action, next_state):
-        next_state_target = next_state.target_pose
-        reward = math.exp(-dist(next_state_target, self.gridworld.target_pose))
-        # reward = 0
-        # if dist(next_state_target, self.gridworld.target_pose) == 0:#self._mpe_target_pose) == 0:
-        #     reward = 1
-        # reward += math.exp(-dist(next_state.robot_pose[:2], self._mpe_target_pose))
-        return reward
 
-    def execute_agent_action(self, real_action, **kwargs):
+    def execute_agent_action_update_belief(self, real_action, **kwargs):
         """Completely overriding parent's function.
-        Belief update NOT done here; It's done in the planner."""
+        Belief update NOT done here; see update_belief"""
+
+        def env_reward_func(agent_mpe_state):
+            """The function that computes the reward that the environment gives to the robot"""
+            reward = math.exp(-dist(agent_mpe_state.target_pose, self.gridworld.target_pose))
+            return reward
 
         cur_true_state = Maze2D_State(self._gridworld.robot_pose, self._gridworld.target_pose)
         next_true_state = self.transition_func(cur_true_state, real_action)
         real_observation = self.observation_func(next_true_state, real_action)
 
-        # Reward is computed based on the belief
-        reward = 0
-        hist = self.cur_belief.distribution.get_histogram()
-        for state in hist:
-            next_state = self.transition_func(state, real_action)
-            reward += hist[state] * self.reward_func(state, real_action, next_state)
-
-        # Execute action in the gridworld; Modify the underlying true state
+        # Execute the real action, update the belief.
         self._gridworld.move_robot(*Environment.ACTIONS[real_action])
         self.cur_state = next_true_state
+        self._update_belief(real_action, real_observation, **kwargs)
+
+        # Pretend that there is a "detect" action after every action the agent takes,
+        # so that it communicates its belief to the environment, with which the environment
+        # computes a reward.
+        cur_mpe_state = Maze2D_State(self._gridworld.robot_pose, self._mpe_target_pose)
+        reward = env_reward_func(cur_mpe_state)  # just compute the reward based on 
+        
+        # Execute action in the gridworld; Modify the underlying true state
         return reward, real_observation
 
-    def update_belief(self, real_action, real_observation, **kwargs):
+    def _update_belief(self, real_action, real_observation, **kwargs):
         print("updating belief>>>>")
         print(self.cur_belief)
-        self.cur_belief.update(real_action, real_observation, self, kwargs['num_particles'])
+        self.cur_belief.update(real_action, real_observation,
+                               self, kwargs['num_particles'])
         print(">>>>")
         print(self.cur_belief)
         self._gridworld.update_belief(self.cur_belief)
@@ -199,11 +225,13 @@ class Experiment:
                         action = self._env.on_event(event)
                         if action is not None:
                             action, reward, observation = self._planner.execute_next_action(action)
+                            self._env._gridworld.update_observation(observation)
                 else:
                     start_time = time.time()
                     action, reward, observation = \
                         self._planner.plan_and_execute_next_action()  # the action is a control to the robot
                     total_time += time.time() - start_time
+                    self._env._gridworld.update_observation(observation)
 
                 if reward is not None:
                     print("---------------------------------------------")
@@ -227,7 +255,7 @@ class Experiment:
             # Render the final belief
             self._env.on_loop()
             self._env.on_render()
-            time.sleep(2)
+            time.sleep(5)
         self._env.on_cleanup()
         return total_time, rewards
 
@@ -241,14 +269,70 @@ class Experiment:
 
 world0 = \
 """
-R......
-.......
-.......
-.......
-.......
-.....T.
-.......
+..........
+.R........
+..........
+..........
+..........
+..........
+.T........
 """
+
+world1 = \
+"""
+Rx...
+.x.xT
+.....
+"""
+
+world2= \
+"""
+............................
+..xxxxxxxxxxxxxxxxxxxxxxxx..
+..xR............T........x..
+..x......................x..
+..x..xxxxxxxxxxxxxxxxxx..x..
+..x..x................x..x..
+..x..xxxxxxxxxxxxxxxxxx..x..
+..x......................x..
+..x......................x..
+..xxxxxxxxxxxxxxxxxxxxxxxx..
+............................
+"""
+
+world3 = \
+"""
+....................................
+....................................
+.R..................................
+....................................
+....................................
+.....x.......x.......x.......x......
+....................................
+....................................
+....................................
+.T..................................
+....................................
+....................................
+....................................
+.....x.......x.......x.......x......
+....................................
+....................................
+....................................
+....................................
+....................................
+""" # textbook
+
+world4 = \
+"""
+.T........R...
+"""
+
+world5 = \
+"""
+RT
+"""
+
 
 def _rollout_policy(tree, actions):
     return random.choice(actions)
@@ -269,17 +353,19 @@ def unittest():
     # env.on_execute()
     sys.stdout.write("done\n")
     sys.stdout.write("Initializing Planner: POMCP...")
-
     num_particles = 5000
     particles = []
     while len(particles) < num_particles:
         random_target_pose = (random.randint(0, gridworld.width-1),
                               random.randint(0, gridworld.height-1))
         particles.append(Maze2D_State(gridworld.robot_pose, random_target_pose))
+        sys.stdout.write("Generating particles [%d/%d]\r" % (len(particles), num_particles))
+    sys.stdout.write("\n")
     init_belief_distribution = POMCP_Particles(particles)
     init_belief = Maze2D_BeliefState(gridworld, init_belief_distribution)
+    init_true_state = Maze2D_State(gridworld.robot_pose, gridworld.target_pose)
     
-    pomdp = Maze2D_POMDP(gridworld, env.sensor_params, init_belief)
+    pomdp = Maze2D_POMDP(gridworld, env.sensor_params, init_belief, init_true_state)
     sys.stdout.write("Initializing Planner: POMCP...")    
     planner = POMCP(pomdp, num_particles=num_particles,
                     max_time=0.5, max_depth=50, gamma=0.99, rollout_policy=_rollout_policy,

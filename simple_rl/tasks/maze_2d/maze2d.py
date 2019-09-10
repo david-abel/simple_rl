@@ -1,11 +1,12 @@
 # Single-target search. (kaiyu zheng)
 
+# Single-target search.
+
 import pygame
 import cv2
 import math
-import random
 import numpy as np
-import moos3d.util as util
+import random
 
 def dist(p1, p2):
     x1, y1 = p1
@@ -15,6 +16,15 @@ def dist(p1, p2):
 def inclusive_within(v, rg):
     a, b = rg # range
     return v >= a and v <= b
+
+# colors
+def lighter(color, percent):
+    '''assumes color is rgb between (0, 0, 0) and (255, 255, 255)'''
+    color = np.array(color)
+    white = np.array([255, 255, 255])
+    vector = white-color
+    return color + vector * percent    
+
 
 class GridWorld:
     """THIS IS ADAPTED FROM MY slam_exercise PROJECT"""
@@ -156,20 +166,22 @@ class GridWorld:
                    if in_field_of_view(th, sensor_params['view_angles'])]
         z = [(d, th) for d, th, _ in z_withc]
         c = [i for _, _, i in z_withc]
-        if target_pose == self._target_pose:
-            self._last_z = z
 
         if known_correspondence:
             return z, c
         else:
-            return z        
+            return z
+        
+    def update_observation(self, observation):
+        z, c = observation
+        self._last_z = z
 
     def provide_observation(self, sensor_params, known_correspondence=False):
         """Given the current robot pose, provide the observation z."""
             
         # RANGE BEARING
         # TODO: right now the laser penetrates through obstacles. Fix this?
-        return self.if_observe_at(self._robot_pose, sensor_params)
+        return self.if_observe_at(self._robot_pose, sensor_params, known_correspondence=known_correspondence)
 
 
 class Environment:
@@ -245,13 +257,16 @@ class Environment:
         radius = int(round(r / 2))
         hist = belief.distribution.get_histogram()
         color = (233, 25, 0)
+        last_val = -1
         for state in reversed(sorted(hist, key=hist.get)):
             # when the color is not too light
+            if last_val != -1:
+                color = lighter(color, 1-hist[state]/last_val)            
             if np.mean(np.array(color) / np.array([255, 255, 255])) < 0.95:
                 tx, ty = state.target_pose
                 cv2.circle(img, (ty*r+radius,
                                  tx*r+radius), size, color, thickness=-1)
-                color = util.lighter(color, 0.1)
+                last_val = hist[state]
 
     def render_env(self, display_surf):
         # draw robot, a circle and a vector
