@@ -2,14 +2,13 @@
 from collections import defaultdict
 
 # Other imports.
-from simple_rl.pomdp.BeliefUpdaterClass import BeliefUpdater
 from simple_rl.mdp.MDPClass import MDP
 
 class POMDP(MDP):
     ''' Abstract class for a Partially Observable Markov Decision Process. '''
 
     def __init__(self, actions, transition_func, reward_func, observation_func,
-                 init_belief, init_true_state, belief_updater_type='discrete', gamma=0.99, step_cost=0):
+                 init_belief, init_true_state, gamma=0.99, step_cost=0):
         '''
         In addition to the input parameters needed to define an MDP, the POMDP
         definition requires an observation function, a way to update the belief
@@ -34,10 +33,6 @@ class POMDP(MDP):
         self.init_belief = init_belief
         self.cur_belief = init_belief
         MDP.__init__(self, actions, transition_func, reward_func, init_true_state, gamma, step_cost)
-
-        if belief_updater_type is not None:
-            self.belief_updater = BeliefUpdater(self, transition_func, reward_func, observation_func, belief_updater_type)
-            self.belief_updater_func = self.belief_updater.updater
 
     def get_cur_belief(self):
         return self.cur_belief
