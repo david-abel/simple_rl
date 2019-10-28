@@ -47,14 +47,14 @@ class FourRoomMDP(GridWorldMDP):
         for i in range(1, width + 1):
             if i == half_width:
                 half_height -= 1
-            if i + 1 == (width) / 3 or i == math.ceil(2 * (width + 2) / 3.0):
+            if i + 1 == math.ceil(width / 3.0) or i == math.ceil(2 * (width + 2) / 3.0):
                 continue
 
             walls.append((i, half_height))
 
         # Wall from bottom to top.
         for j in range(1, height + 1):
-            if j + 1 == (height) / 3 or j == math.ceil(2 * (height + 2) / 3.0):
+            if j + 1 == math.ceil(height / 3.0) or j == math.ceil(2 * (height + 2) / 3.0):
                 continue
             walls.append((half_width, j))
 
