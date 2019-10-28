@@ -26,15 +26,15 @@ import decimal
 import sys
 import os
 import matplotlib
+if sys.platform == "darwin":
+	# Use TkAgg on Mac OS.
+	matplotlib.use('TkAgg')
 import matplotlib.pyplot as pyplot
+pyplot.style.use("fivethirtyeight")
 import numpy as np
 import subprocess
 import argparse
-#, [94, 94, 94],
-color_ls = [[102, 120, 173],[118, 167, 125], \
-            [198, 113, 113], \
-            [230, 169, 132], [169, 193, 213],\
-            [192, 197, 182], [210, 180, 226]]
+colors = pyplot.rcParams['axes.prop_cycle'].by_key()['color']
 
 # Set font.
 font = {'size':14}
@@ -204,8 +204,8 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     x_axis_unit = "episode" if episodic else "step"
 
     # Map them to floats in [0:1].
-    colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
-    colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
+    # colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
+    # colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
 
     # Puts the legend into the best location in the plot and use a tight layout.
     pyplot.rcParams['legend.loc'] = 'best'
