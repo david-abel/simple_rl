@@ -3,8 +3,12 @@
 # Other imports.
 from simple_rl.mdp.StateClass import State
 import numpy as np
+import sys
 import time
 import matplotlib
+if sys.platform == "darwin":
+    # Use TkAgg on Mac OS.
+    matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt # NOTE: for debugging
 
 COLORS = {
