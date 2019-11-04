@@ -292,9 +292,14 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     pyplot.savefig(plot_file_name, format="pdf")
     
     if open_plot and os.name != 'nt':
-        # Open it.
-        open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
-        os.system(open_prefix + "open " + plot_file_name)
+        # Open plot.
+        if os.name == 'nt':
+            # Windows.
+            os.system("start " + plot_file_name)
+        else:
+            # OS X and Linux.
+            open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
+            os.system(open_prefix + "open " + plot_file_name)
 
     # Clear and close.
     pyplot.cla()
