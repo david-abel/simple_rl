@@ -291,7 +291,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     # Save the plot.
     pyplot.savefig(plot_file_name, format="pdf")
     
-    if open_plot:
+    if open_plot and os.name != 'nt':
         # Open it.
         open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
         os.system(open_prefix + "open " + plot_file_name)
