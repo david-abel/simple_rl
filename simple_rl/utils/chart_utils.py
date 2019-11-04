@@ -175,6 +175,7 @@ def _format_title(plot_title):
     return plot_title_final
 
 def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], use_cost=False, cumulative=False, episodic=True, open_plot=True, track_disc_reward=False, add_legend=True):
+
     '''
     Args:
         results (list of lists): each element is itself the reward from an episode for an algorithm.
@@ -248,7 +249,6 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
         pyplot.plot(x_axis, y_axis, color=series_color, marker=series_marker, markevery=marker_every, label=agent_name)
         if add_legend:
             pyplot.legend()
-    print()
     
     # Configure plot naming information.
     unit = "Cost" if use_cost else "Reward"
@@ -259,8 +259,11 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
     disc_ext = "Discounted " if track_disc_reward else ""
 
-    # Set names.
-    exp_dir_split_list = experiment_dir.split("/")
+    if (os.name == 'nt'):
+        exp_dir_split_list = experiment_dir.split("\\")
+    else:
+        exp_dir_split_list = experiment_dir.split("/")
+
     if 'results' in exp_dir_split_list:
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     else:
@@ -291,19 +294,19 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     # Save the plot.
     pyplot.savefig(plot_file_name, format="pdf")
     
-    if open_plot and os.name != 'nt':
-        # Open plot.
-        if os.name == 'nt':
-            # Windows.
+    if open_plot:
+        if (os.name == 'nt'):
+            # open on windows
             os.system("start " + plot_file_name)
         else:
-            # OS X and Linux.
+            # open on linux/osx
             open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
             os.system(open_prefix + "open " + plot_file_name)
 
     # Clear and close.
     pyplot.cla()
     pyplot.close()
+
 
 def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=True, use_cost=False, episodic=True, open_plot=True, track_disc_reward=False, new_title=None, new_x_label=None, new_y_label=None, add_legend=True):
     '''
@@ -342,6 +345,7 @@ def make_plots(experiment_dir, experiment_agents, plot_file_name="", cumulative=
 
     # Compute confidence intervals.
     conf_intervals = compute_conf_intervals(data, cumulative=cumulative)
+
 
     # Create plot.
     plot(avg_data, experiment_dir, experiment_agents,
