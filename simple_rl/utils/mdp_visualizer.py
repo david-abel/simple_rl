@@ -11,10 +11,6 @@ except ImportError:
     print("Error: pygame not installed (needed for visuals).")
     exit()
 
-
-# Other imports.
-from simple_rl.utils.chart_utils import color_ls
-
 def val_to_color(val, good_col=(169, 193, 249), bad_col=(249, 193, 169)):
     '''
     Args:
