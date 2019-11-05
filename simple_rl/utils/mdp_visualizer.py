@@ -210,8 +210,18 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
                         else:
                             mdp.lava_locs += [(cell_x, cell_y)]
 
+
             # Move agent.
             action = agent.act(cur_state, reward)
+
+            if cur_state.is_terminal():
+                score += 1
+                cur_state = mdp.get_init_state()
+                mdp.reset()
+                agent.end_of_episode()
+                agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
+
+
             reward, cur_state = mdp.execute_agent_action(action)
             agent_shape = draw_state(screen, mdp, cur_state, agent=agent, show_value=True, draw_statics=True,agent_shape=agent_shape)
 
@@ -221,11 +231,6 @@ def visualize_learning(mdp, agent, draw_state, cur_state=None, scr_width=720, sc
 
             time.sleep(delay)
 
-            if cur_state.is_terminal():
-                score += 1
-                cur_state = mdp.get_init_state()
-                mdp.reset()
-                agent_shape = _vis_init(screen, mdp, draw_state, cur_state, agent, score=score)
     else:
         # Main loop.
         i = 0
