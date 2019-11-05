@@ -14,7 +14,7 @@ class BeliefState(State):
             belief_distribution (defaultdict)
         '''
         self.distribution = belief_distribution
-        State.__init__(self, data=belief_distribution.values())
+        State.__init__(self, data=list(belief_distribution.values()))
 
     def __repr__(self):
         return self.__str__()
