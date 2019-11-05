@@ -274,6 +274,10 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     if CUSTOM_TITLE is None:
         plot_title = _format_title(plot_title)
 
+    # If plot title is too long, just replace it with a dummy title.
+    if len(plot_title) > 22:
+        plot_title = "Results"
+
     # Axis labels.
     x_axis_label = X_AXIS_LABEL if X_AXIS_LABEL is not None else x_axis_unit[0].upper() + x_axis_unit[1:] + " Number"
     y_axis_label = Y_AXIS_LABEL if Y_AXIS_LABEL is not None else plot_label + " " + unit
