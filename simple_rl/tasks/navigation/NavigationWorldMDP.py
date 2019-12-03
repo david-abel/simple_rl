@@ -4,8 +4,7 @@ import random
 import itertools
 import numpy as np
 from collections import defaultdict
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+import matplotlib
 from matplotlib import colors as mplotcolors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -870,7 +869,7 @@ class NavigationWorldMDP(MDP):
                 ax.text(x, y, label, color='black', ha='center',
                         va='center', fontsize=fontsize)
 
-    def visualize_grid(self, values=None, cmap=cm.viridis, trajectories=None,
+    def visualize_grid(self, values=None, cmap=matplotlib.cm.viridis, trajectories=None,
                        subplot_str=None, show_colorbar=False,
                        show_rewards_colorbar=False, state_space_cmap=True,
                        init_marker=".k", traj_marker="-k",
@@ -900,7 +899,7 @@ class NavigationWorldMDP(MDP):
             title (str): Title of the plot.
         """
         if fig is None:
-            fig = plt.figure(
+            fig = matplotlib.pyplot.figure(
                 figsize=(max(self.height // 4, 6), max(self.width // 4, 6)))
 
         if ax is None:
@@ -984,12 +983,12 @@ class NavigationWorldMDP(MDP):
             divider = make_axes_locatable(ax)
             cax = divider.append_axes("right", size="3%", pad=0.05)
             if show_rewards_colorbar:
-                cb = plt.colorbar(im, ticks=range(len(self.cell_type_rewards)),
+                cb = matplotlib.pyplot.colorbar(im, ticks=range(len(self.cell_type_rewards)),
                                   cax=cax)
                 cb.set_ticklabels(self.cell_type_rewards)
             else:
                 fig.colorbar(im, cax=cax)
 
         if plot and subplot_str is None:
-            plt.show()
+            matplotlib.pyplot.show()
         return fig, ax
