@@ -8,10 +8,7 @@ import time
 import matplotlib
 
 if sys.platform == "darwin":
-    # Use TkAgg on Mac OS.
     matplotlib.use('MacOSX')
-
-import matplotlib.pyplot as plt # NOTE: for debugging
 
 COLORS = {
     'agent1': (0, 34, 244),
@@ -96,9 +93,9 @@ class GatherState(State):
 
     def show(self):
         rgb = self.to_rgb()
-        plt.imshow(rgb)
-        plt.pause(self.render_time)
-        plt.draw()
+        matplotlib.pyplot.imshow(rgb)
+        matplotlib.pyplot.pause(self.render_time)
+        matplotlib.pyplot.draw()
 
 class GatherAgent():
 
@@ -155,5 +152,5 @@ if __name__ == '__main__':
     state1 = GatherState(agent1, agent2, np.zeros(shape=[35, 11], dtype=np.int32))
     state2 = GatherState(agent3, agent4, np.zeros(shape=[21, 11], dtype=np.int32))
     state3 = GatherState(agent3, agent4, np.zeros(shape=[21, 11], dtype=np.int32))
-    plt.imshow(state1.to_rgb())
-    plt.show()
+    matplotlib.pyplot.imshow(state1.to_rgb())
+    matplotlib.pyplot.show()
