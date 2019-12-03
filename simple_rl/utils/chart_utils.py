@@ -28,7 +28,9 @@ import os
 import matplotlib
 if sys.platform == "darwin":
 	# Use TkAgg on Mac OS.
-	matplotlib.use('TkAgg')
+    # matplotlib.use('TkAgg')
+    matplotlib.use('MacOSX')
+
 import matplotlib.pyplot as pyplot
 pyplot.style.use("fivethirtyeight")
 import numpy as np

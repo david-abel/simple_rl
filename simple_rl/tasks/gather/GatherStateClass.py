@@ -6,9 +6,11 @@ import numpy as np
 import sys
 import time
 import matplotlib
+
 if sys.platform == "darwin":
     # Use TkAgg on Mac OS.
-    matplotlib.use('TkAgg')
+    matplotlib.use('MacOSX')
+
 import matplotlib.pyplot as plt # NOTE: for debugging
 
 COLORS = {
