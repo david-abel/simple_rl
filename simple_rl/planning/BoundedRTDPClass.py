@@ -107,7 +107,7 @@ class BoundedRTDP(Planner):
         return max([(self._qvalue(state, action, values), action) for action in self.actions])[1]
 
     def _qvalue(self, state, action, values):
-        return self.mdp.reward_func(state, action) + sum([self.trans_dict[state][action][next_state] * values[next_state] \
+        return sum([self.mdp.reward_func(state, action, next_state) + self.trans_dict[state][action][next_state] * values[next_state] \
                                                       for next_state in self.states])
 
     def _best_qvalue(self, state, values):
