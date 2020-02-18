@@ -50,7 +50,7 @@ class CleanUpMDP(MDP):
         Returns:
             (dict) key=param_name (str) --> val=param_val (object).
         '''
-        raise TypeError("(simple_rl): Reproduction of results not implemented for CleanUpMDP".)
+        raise TypeError("(simple_rl): Reproduction of results not implemented for CleanUpMDP.")
 
     def _transition_func(self, state, action):
         '''
