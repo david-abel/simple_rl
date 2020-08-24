@@ -260,10 +260,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
 
     disc_ext = "Discounted " if track_disc_reward else ""
 
-    if (os.name == 'nt'):
-        exp_dir_split_list = experiment_dir.split("\\")
-    else:
-        exp_dir_split_list = experiment_dir.split("/")
+    exp_dir_split_list = os.path.normpath(experiment_dir).split(os.sep)
 
     if 'results' in exp_dir_split_list:
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
@@ -302,11 +299,11 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
     if open_plot:
         if (os.name == 'nt'):
             # open on windows
-            os.system("start " + plot_file_name)
+            open_cmd = "start"
         else:
             # open on linux/osx
-            open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
-            os.system(open_prefix + "open " + plot_file_name)
+            open_cmd = ("gnome-" if sys.platform == "linux" or sys.platform == "linux2" else "") + "open"
+        subprocess.check_call([open_cmd, plot_file_name], shell=os.name=='nt')
 
     # Clear and close.
     pyplot.cla()
