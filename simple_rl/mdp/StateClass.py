@@ -1,9 +1,11 @@
 # Python imports
+from collections.abc import Sequence
+
 import numpy as np
 
 ''' StateClass.py: Contains the State Class. '''
 
-class State(object):
+class State(Sequence):
     ''' Abstract State class '''
 
     def __init__(self, data=[], is_terminal=False):

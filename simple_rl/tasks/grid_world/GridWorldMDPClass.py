@@ -276,6 +276,13 @@ class GridWorldMDP(MDP):
         from simple_rl.tasks.grid_world.grid_visualizer import _draw_state
         mdpv.visualize_interaction(self, _draw_state)
 
+    def reset(self):
+        if self.rand_init:
+            init_loc = random.randint(1, num_cols), random.randint(1, num_rows)
+            self.cur_state = GridWorldState(init_loc[0], init_loc[1])
+        else:
+            self.cur_state = copy.deepcopy(self.init_state)
+
 def _error_check(state, action):
     '''
     Args:
@@ -358,12 +365,6 @@ def make_grid_world_from_file(file_name, randomize=False, num_goals=1, name=None
 
     return GridWorldMDP(width=num_cols, height=num_rows, init_loc=(agent_x, agent_y), goal_locs=goal_locs, lava_locs=lava_locs, walls=walls, name=name, slip_prob=slip_prob)
 
-    def reset(self):
-        if self.rand_init:
-            init_loc = random.randint(1, num_cols), random.randint(1, num_rows)
-            self.cur_state = GridWorldState(init_loc[0], init_loc[1])
-        else:
-            self.cur_state = copy.deepcopy(self.init_state)
 
 def main():
     grid_world = GridWorldMDP(5, 10, (1, 1), (6, 7))
