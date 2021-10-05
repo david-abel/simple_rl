@@ -2,6 +2,8 @@
 
     Williams, Ronald J. "Simple statistical gradient-following algorithms for
     connectionist reinforcement learning." Machine learning 8.3-4 (1992): 229-256.
+    
+Note: This agent has not yet been implemented.
 '''
 
 # Python imports.
