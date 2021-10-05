@@ -1,4 +1,6 @@
-''' PolicyGradientAgentClass.py: Class for a policy gradient agent '''
+''' PolicyGradientAgentClass.py: Class for a policy gradient agent.
+
+Note: At present, this agent is not implemented.'''
 
 # Python imports.
 import random
