@@ -16,9 +16,7 @@ class ReinforceAgent(PolicyGradientAgent):
     ''' Class for REINFORCE agent, '''
 
     def __init__(self, actions, name=""):
-        name = "reinforce" if name is "" else name
-        self.pmf_a_given_s = defaultdict(lambda : defaultdict(lambda : 1.0 / len(actions))) # S --> A --> [r_1, ...]
-        Agent.__init__(self, name=name, actions=actions)
+        raise NotImplementedError("REINFORCE not yet implemented.)
 
     def policy(self, state):
     	'''
