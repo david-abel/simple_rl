@@ -105,12 +105,7 @@ def average_data(data, cumulative=False):
         
         if cumulative:
             # If we're summing over episodes.
-            temp = []
-            total_so_far = 0
-            for rew in avged:
-                total_so_far += rew
-                temp.append(total_so_far)
-
+            temp = np.cumsum(avged)
             avged = temp
 
         result[i] = avged
