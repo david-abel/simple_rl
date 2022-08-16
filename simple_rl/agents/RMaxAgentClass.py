@@ -119,7 +119,7 @@ class RMaxAgent(Agent):
         empirical_transition_mat = self.transitions / pseudo_count[:, :, None]
         # only masked positions should be trusted, otherwise self transition
 
-        empirical_transition_mat[~mask] = self._self_transition_mat[~mask]
+        empirical_transition_mat[~mask] = self._self_transition_mat()[~mask]
         assert np.all(empirical_transition_mat.sum(axis=-1) == 1)
 
         # compute the update for every (s, a), but only apply the ones that needed with a mask
@@ -158,7 +158,7 @@ class RMaxAgent(Agent):
         '''
         # Grab random initial action in case all equal
         if np.all(self.q_func[state] == self.q_func[state, 0]):
-            best_action = self.rng.choice(self.actions)
+            best_action = random.choice(self.actions)
         else:
             best_action =np.argmax(self.q_func[state])
         max_q_val = self.q_func[state][best_action]
