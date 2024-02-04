@@ -12,7 +12,7 @@ class PolicyGradientAgent(Agent):
     ''' Class for a random decision maker. '''
 
     def __init__(self, actions, name=""):
-        raise NotImplementedError("Policy Gradient has not yet been implemented.)
+        raise NotImplementedError("Policy Gradient has not yet been implemented.")
 
     def act(self, state, reward):
         '''
