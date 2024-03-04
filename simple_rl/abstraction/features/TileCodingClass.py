@@ -52,7 +52,8 @@ class TileCoding(object):
             li_offset = [-x[0] + float(x[1] - x[0]) * to for x,to in zip(self.ranges, tiling_offset)]
             state_shifted = [s + o for s,o in zip(clipped_state, li_offset)]
             li_indices_in_tiling = [np.floor(float(ss) / lts) for ss,lts in zip(state_shifted,self.li_tile_size)]
-            feature_index = np.sum([li_indices_in_tiling[i]*np.product(self.num_tiles[0:i]) for i in range(len(self.num_tiles))])
+            feature_index = np.dot([li_indices_in_tiling[i] for i in range(len(self.num_tiles))],
+                                    [np.product(self.num_tiles[0:i])  for i in range(len(self.num_tiles))])
             features.append(int(feature_index + tiling * self.features_per_tiling))
         
         vec = self.max_feature * [0]
