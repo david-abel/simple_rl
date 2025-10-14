@@ -297,7 +297,7 @@ def plot(results, experiment_dir, agents, plot_file_name="", conf_intervals=[], 
             open_cmd = "start"
         else:
             # open on linux/osx
-            open_cmd = ("gnome-" if sys.platform == "linux" or sys.platform == "linux2" else "") + "open"
+            open_cmd = ("xdg-" if sys.platform == "linux" or sys.platform == "linux2" else "") + "open"
         subprocess.check_call([open_cmd, plot_file_name], shell=os.name=='nt')
 
     # Clear and close.
